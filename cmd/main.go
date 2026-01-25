@@ -34,5 +34,21 @@ func main() {
 	}
 	defer quit()
 
-	// TODO implement basic grid
+	// Event loop
+	for {
+		s.Show()           // Updating screen
+		ev := <-s.EventQ() // Polling event
+
+		// Processing the events
+		switch ev := ev.(type) {
+		case *tcell.EventResize:
+			s.Sync()
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+				return
+			} else if ev.Key() == tcell.KeyCtrlL {
+				s.Sync()
+			}
+		}
+	}
 }
