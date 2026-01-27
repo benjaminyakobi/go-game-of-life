@@ -35,17 +35,17 @@ func main() {
 	defer quit()
 
 	// Draw grid
-	cellStyleOne := tcell.StyleDefault.Foreground(color.White).Background(color.Grey)
-	cellStyleTwo := tcell.StyleDefault.Foreground(color.White).Background(color.NewRGBColor(150, 150, 150))
-	rows, cols := s.Size()
-	for r := 0; r < rows; r++ {
-		for c := 0; c < cols; c++ {
-			if r%2 == 0 && c%2 != 0 {
-				s.Put(r, c, " ", cellStyleOne)
-			} else if r%2 != 0 && c%2 == 0 {
-				s.Put(r, c, " ", cellStyleOne)
+	cellStyleOne := tcell.StyleDefault.Foreground(color.Black).Background(color.Grey)
+	cellStyleTwo := tcell.StyleDefault.Foreground(color.Black).Background(color.NewRGBColor(150, 150, 150))
+	width, height := s.Size()
+	for w := 0; w < width; w++ {
+		for h := 0; h < height; h++ {
+			if w%2 == 0 && h%2 != 0 {
+				s.Put(w, h, ".", cellStyleOne)
+			} else if w%2 != 0 && h%2 == 0 {
+				s.Put(w, h, ".", cellStyleOne)
 			} else {
-				s.Put(r, c, " ", cellStyleTwo)
+				s.Put(w, h, ".", cellStyleTwo)
 			}
 		}
 	}
