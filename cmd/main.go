@@ -104,13 +104,12 @@ func main() {
 			x, y := ev.Position()
 			switch ev.Buttons() {
 			case tcell.ButtonPrimary:
-				drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
-				s.Put(x, y, ".", cellStyleThree)
 				now := time.Now()
 
 				// double click detected - unselect the cell
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY {
+					drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
 					if x%2 == 0 && y%2 != 0 {
 						s.Put(x, y, ".", cellStyleOne)
 					} else if x%2 != 0 && y%2 == 0 {
