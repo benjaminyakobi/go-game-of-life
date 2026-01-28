@@ -1,10 +1,9 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
+	"log"
 )
 
 func main() {
@@ -37,6 +36,7 @@ func main() {
 	// Draw grid
 	cellStyleOne := tcell.StyleDefault.Foreground(color.Black).Background(color.Grey)
 	cellStyleTwo := tcell.StyleDefault.Foreground(color.Black).Background(color.NewRGBColor(150, 150, 150))
+	cellStyleThree := tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow)
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := 0; h < height; h++ {
@@ -64,6 +64,15 @@ func main() {
 				return
 			} else if ev.Key() == tcell.KeyCtrlL {
 				s.Sync()
+			} else if ev.Key() == tcell.KeyCtrlR {
+				// run game of life
+			}
+		case *tcell.EventMouse:
+			x, y := ev.Position()
+			switch ev.Buttons() {
+			case tcell.ButtonPrimary:
+				s.Put(x, y, ".", cellStyleThree)
+				s.Put(x, y, ".", cellStyleThree)
 			}
 		}
 	}
