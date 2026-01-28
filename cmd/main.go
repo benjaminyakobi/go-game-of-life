@@ -1,11 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 	"log"
 	"time"
 )
+
+func drawText(s tcell.Screen, x, y int, text string) {
+	style := tcell.StyleDefault.Foreground(color.White).Background(color.Default)
+	col := x
+	row := y
+	var width int
+	for text != "" {
+		text, width = s.Put(col, row, text, style)
+		col += width
+		if width == 0 {
+			// incomplete grapheme at end of string
+			break
+		}
+	}
+}
 
 func main() {
 	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
@@ -39,9 +55,10 @@ func main() {
 	cellStyleTwo := tcell.StyleDefault.Foreground(color.Black).Background(color.NewRGBColor(150, 150, 150))
 	cellStyleThree := tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow)
 
+	drawText(s, 0, 0, "Single click to select | Double click to unselect | Ctrl+R to run | Ctrl+C to exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
-		for h := 0; h < height; h++ {
+		for h := 2; h < height; h++ {
 			if w%2 == 0 && h%2 != 0 {
 				s.Put(w, h, ".", cellStyleOne)
 			} else if w%2 != 0 && h%2 == 0 {
@@ -79,6 +96,7 @@ func main() {
 			x, y := ev.Position()
 			switch ev.Buttons() {
 			case tcell.ButtonPrimary:
+				drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
 				s.Put(x, y, ".", cellStyleThree)
 				now := time.Now()
 
@@ -93,6 +111,7 @@ func main() {
 						s.Put(x, y, ".", cellStyleTwo)
 					}
 				} else { // single click - select the cell
+					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
 					s.Put(x, y, ".", cellStyleThree)
 				}
 
