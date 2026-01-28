@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 	"log"
+	"time"
 )
 
 func main() {
@@ -37,6 +38,7 @@ func main() {
 	cellStyleOne := tcell.StyleDefault.Foreground(color.Black).Background(color.Grey)
 	cellStyleTwo := tcell.StyleDefault.Foreground(color.Black).Background(color.NewRGBColor(150, 150, 150))
 	cellStyleThree := tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow)
+
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := 0; h < height; h++ {
@@ -49,6 +51,12 @@ func main() {
 			}
 		}
 	}
+
+	var (
+		lastClickTime time.Time
+		lastX, lastY  int
+		dblClickDelay = 500 * time.Millisecond
+	)
 
 	// Event loop
 	for {
@@ -72,7 +80,24 @@ func main() {
 			switch ev.Buttons() {
 			case tcell.ButtonPrimary:
 				s.Put(x, y, ".", cellStyleThree)
-				s.Put(x, y, ".", cellStyleThree)
+				now := time.Now()
+
+				// double click detected - unselect the cell
+				if now.Sub(lastClickTime) <= dblClickDelay &&
+					x == lastX && y == lastY {
+					if x%2 == 0 && y%2 != 0 {
+						s.Put(x, y, ".", cellStyleOne)
+					} else if x%2 != 0 && y%2 == 0 {
+						s.Put(x, y, ".", cellStyleOne)
+					} else {
+						s.Put(x, y, ".", cellStyleTwo)
+					}
+				} else { // single click - select the cell
+					s.Put(x, y, ".", cellStyleThree)
+				}
+
+				lastClickTime = now
+				lastX, lastY = x, y
 			}
 		}
 	}
