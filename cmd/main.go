@@ -8,7 +8,15 @@ import (
 	"time"
 )
 
+func clearLine(s tcell.Screen, y int) {
+	w, _ := s.Size()
+	for x := 0; x < w; x++ {
+		s.SetContent(x, y, ' ', nil, tcell.StyleDefault)
+	}
+}
+
 func drawText(s tcell.Screen, x, y int, text string) {
+	clearLine(s, y)
 	style := tcell.StyleDefault.Foreground(color.White).Background(color.Default)
 	col := x
 	row := y
