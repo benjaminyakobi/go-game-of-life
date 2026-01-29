@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/gdamore/tcell/v3"
-	"github.com/gdamore/tcell/v3/color"
 	"log"
 	"time"
+
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
+
+func runGameOfLife(s tcell.Screen) {
+	s.DisableMouse()      // disabling mouse before running the game
+	defer s.EnableMouse() // enabling mouse before returning
+}
 
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
@@ -77,6 +83,12 @@ func main() {
 		}
 	}
 
+	// initialize generationsGrid
+	lifeGrid := make([][]int, width)
+	for i := range lifeGrid {
+		lifeGrid[i] = make([]int, height)
+	}
+
 	var (
 		lastClickTime time.Time
 		lastX, lastY  int
@@ -98,7 +110,7 @@ func main() {
 			} else if ev.Key() == tcell.KeyCtrlL {
 				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
-				// run game of life
+				runGameOfLife(s)
 			}
 		case *tcell.EventMouse:
 			x, y := ev.Position()
@@ -117,8 +129,10 @@ func main() {
 					} else {
 						s.Put(x, y, ".", cellStyleTwo)
 					}
-				} else { // single click - select the cell
+					lifeGrid[x][y] = 0
+				} else if y > 1 { // single click - select the cell
 					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
+					lifeGrid[x][y] = 1
 					s.Put(x, y, ".", cellStyleThree)
 				}
 
