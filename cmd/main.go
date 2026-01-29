@@ -9,11 +9,6 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func runGameOfLife(s tcell.Screen) {
-	s.DisableMouse()      // disabling mouse before running the game
-	defer s.EnableMouse() // enabling mouse before returning
-}
-
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
 	for x := 0; x < w; x++ {
@@ -35,6 +30,11 @@ func drawText(s tcell.Screen, x, y int, text string) {
 			break
 		}
 	}
+}
+
+func runGameOfLife(s tcell.Screen) {
+	s.DisableMouse()      // disabling mouse before running the game
+	defer s.EnableMouse() // enabling mouse before returning
 }
 
 func main() {
@@ -83,12 +83,6 @@ func main() {
 		}
 	}
 
-	// initialize generationsGrid
-	lifeGrid := make([][]int, width)
-	for i := range lifeGrid {
-		lifeGrid[i] = make([]int, height)
-	}
-
 	var (
 		lastClickTime time.Time
 		lastX, lastY  int
@@ -129,10 +123,8 @@ func main() {
 					} else {
 						s.Put(x, y, ".", cellStyleTwo)
 					}
-					lifeGrid[x][y] = 0
 				} else if y > 1 { // single click - select the cell
 					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
-					lifeGrid[x][y] = 1
 					s.Put(x, y, ".", cellStyleThree)
 				}
 
