@@ -33,7 +33,10 @@ func drawText(s tcell.Screen, x, y int, text string) {
 }
 
 func runGameOfLife(s tcell.Screen) {
-	s.DisableMouse()      // disabling mouse before running the game
+	s.DisableMouse() // disabling mouse before running the game
+
+	// TODO implement producer-consumer pattern with channels
+
 	defer s.EnableMouse() // enabling mouse before returning
 }
 
