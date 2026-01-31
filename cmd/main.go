@@ -45,6 +45,17 @@ func drawText(s tcell.Screen, x, y int, text string) {
 	}
 }
 
+func updateCellStyles(s tcell.Screen, w, h int) {
+	if w%2 == 0 && h%2 != 0 {
+		s.Put(w, h, ".", cellStyles.grey)
+	} else if w%2 != 0 && h%2 == 0 {
+		s.Put(w, h, ".", cellStyles.grey)
+	} else {
+		s.Put(w, h, ".", cellStyles.lightSlateGrey)
+	}
+
+}
+
 func runGameOfLife(s tcell.Screen) {
 	s.DisableMouse() // disabling mouse before running the game
 
@@ -85,13 +96,7 @@ func main() {
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := 2; h < height; h++ {
-			if w%2 == 0 && h%2 != 0 {
-				s.Put(w, h, ".", cellStyles.grey)
-			} else if w%2 != 0 && h%2 == 0 {
-				s.Put(w, h, ".", cellStyles.grey)
-			} else {
-				s.Put(w, h, ".", cellStyles.lightSlateGrey)
-			}
+			updateCellStyles(s, w, h)
 		}
 	}
 
@@ -128,13 +133,7 @@ func main() {
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY {
 					drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
-					if x%2 == 0 && y%2 != 0 {
-						s.Put(x, y, ".", cellStyles.grey)
-					} else if x%2 != 0 && y%2 == 0 {
-						s.Put(x, y, ".", cellStyles.grey)
-					} else {
-						s.Put(x, y, ".", cellStyles.lightSlateGrey)
-					}
+					updateCellStyles(s, x, y)
 				} else if y > 1 { // single click - select the cell
 					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
 					s.Put(x, y, ".", cellStyles.greenYellow)
