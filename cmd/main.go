@@ -53,7 +53,16 @@ func updateCellStyles(s tcell.Screen, w, h int) {
 	} else {
 		s.Put(w, h, ".", cellStyles.lightSlateGrey)
 	}
+}
 
+func drawNewGrid(s tcell.Screen) {
+	drawText(s, 0, 0, "Single click to select | Double click to unselect | Ctrl+R to run | Ctrl+C to exit")
+	width, height := s.Size()
+	for w := 0; w < width; w++ {
+		for h := 2; h < height; h++ {
+			updateCellStyles(s, w, h)
+		}
+	}
 }
 
 func runGameOfLife(s tcell.Screen) {
@@ -91,14 +100,7 @@ func main() {
 	}
 	defer quit()
 
-	// Draw grid
-	drawText(s, 0, 0, "Single click to select | Double click to unselect | Ctrl+R to run | Ctrl+C to exit")
-	width, height := s.Size()
-	for w := 0; w < width; w++ {
-		for h := 2; h < height; h++ {
-			updateCellStyles(s, w, h)
-		}
-	}
+	drawNewGrid(s)
 
 	var (
 		lastClickTime time.Time
