@@ -9,6 +9,20 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
+type CellStyles struct {
+	def            tcell.Style
+	grey           tcell.Style
+	lightSlateGrey tcell.Style
+	greenYellow    tcell.Style
+}
+
+var cellStyles = CellStyles{
+	def:            tcell.StyleDefault.Foreground(color.White).Background(color.Default),
+	grey:           tcell.StyleDefault.Foreground(color.Black).Background(color.Grey),
+	lightSlateGrey: tcell.StyleDefault.Foreground(color.Black).Background(color.LightSlateGrey),
+	greenYellow:    tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow),
+}
+
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
 	for x := 0; x < w; x++ {
@@ -18,12 +32,11 @@ func clearLine(s tcell.Screen, y int) {
 
 func drawText(s tcell.Screen, x, y int, text string) {
 	clearLine(s, y)
-	style := tcell.StyleDefault.Foreground(color.White).Background(color.Default)
 	col := x
 	row := y
 	var width int
 	for text != "" {
-		text, width = s.Put(col, row, text, style)
+		text, width = s.Put(col, row, text, cellStyles.def)
 		col += width
 		if width == 0 {
 			// incomplete grapheme at end of string
@@ -68,20 +81,16 @@ func main() {
 	defer quit()
 
 	// Draw grid
-	cellStyleOne := tcell.StyleDefault.Foreground(color.Black).Background(color.Grey)
-	cellStyleTwo := tcell.StyleDefault.Foreground(color.Black).Background(color.NewRGBColor(150, 150, 150))
-	cellStyleThree := tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow)
-
 	drawText(s, 0, 0, "Single click to select | Double click to unselect | Ctrl+R to run | Ctrl+C to exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := 2; h < height; h++ {
 			if w%2 == 0 && h%2 != 0 {
-				s.Put(w, h, ".", cellStyleOne)
+				s.Put(w, h, ".", cellStyles.grey)
 			} else if w%2 != 0 && h%2 == 0 {
-				s.Put(w, h, ".", cellStyleOne)
+				s.Put(w, h, ".", cellStyles.grey)
 			} else {
-				s.Put(w, h, ".", cellStyleTwo)
+				s.Put(w, h, ".", cellStyles.lightSlateGrey)
 			}
 		}
 	}
@@ -120,15 +129,15 @@ func main() {
 					x == lastX && y == lastY {
 					drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
 					if x%2 == 0 && y%2 != 0 {
-						s.Put(x, y, ".", cellStyleOne)
+						s.Put(x, y, ".", cellStyles.grey)
 					} else if x%2 != 0 && y%2 == 0 {
-						s.Put(x, y, ".", cellStyleOne)
+						s.Put(x, y, ".", cellStyles.grey)
 					} else {
-						s.Put(x, y, ".", cellStyleTwo)
+						s.Put(x, y, ".", cellStyles.lightSlateGrey)
 					}
 				} else if y > 1 { // single click - select the cell
 					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
-					s.Put(x, y, ".", cellStyleThree)
+					s.Put(x, y, ".", cellStyles.greenYellow)
 				}
 
 				lastClickTime = now
