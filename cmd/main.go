@@ -45,7 +45,7 @@ func drawText(s tcell.Screen, x, y int, text string) {
 	}
 }
 
-func updateCellStyles(s tcell.Screen, w, h int) {
+func updateCellStyle(s tcell.Screen, w, h int) {
 	if w%2 == 0 && h%2 != 0 {
 		s.Put(w, h, ".", cellStyles.grey)
 	} else if w%2 != 0 && h%2 == 0 {
@@ -60,7 +60,7 @@ func drawNewGrid(s tcell.Screen) {
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := 2; h < height; h++ {
-			updateCellStyles(s, w, h)
+			updateCellStyle(s, w, h)
 		}
 	}
 }
@@ -130,17 +130,14 @@ func main() {
 			switch ev.Buttons() {
 			case tcell.ButtonPrimary:
 				now := time.Now()
-
-				// double click detected - unselect the cell
 				if now.Sub(lastClickTime) <= dblClickDelay &&
-					x == lastX && y == lastY {
+					x == lastX && y == lastY { // double-click
 					drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
-					updateCellStyles(s, x, y)
-				} else if y > 1 { // single click - select the cell
+					updateCellStyle(s, x, y)
+				} else if y > 1 { // single-click
 					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
 					s.Put(x, y, ".", cellStyles.greenYellow)
 				}
-
 				lastClickTime = now
 				lastX, lastY = x, y
 			}
