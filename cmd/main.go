@@ -74,8 +74,6 @@ func runGameOfLife(s tcell.Screen) {
 }
 
 func main() {
-	defStyle := tcell.StyleDefault.Background(color.Reset).Foreground(color.Reset)
-
 	// Initialize screen
 	s, err := tcell.NewScreen()
 	if err != nil {
@@ -84,7 +82,7 @@ func main() {
 	if err := s.Init(); err != nil {
 		log.Fatalf("%+v", err)
 	}
-	s.SetStyle(defStyle)
+	s.SetStyle(cellStyles.def)
 	s.EnableMouse()
 	s.Clear()
 
