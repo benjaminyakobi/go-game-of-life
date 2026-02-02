@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -8,6 +9,11 @@ import (
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
+
+type Position struct {
+	x int
+	y int
+}
 
 type CellStyles struct {
 	def            tcell.Style
@@ -68,9 +74,37 @@ func drawNewGrid(s tcell.Screen) {
 func runGameOfLife(s tcell.Screen) {
 	s.DisableMouse() // disabling mouse before running the game
 
-	// TODO implement producer-consumer pattern with channels
+	q := make(chan Position)
+	ctx := context.Background()
+	go setPosition(s, q, ctx) // consumer
+
+	// producer
+	go func() {
+		i := 2 // TODO dummy value that should be replaced
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		for range ticker.C {
+			q <- Position{x: i, y: i} // TODO dummy call that should be replaced
+			i++
+		}
+	}()
 
 	defer s.EnableMouse() // enabling mouse before returning
+}
+
+func setPosition(s tcell.Screen, q <-chan Position, ctx context.Context) {
+	for {
+		select {
+		case pos, ok := <-q:
+			if !ok {
+				return
+			}
+			s.Put(pos.x, pos.y, ".", cellStyles.greenYellow)
+			s.Show()
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 func main() {
