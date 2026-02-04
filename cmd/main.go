@@ -29,6 +29,8 @@ var cellStyles = CellStyles{
 	greenYellow:    tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow),
 }
 
+var livingCells map[Position]struct{} = make(map[Position]struct{})
+
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
 	for x := 0; x < w; x++ {
@@ -71,8 +73,13 @@ func drawNewGrid(s tcell.Screen) {
 	}
 }
 
+func add(m map[Position]struct{}, p Position) {
+	m[p] = struct{}{}
+}
+
 func runGameOfLife(s tcell.Screen) {
-	s.DisableMouse() // disabling mouse before running the game
+	s.DisableMouse()      // disabling mouse before running the game
+	defer s.EnableMouse() // enabling mouse before returning
 
 	q := make(chan Position)
 	ctx := context.Background()
@@ -84,12 +91,11 @@ func runGameOfLife(s tcell.Screen) {
 		ticker := time.NewTicker(500 * time.Millisecond)
 		defer ticker.Stop()
 		for range ticker.C {
+			// TODO implement game logic & remove dummy i variable
 			q <- Position{x: i, y: i} // TODO dummy call that should be replaced
 			i++
 		}
 	}()
-
-	defer s.EnableMouse() // enabling mouse before returning
 }
 
 func setPosition(s tcell.Screen, q <-chan Position, ctx context.Context) {
@@ -99,6 +105,8 @@ func setPosition(s tcell.Screen, q <-chan Position, ctx context.Context) {
 			if !ok {
 				return
 			}
+			add(livingCells, pos)
+			drawText(s, 0, 1, fmt.Sprintf("cell [%v, %v] - living cells: %v", pos.x, pos.y, len(livingCells)))
 			s.Put(pos.x, pos.y, ".", cellStyles.greenYellow)
 			s.Show()
 		case <-ctx.Done():
@@ -164,10 +172,12 @@ func main() {
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY { // double-click
-					drawText(s, 0, 1, fmt.Sprintf("unselected %v %v", x, y))
+					delete(livingCells, Position{x: x, y: y})
+					drawText(s, 0, 1, fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, len(livingCells)))
 					updateCellStyle(s, x, y)
 				} else if y > 1 { // single-click
-					drawText(s, 0, 1, fmt.Sprintf("selected %v %v", x, y))
+					add(livingCells, Position{x: x, y: y})
+					drawText(s, 0, 1, fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, len(livingCells)))
 					s.Put(x, y, ".", cellStyles.greenYellow)
 				}
 				lastClickTime = now
