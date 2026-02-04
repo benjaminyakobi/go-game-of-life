@@ -3,6 +3,8 @@
 
 [Conway's Game Of Life Simulation](https://playgameoflife.com)
 
+[Backpressure Patterns in Go: From Channels to Queues to Load Shedding](https://medium.com/@Realblank/backpressure-patterns-in-go-from-channels-to-queues-to-load-shedding-0841c9fe5607)
+
 ## Rules
 [Wikipedia - Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
 
