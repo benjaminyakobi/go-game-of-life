@@ -95,7 +95,7 @@ func drawNewGrid(s tcell.Screen) {
 func runGameOfLife(s tcell.Screen) {
 	q := make(chan LivingCell)
 	ctx := context.Background()
-	go setLivingCell(s, q, ctx) // consumer
+	go updateScreen(s, q, ctx) // consumer
 
 	// producer
 	go func() {
@@ -115,7 +115,7 @@ func runGameOfLife(s tcell.Screen) {
 	}()
 }
 
-func setLivingCell(s tcell.Screen, q <-chan LivingCell, ctx context.Context) {
+func updateScreen(s tcell.Screen, q <-chan LivingCell, ctx context.Context) {
 	for {
 		select {
 		case lc, ok := <-q:
