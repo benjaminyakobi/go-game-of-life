@@ -10,7 +10,7 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-type Position struct {
+type LivingCell struct {
 	x int
 	y int
 }
@@ -29,7 +29,7 @@ var cellStyles = CellStyles{
 	greenYellow:    tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow),
 }
 
-var livingCells map[Position]struct{} = make(map[Position]struct{})
+var livingCells map[LivingCell]struct{} = make(map[LivingCell]struct{})
 
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
@@ -73,17 +73,17 @@ func drawNewGrid(s tcell.Screen) {
 	}
 }
 
-func add(m map[Position]struct{}, p Position) {
-	m[p] = struct{}{}
+func add(m map[LivingCell]struct{}, lc LivingCell) {
+	m[lc] = struct{}{}
 }
 
 func runGameOfLife(s tcell.Screen) {
 	s.DisableMouse()      // disabling mouse before running the game
 	defer s.EnableMouse() // enabling mouse before returning
 
-	q := make(chan Position)
+	q := make(chan LivingCell)
 	ctx := context.Background()
-	go setPosition(s, q, ctx) // consumer
+	go setLivingCell(s, q, ctx) // consumer
 
 	// producer
 	go func() {
@@ -91,23 +91,26 @@ func runGameOfLife(s tcell.Screen) {
 		ticker := time.NewTicker(500 * time.Millisecond)
 		defer ticker.Stop()
 		for range ticker.C {
-			// TODO implement game logic & remove dummy i variable
-			q <- Position{x: i, y: i} // TODO dummy call that should be replaced
+			// TODO implement game logic
+			// TODO remove dummy i variable
+			// TODO add new func that calculates the next generation
+			// TODO implement by iterating over livingCells map (apply Life's rules)
+			q <- LivingCell{x: i, y: i} // TODO dummy call that should be replaced
 			i++
 		}
 	}()
 }
 
-func setPosition(s tcell.Screen, q <-chan Position, ctx context.Context) {
+func setLivingCell(s tcell.Screen, q <-chan LivingCell, ctx context.Context) {
 	for {
 		select {
-		case pos, ok := <-q:
+		case lc, ok := <-q:
 			if !ok {
 				return
 			}
-			add(livingCells, pos)
-			drawText(s, 0, 1, fmt.Sprintf("cell [%v, %v] - living cells: %v", pos.x, pos.y, len(livingCells)))
-			s.Put(pos.x, pos.y, ".", cellStyles.greenYellow)
+			add(livingCells, lc)
+			drawText(s, 0, 1, fmt.Sprintf("cell [%v, %v] - living cells: %v", lc.x, lc.y, len(livingCells)))
+			s.Put(lc.x, lc.y, ".", cellStyles.greenYellow)
 			s.Show()
 		case <-ctx.Done():
 			return
@@ -172,11 +175,11 @@ func main() {
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY { // double-click
-					delete(livingCells, Position{x: x, y: y})
+					delete(livingCells, LivingCell{x: x, y: y})
 					drawText(s, 0, 1, fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, len(livingCells)))
 					updateCellStyle(s, x, y)
 				} else if y > 1 { // single-click
-					add(livingCells, Position{x: x, y: y})
+					add(livingCells, LivingCell{x: x, y: y})
 					drawText(s, 0, 1, fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, len(livingCells)))
 					s.Put(x, y, ".", cellStyles.greenYellow)
 				}
