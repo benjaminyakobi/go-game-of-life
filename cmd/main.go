@@ -93,16 +93,15 @@ func drawNewGrid(s tcell.Screen) {
 }
 
 func runGameOfLife(s tcell.Screen) {
-	s.DisableMouse()      // disabling mouse before running the game
-	defer s.EnableMouse() // enabling mouse before returning
-
 	q := make(chan LivingCell)
 	ctx := context.Background()
 	go setLivingCell(s, q, ctx) // consumer
 
 	// producer
 	go func() {
-		i := 2 // TODO dummy value that should be replaced
+		s.DisableMouse()      // disabling mouse before running the game
+		defer s.EnableMouse() // enabling mouse before returning
+		i := 2                // TODO dummy value that should be replaced
 		ticker := time.NewTicker(500 * time.Millisecond)
 		defer ticker.Stop()
 		for range ticker.C {
