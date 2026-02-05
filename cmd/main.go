@@ -25,8 +25,8 @@ var cellStyles = CellStyles{
 }
 
 type LivingCell struct {
-	x int
-	y int
+	posX int
+	posY int
 }
 
 type LivingCellsSet map[LivingCell]struct{}
@@ -110,7 +110,7 @@ func runGameOfLife(s tcell.Screen) {
 			// TODO remove dummy i variable
 			// TODO add new func that calculates the next generation
 			// TODO implement by iterating over livingCells map (apply Life's rules)
-			q <- LivingCell{x: i, y: i} // TODO dummy call that should be replaced
+			q <- LivingCell{posX: i, posY: i} // TODO dummy call that should be replaced
 			i++
 		}
 	}()
@@ -124,8 +124,8 @@ func setLivingCell(s tcell.Screen, q <-chan LivingCell, ctx context.Context) {
 				return
 			}
 			livingCells.Add(lc)
-			drawText(s, 0, 1, fmt.Sprintf("cell [%v, %v] - living cells: %v", lc.x, lc.y, livingCells.Len()))
-			s.Put(lc.x, lc.y, ".", cellStyles.greenYellow)
+			drawText(s, 0, 1, fmt.Sprintf("cell [%v, %v] - living cells: %v", lc.posX, lc.posY, livingCells.Len()))
+			s.Put(lc.posX, lc.posY, ".", cellStyles.greenYellow)
 			s.Show()
 		case <-ctx.Done():
 			return
@@ -190,11 +190,11 @@ func main() {
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY { // double-click
-					livingCells.Remove(LivingCell{x: x, y: y})
+					livingCells.Remove(LivingCell{posX: x, posY: y})
 					drawText(s, 0, 1, fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len()))
 					updateCellStyle(s, x, y)
 				} else if y > 1 { // single-click
-					livingCells.Add(LivingCell{x: x, y: y})
+					livingCells.Add(LivingCell{posX: x, posY: y})
 					drawText(s, 0, 1, fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len()))
 					s.Put(x, y, ".", cellStyles.greenYellow)
 				}
