@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -48,6 +49,9 @@ func (lcs LivingCellsSet) Len() int {
 }
 
 var livingCells = make(LivingCellsSet)
+var generation = 0
+var ctx, cancel = context.WithCancel(context.Background())
+var gameIsRuning = false
 
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
@@ -91,29 +95,62 @@ func drawNewGrid(s tcell.Screen) {
 	}
 }
 
-func runGameOfLife(s tcell.Screen, done chan bool) {
+func runGameOfLife(s tcell.Screen, ctx context.Context) {
+	drawText(s, 0, 1, "not startiiiiiiing, select cells first")
 	ticker := time.NewTicker(500 * time.Millisecond)
 	s.DisableMouse() // disabling mouse before running the game
 	defer ticker.Stop()
 	defer s.EnableMouse() // enabling mouse before returning
-	generation := 0
 	for {
 		select {
-		case <-done:
-			drawText(s, 0, 1, fmt.Sprintf("stopped after %v generations", generation))
-			s.Show()
-			return
 		case <-ticker.C:
-			for lc := range livingCells {
-				s.Put(lc.posX, lc.posY, ".", cellStyles.greenYellow)
-			}
-			drawText(s, 0, 1, fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len()))
-			generation++
-			if livingCells.Len() == 0 {
-				done <- true
-			}
+			calcNextGeneration(s)
 			s.Show()
+		case <-ctx.Done():
+			gameIsRuning = false
+			generation = 0
+			return
 		}
+	}
+}
+
+func calcNextGeneration(s tcell.Screen) {
+	directions := [][]int{
+		{-1, -1},
+		{-1, 0},
+		{-1, 1},
+		{0, -1},
+		{0, 0},
+		{0, 1},
+		{1, -1},
+		{1, 0},
+		{1, 1},
+	}
+	for lc := range livingCells {
+		count := 0
+		for _, d := range directions {
+			dx, dy := d[0], d[1]
+			if livingCells.Contains(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}) {
+				count++
+			}
+			if count > 3 {
+				s.Put(lc.posX, lc.posY, ".", cellStyles.lightSlateGrey)
+				livingCells.Remove(lc)
+				break
+			}
+		}
+		if count < 2 {
+			s.Put(lc.posX, lc.posY, ".", cellStyles.def)
+			livingCells.Remove(lc)
+		}
+	}
+	generation++
+	drawText(s, 0, 1, fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len()))
+	if livingCells.Len() == 0 {
+		drawText(s, 0, 1, fmt.Sprintf("stopped after %v generations", generation))
+		s.Show()
+		generation = 0
+		cancel()
 	}
 }
 
@@ -148,8 +185,6 @@ func main() {
 		lastClickTime time.Time
 		lastX, lastY  int
 		dblClickDelay = 500 * time.Millisecond
-		done          = make(chan bool)
-		gameIsRuning  = false
 	)
 
 	// Event loop
@@ -171,10 +206,10 @@ func main() {
 					drawText(s, 0, 1, "not starting, select cells first")
 				} else {
 					gameIsRuning = true
-					go runGameOfLife(s, done)
+					go runGameOfLife(s, ctx)
 				}
 			} else if ev.Key() == tcell.KeyCtrlS && gameIsRuning {
-				done <- true
+				cancel()
 			}
 		case *tcell.EventMouse:
 			x, y := ev.Position()
