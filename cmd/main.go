@@ -87,7 +87,7 @@ func updateCellStyle(s tcell.Screen, w, h int) {
 }
 
 func drawNewGrid(s tcell.Screen) {
-	drawText(s, 0, 0, "Single click to select | Double click to unselect | Ctrl+R to run | Ctrl+S to stop | Ctrl+C to exit")
+	drawText(s, 0, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := 2; h < height; h++ {
@@ -232,7 +232,7 @@ func main() {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
-			} else if ev.Key() == tcell.KeyCtrlL {
+			} else if ev.Key() == tcell.KeyCtrlS {
 				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
 				if livingCells.Len() == 0 {
@@ -242,7 +242,7 @@ func main() {
 					ctx, cancel = context.WithCancel(context.Background())
 					go runGameOfLife(s, ctx)
 				}
-			} else if ev.Key() == tcell.KeyCtrlS && gameIsRuning {
+			} else if ev.Key() == tcell.KeyCtrlP && gameIsRuning {
 				cancel()
 			}
 		case *tcell.EventMouse:
