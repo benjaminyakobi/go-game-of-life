@@ -18,10 +18,9 @@ type CellStyles struct {
 }
 
 var cellStyles = CellStyles{
-	def:            tcell.StyleDefault.Foreground(color.White).Background(color.Default),
-	grey:           tcell.StyleDefault.Foreground(color.Black).Background(color.Grey),
-	lightSlateGrey: tcell.StyleDefault.Foreground(color.Black).Background(color.LightSlateGrey),
-	greenYellow:    tcell.StyleDefault.Foreground(color.Black).Background(color.GreenYellow),
+	def:            tcell.StyleDefault.Background(color.Reset).Foreground(color.Default),
+	lightSlateGrey: tcell.StyleDefault.Background(color.Reset).Foreground(color.LightSlateGrey),
+	greenYellow:    tcell.StyleDefault.Background(color.Reset).Foreground(color.GreenYellow),
 }
 
 type LivingCell struct {
@@ -47,6 +46,8 @@ func (lcs LivingCellsSet) Contains(lc LivingCell) bool {
 func (lcs LivingCellsSet) Len() int {
 	return len(lcs)
 }
+
+const screenOffset = 2
 
 var livingCells = make(LivingCellsSet)
 var generation = 0
@@ -86,21 +87,20 @@ func drawText(s tcell.Screen, x, y int, text string) {
 	}
 }
 
-func updateCellStyle(s tcell.Screen, w, h int) {
-	if w%2 == 0 && h%2 != 0 {
-		s.Put(w, h, ".", cellStyles.grey)
-	} else if w%2 != 0 && h%2 == 0 {
-		s.Put(w, h, ".", cellStyles.grey)
+func updateCellStyle(s tcell.Screen, x, y int) {
+	if y == screenOffset {
+		s.Put(x, y, string(tcell.RuneHLine), cellStyles.def)
 	} else {
-		s.Put(w, h, ".", cellStyles.lightSlateGrey)
+		s.Put(x, y, ".", cellStyles.lightSlateGrey)
 	}
+
 }
 
 func drawNewGrid(s tcell.Screen) {
 	drawText(s, 0, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
-		for h := 2; h < height; h++ {
+		for h := screenOffset; h < height; h++ {
 			updateCellStyle(s, w, h)
 		}
 	}
@@ -138,7 +138,7 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 		}
 	}
 	if count == 3 {
-		s.Put(lc.posX, lc.posY, ".", cellStyles.greenYellow)
+		s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
 		return true
 	}
 	return false
@@ -242,10 +242,10 @@ func main() {
 					livingCells.Remove(LivingCell{posX: x, posY: y})
 					drawText(s, 0, 1, fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len()))
 					updateCellStyle(s, x, y)
-				} else if y > 1 { // single-click
+				} else if y > screenOffset { // single-click
 					livingCells.Add(LivingCell{posX: x, posY: y})
 					drawText(s, 0, 1, fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len()))
-					s.Put(x, y, ".", cellStyles.greenYellow)
+					s.Put(x, y, "@", cellStyles.greenYellow)
 				}
 				lastClickTime = now
 				lastX, lastY = x, y
