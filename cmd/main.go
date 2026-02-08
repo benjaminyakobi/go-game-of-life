@@ -96,7 +96,6 @@ func drawNewGrid(s tcell.Screen) {
 }
 
 func runGameOfLife(s tcell.Screen, ctx context.Context) {
-	drawText(s, 0, 1, "not startiiiiiiing, select cells first")
 	ticker := time.NewTicker(500 * time.Millisecond)
 	s.DisableMouse() // disabling mouse before running the game
 	defer ticker.Stop()
@@ -114,13 +113,41 @@ func runGameOfLife(s tcell.Screen, ctx context.Context) {
 	}
 }
 
-func calcNextGeneration(s tcell.Screen) {
+func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 	directions := [][]int{
 		{-1, -1},
 		{-1, 0},
 		{-1, 1},
 		{0, -1},
-		{0, 0},
+		{0, 1},
+		{1, -1},
+		{1, 0},
+		{1, 1},
+	}
+	count := 0
+	for _, d := range directions {
+		dx, dy := d[0], d[1]
+		if livingCells.Contains(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}) {
+			count++
+		}
+		if count > 3 {
+			return false
+		}
+	}
+	if count == 3 {
+		s.Put(lc.posX, lc.posY, ".", cellStyles.greenYellow)
+		return true
+	}
+	return false
+}
+
+func calcNextGeneration(s tcell.Screen) {
+	livingCellsNextGen := make(LivingCellsSet)
+	directions := [][]int{
+		{-1, -1},
+		{-1, 0},
+		{-1, 1},
+		{0, -1},
 		{0, 1},
 		{1, -1},
 		{1, 0},
@@ -132,18 +159,24 @@ func calcNextGeneration(s tcell.Screen) {
 			dx, dy := d[0], d[1]
 			if livingCells.Contains(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}) {
 				count++
+			} else {
+				ok := calcNextGenDeadCells(s, LivingCell{posX: lc.posX + dx, posY: lc.posY + dy})
+				if ok {
+					livingCellsNextGen.Add(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy})
+				}
 			}
 			if count > 3 {
 				s.Put(lc.posX, lc.posY, ".", cellStyles.lightSlateGrey)
-				livingCells.Remove(lc)
 				break
 			}
 		}
 		if count < 2 {
 			s.Put(lc.posX, lc.posY, ".", cellStyles.def)
-			livingCells.Remove(lc)
+		} else if count == 2 || count == 3 {
+			livingCellsNextGen.Add(lc)
 		}
 	}
+	livingCells = livingCellsNextGen
 	generation++
 	drawText(s, 0, 1, fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len()))
 	if livingCells.Len() == 0 {
