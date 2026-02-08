@@ -159,12 +159,8 @@ func calcNextGeneration(s tcell.Screen) {
 					livingCellsNextGen.Add(neighborCell)
 				}
 			}
-			if count > 3 {
-				updateCellStyle(s, lc.posX, lc.posY)
-				break
-			}
 		}
-		if count < 2 {
+		if count < 2 || count > 3 {
 			updateCellStyle(s, lc.posX, lc.posY)
 		} else if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
