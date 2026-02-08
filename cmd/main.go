@@ -215,7 +215,7 @@ func main() {
 		// Processing the events
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
-			s.Sync()
+			drawNewGrid(s)
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
