@@ -53,6 +53,16 @@ var generation = 0
 var ctx context.Context
 var cancel context.CancelFunc
 var gameIsRuning = false
+var directions = [][]int{
+	{-1, -1}, // top left
+	{0, -1},  // top mid
+	{1, -1},  // top right
+	{-1, 0},  // left
+	{1, 0},   // right
+	{-1, 1},  // bottom left
+	{0, 1},   // bottom mid
+	{1, 1},   // bottom right
+}
 
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
@@ -117,16 +127,6 @@ func runGameOfLife(s tcell.Screen, ctx context.Context) {
 }
 
 func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
-	directions := [][]int{
-		{-1, -1},
-		{-1, 0},
-		{-1, 1},
-		{0, -1},
-		{0, 1},
-		{1, -1},
-		{1, 0},
-		{1, 1},
-	}
 	count := 0
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
@@ -146,35 +146,26 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 
 func calcNextGeneration(s tcell.Screen) {
 	livingCellsNextGen := make(LivingCellsSet)
-	directions := [][]int{
-		{-1, -1},
-		{-1, 0},
-		{-1, 1},
-		{0, -1},
-		{0, 1},
-		{1, -1},
-		{1, 0},
-		{1, 1},
-	}
 	for lc := range livingCells {
 		count := 0
 		for _, d := range directions {
 			dx, dy := d[0], d[1]
-			if livingCells.Contains(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}) {
+			neighborCell := LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}
+			if livingCells.Contains(neighborCell) {
 				count++
 			} else {
-				ok := calcNextGenDeadCells(s, LivingCell{posX: lc.posX + dx, posY: lc.posY + dy})
+				ok := calcNextGenDeadCells(s, neighborCell)
 				if ok {
-					livingCellsNextGen.Add(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy})
+					livingCellsNextGen.Add(neighborCell)
 				}
 			}
 			if count > 3 {
-				s.Put(lc.posX, lc.posY, ".", cellStyles.lightSlateGrey)
+				updateCellStyle(s, lc.posX, lc.posY)
 				break
 			}
 		}
 		if count < 2 {
-			s.Put(lc.posX, lc.posY, ".", cellStyles.def)
+			updateCellStyle(s, lc.posX, lc.posY)
 		} else if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
 		}
