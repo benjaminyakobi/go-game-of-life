@@ -50,7 +50,8 @@ func (lcs LivingCellsSet) Len() int {
 
 var livingCells = make(LivingCellsSet)
 var generation = 0
-var ctx, cancel = context.WithCancel(context.Background())
+var ctx context.Context
+var cancel context.CancelFunc
 var gameIsRuning = false
 
 func clearLine(s tcell.Screen, y int) {
@@ -106,6 +107,8 @@ func runGameOfLife(s tcell.Screen, ctx context.Context) {
 			calcNextGeneration(s)
 			s.Show()
 		case <-ctx.Done():
+			drawText(s, 0, 1, fmt.Sprintf("stopped after %v generations", generation))
+			s.Show()
 			gameIsRuning = false
 			generation = 0
 			return
@@ -180,9 +183,6 @@ func calcNextGeneration(s tcell.Screen) {
 	generation++
 	drawText(s, 0, 1, fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len()))
 	if livingCells.Len() == 0 {
-		drawText(s, 0, 1, fmt.Sprintf("stopped after %v generations", generation))
-		s.Show()
-		generation = 0
 		cancel()
 	}
 }
@@ -236,9 +236,10 @@ func main() {
 				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
 				if livingCells.Len() == 0 {
-					drawText(s, 0, 1, "not starting, select cells first")
+					drawText(s, 0, 1, fmt.Sprintf("not starting, select cells first %v", livingCells.Len()))
 				} else {
 					gameIsRuning = true
+					ctx, cancel = context.WithCancel(context.Background())
 					go runGameOfLife(s, ctx)
 				}
 			} else if ev.Key() == tcell.KeyCtrlS && gameIsRuning {
