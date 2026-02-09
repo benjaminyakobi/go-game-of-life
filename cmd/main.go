@@ -136,7 +136,7 @@ func updateCellStyle(s tcell.Screen, x, y int) {
 }
 
 func drawNewGrid(s tcell.Screen) {
-	_, h := s.Size()
+	w, h := s.Size()
 	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
@@ -148,7 +148,9 @@ func drawNewGrid(s tcell.Screen) {
 	drawText(s, h-1, "Conway's Game Of Life")
 
 	for lc := range livingCells {
-		s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
+		if lc.posY > screenOffset && lc.posY < h-1 && lc.posX > 0 && lc.posX < w-1 {
+			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
+		}
 	}
 }
 
