@@ -74,7 +74,7 @@ func clearLine(s tcell.Screen, y int) {
 	}
 }
 
-func drawText(s tcell.Screen, x, y int, text string) {
+func drawText(s tcell.Screen, y int, text string) {
 	clearLine(s, y)
 	w, h := s.Size()
 	textWidth := runewidth.StringWidth(text)
@@ -137,15 +137,15 @@ func updateCellStyle(s tcell.Screen, x, y int) {
 
 func drawNewGrid(s tcell.Screen) {
 	_, h := s.Size()
-	drawText(s, 0, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
+	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := screenOffset; h < height; h++ {
 			updateCellStyle(s, w, h)
 		}
 	}
-	drawText(s, 0, 1, gameText)
-	drawText(s, 0, h-1, "Conway's Game Of Life")
+	drawText(s, 1, gameText)
+	drawText(s, h-1, "Conway's Game Of Life")
 
 	for lc := range livingCells {
 		s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
@@ -164,7 +164,7 @@ func runGameOfLife(s tcell.Screen, ctx context.Context) {
 			s.Show()
 		case <-ctx.Done():
 			gameText = fmt.Sprintf("stopped after %v generations", generation)
-			drawText(s, 0, 1, gameText)
+			drawText(s, 1, gameText)
 			s.Show()
 			gameIsRuning = false
 			generation = 0
@@ -222,7 +222,7 @@ func calcNextGeneration(s tcell.Screen) {
 	livingCells = livingCellsNextGen
 	generation++
 	gameText = fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len())
-	drawText(s, 0, 1, gameText)
+	drawText(s, 1, gameText)
 	if livingCells.Len() == 0 {
 		cancel()
 	}
@@ -280,7 +280,7 @@ func main() {
 			} else if ev.Key() == tcell.KeyCtrlR {
 				if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
-					drawText(s, 0, 1, gameText)
+					drawText(s, 1, gameText)
 				} else {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
@@ -298,12 +298,12 @@ func main() {
 					x == lastX && y == lastY && y > screenOffset && y < h-1 && x > 0 && x < w-1 { // double-click
 					livingCells.Remove(LivingCell{posX: x, posY: y})
 					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len())
-					drawText(s, 0, 1, gameText)
+					drawText(s, 1, gameText)
 					updateCellStyle(s, x, y)
 				} else if y > screenOffset && y < h-1 && x > 0 && x < w-1 { // single-click
 					livingCells.Add(LivingCell{posX: x, posY: y})
 					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len())
-					drawText(s, 0, 1, gameText)
+					drawText(s, 1, gameText)
 					s.Put(x, y, "@", cellStyles.greenYellow)
 				}
 				lastClickTime = now
