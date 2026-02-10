@@ -50,6 +50,9 @@ func (lcs LivingCellsSet) Len() int {
 
 const screenOffset = 1
 
+var boxOpen = false
+var boxWidth = 0
+var boxHeight = 0
 var gameText = ""
 var livingCells = make(LivingCellsSet)
 var generation = 0
@@ -137,7 +140,7 @@ func updateCellStyle(s tcell.Screen, x, y int) {
 
 func drawNewGrid(s tcell.Screen) {
 	w, h := s.Size()
-	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
+	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+F Clear & Choose Pattern | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := screenOffset; h < height; h++ {
@@ -152,6 +155,32 @@ func drawNewGrid(s tcell.Screen) {
 			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
 		}
 	}
+}
+
+func drawBox(s tcell.Screen, w, h int, title string) {
+	boxWidth = w
+	boxHeight = h
+	sw, sh := s.Size()
+	x := (sw - w) / 2
+	y := (sh - h) / 2
+
+	for col := x; col < x+w; col++ {
+		s.SetContent(col, y, tcell.RuneHLine, nil, cellStyles.def)
+		s.SetContent(col, y+h-1, tcell.RuneHLine, nil, cellStyles.def)
+	}
+
+	for row := y; row < y+h; row++ {
+		s.SetContent(x, row, tcell.RuneVLine, nil, cellStyles.def)
+		s.SetContent(x+w-1, row, tcell.RuneVLine, nil, cellStyles.def)
+	}
+
+	s.SetContent(x, y, tcell.RuneULCorner, nil, cellStyles.def)
+	s.SetContent(x+w-1, y, tcell.RuneURCorner, nil, cellStyles.def)
+	s.SetContent(x, y+h-1, tcell.RuneLLCorner, nil, cellStyles.def)
+	s.SetContent(x+w-1, y+h-1, tcell.RuneLRCorner, nil, cellStyles.def)
+
+	drawText(s, 1, title)
+
 }
 
 func runGameOfLife(s tcell.Screen, ctx context.Context) {
@@ -274,12 +303,26 @@ func main() {
 		case *tcell.EventResize:
 			w, h = s.Size()
 			drawNewGrid(s)
+			if boxOpen {
+				drawBox(s, boxWidth, boxHeight, "Choose pattern")
+			}
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
+			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning {
+				if boxOpen {
+					drawNewGrid(s)
+					s.EnableMouse()
+				} else {
+					s.DisableMouse()
+					livingCells = make(LivingCellsSet)
+					drawNewGrid(s)
+					drawBox(s, 30, 5, "Choose pattern")
+				}
+				boxOpen = !boxOpen
 			} else if ev.Key() == tcell.KeyCtrlS {
 				s.Sync()
-			} else if ev.Key() == tcell.KeyCtrlR {
+			} else if ev.Key() == tcell.KeyCtrlR && !boxOpen {
 				if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
 					drawText(s, 1, gameText)
