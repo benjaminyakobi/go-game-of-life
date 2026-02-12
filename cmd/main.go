@@ -48,6 +48,17 @@ func (lcs LivingCellsSet) Len() int {
 	return len(lcs)
 }
 
+func (lcs LivingCellsSet) Copy() LivingCellsSet {
+	if lcs == nil {
+		return nil
+	}
+	lcsCopy := make(LivingCellsSet, lcs.Len())
+	for cell := range lcs {
+		lcsCopy[cell] = struct{}{}
+	}
+	return lcsCopy
+}
+
 const screenOffset = 1
 
 var predefinedLivingCells = []LivingCellsSet{
@@ -188,7 +199,7 @@ func updateCellStyle(s tcell.Screen, x, y int) {
 }
 
 func drawNewGrid(s tcell.Screen) {
-	w, h := s.Size()
+	_, h := s.Size()
 	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+F Clear & Choose Pattern | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
@@ -198,7 +209,10 @@ func drawNewGrid(s tcell.Screen) {
 	}
 	drawText(s, 1, gameText)
 	drawText(s, h-1, "Conway's Game Of Life")
+}
 
+func drawLivingCellsOnGrid(s tcell.Screen) {
+	w, h := s.Size()
 	for lc := range livingCells {
 		if lc.posY > screenOffset && lc.posY < h-1 && lc.posX > 0 && lc.posX < w-1 {
 			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
@@ -206,27 +220,30 @@ func drawNewGrid(s tcell.Screen) {
 	}
 }
 
-func calcBoxDimesions(s tcell.Screen) (int, int, LivingCellsSet) {
+func calcBoxDimesions(s tcell.Screen) (int, int) {
 	// TODO draw lc content inside the box
 	if predefinedLCIndex == len(predefinedLivingCells) {
 		predefinedLCIndex = 0
 	}
-	lc := predefinedLivingCells[predefinedLCIndex]
+	livingCells = predefinedLivingCells[predefinedLCIndex].Copy()
 	predefinedLCIndex++
 	sw, sh := s.Size()
 	minW, maxW := sw, -1
 	minH, maxH := sh, -1
-	for cell := range lc {
+	if livingCells.Len() == 1 {
+		return 10, 10
+	}
+	for cell := range livingCells {
 		minW = min(minW, cell.posX)
 		maxW = max(maxW, cell.posX)
 		minH = min(minH, cell.posY)
 		maxH = max(maxH, cell.posY)
 	}
-	return maxW - minW + 10, maxH - minH + 10, lc
+	return maxW - minW + 10, maxH - minH + 10
 }
 
 func drawBox(s tcell.Screen, title string) {
-	boxWidth, boxHeight, livingCells = calcBoxDimesions(s)
+	boxWidth, boxHeight = calcBoxDimesions(s)
 	sw, sh := s.Size()
 	x := (sw - boxWidth) / 2
 	y := (sh - boxHeight) / 2
@@ -246,8 +263,8 @@ func drawBox(s tcell.Screen, title string) {
 	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cellStyles.def)
 	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cellStyles.def)
 
+	drawLivingCellsOnGrid(s)
 	drawText(s, 1, title)
-
 }
 
 func runGameOfLife(s tcell.Screen, ctx context.Context) {
@@ -352,6 +369,7 @@ func main() {
 	defer quit()
 
 	drawNewGrid(s)
+	drawLivingCellsOnGrid(s)
 
 	var (
 		lastClickTime time.Time
@@ -370,6 +388,7 @@ func main() {
 		case *tcell.EventResize:
 			w, h = s.Size()
 			drawNewGrid(s)
+			drawLivingCellsOnGrid(s)
 			if boxOpen {
 				drawBox(s, "Choose predefined pattern")
 			}
@@ -387,6 +406,7 @@ func main() {
 				if boxOpen {
 					s.EnableMouse()
 					drawNewGrid(s)
+					drawLivingCellsOnGrid(s)
 					drawText(s, 1, "Chosen predefined pattern")
 					boxOpen = !boxOpen
 				} else if livingCells.Len() == 0 {
