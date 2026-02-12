@@ -70,7 +70,6 @@ var predefinedLivingCells = []LivingCellsSet{
 		{posX: 10, posY: 5}: {},
 	},
 	{
-
 		{posX: 30, posY: 30}: {},
 		{posX: 31, posY: 30}: {},
 		{posX: 32, posY: 30}: {},
@@ -416,7 +415,7 @@ func main() {
 				} else if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
 					drawText(s, 1, gameText)
-				} else {
+				} else if !gameIsRuning {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
 					go runGameOfLife(s, ctx)
