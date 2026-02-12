@@ -242,8 +242,10 @@ func calcBoxDimesions(s tcell.Screen) (int, int) {
 	return maxW - minW + 10, maxH - minH + 10
 }
 
-func drawBox(s tcell.Screen, title string) {
-	boxWidth, boxHeight = calcBoxDimesions(s)
+func drawBox(s tcell.Screen, title string, nextBox bool) {
+	if nextBox {
+		boxWidth, boxHeight = calcBoxDimesions(s)
+	}
 	sw, sh := s.Size()
 	x := (sw - boxWidth) / 2
 	y := (sh - boxHeight) / 2
@@ -387,10 +389,12 @@ func main() {
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			w, h = s.Size()
-			drawNewGrid(s)
-			drawLivingCellsOnGrid(s)
 			if boxOpen {
-				drawBox(s, "Choose predefined pattern")
+				drawNewGrid(s)
+				drawBox(s, "Choose predefined pattern", false)
+			} else {
+				drawNewGrid(s)
+				drawLivingCellsOnGrid(s)
 			}
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
@@ -399,7 +403,7 @@ func main() {
 				s.DisableMouse()
 				boxOpen = true
 				drawNewGrid(s)
-				drawBox(s, "Choose predefined pattern")
+				drawBox(s, "Choose predefined pattern", true)
 			} else if ev.Key() == tcell.KeyCtrlS {
 				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
