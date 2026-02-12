@@ -50,9 +50,58 @@ func (lcs LivingCellsSet) Len() int {
 
 const screenOffset = 1
 
+var predefinedLivingCells = []LivingCellsSet{
+	{
+		{posX: 30, posY: 30}: {},
+		{posX: 31, posY: 30}: {},
+	},
+	{
+		{posX: 10, posY: 5}: {},
+	},
+	{
+
+		{posX: 30, posY: 30}: {},
+		{posX: 31, posY: 30}: {},
+		{posX: 32, posY: 30}: {},
+		{posX: 33, posY: 30}: {},
+		{posX: 28, posY: 32}: {},
+		{posX: 29, posY: 32}: {},
+		{posX: 30, posY: 32}: {},
+		{posX: 31, posY: 32}: {},
+		{posX: 32, posY: 32}: {},
+		{posX: 33, posY: 32}: {},
+		{posX: 34, posY: 32}: {},
+		{posX: 35, posY: 32}: {},
+		{posX: 26, posY: 34}: {},
+		{posX: 27, posY: 34}: {},
+		{posX: 28, posY: 34}: {},
+		{posX: 29, posY: 34}: {},
+		{posX: 30, posY: 34}: {},
+		{posX: 31, posY: 34}: {},
+		{posX: 32, posY: 34}: {},
+		{posX: 33, posY: 34}: {},
+		{posX: 34, posY: 34}: {},
+		{posX: 35, posY: 34}: {},
+		{posX: 36, posY: 34}: {},
+		{posX: 37, posY: 34}: {},
+		{posX: 28, posY: 36}: {},
+		{posX: 29, posY: 36}: {},
+		{posX: 30, posY: 36}: {},
+		{posX: 31, posY: 36}: {},
+		{posX: 32, posY: 36}: {},
+		{posX: 33, posY: 36}: {},
+		{posX: 34, posY: 36}: {},
+		{posX: 35, posY: 36}: {},
+		{posX: 30, posY: 38}: {},
+		{posX: 31, posY: 38}: {},
+		{posX: 32, posY: 38}: {},
+		{posX: 33, posY: 38}: {},
+	},
+}
+
+var boxWidth, boxHeight = -1, -1
+var predefinedLCIndex = 0
 var boxOpen = false
-var boxWidth = 0
-var boxHeight = 0
 var gameText = ""
 var livingCells = make(LivingCellsSet)
 var generation = 0
@@ -68,6 +117,25 @@ var directions = [][]int{
 	{-1, 1},  // bottom left
 	{0, 1},   // bottom mid
 	{1, 1},   // bottom right
+}
+
+func calcBoxDimesions(s tcell.Screen) (int, int, LivingCellsSet) {
+	// TODO draw lc content inside the box
+	if predefinedLCIndex == len(predefinedLivingCells) {
+		predefinedLCIndex = 0
+	}
+	lc := predefinedLivingCells[predefinedLCIndex]
+	predefinedLCIndex++
+	sw, sh := s.Size()
+	minW, maxW := sw, -1
+	minH, maxH := sh, -1
+	for cell := range lc {
+		minW = min(minW, cell.posX)
+		maxW = max(maxW, cell.posX)
+		minH = min(minH, cell.posY)
+		maxH = max(maxH, cell.posY)
+	}
+	return maxW - minW + 10, maxH - minH + 10, lc
 }
 
 func clearLine(s tcell.Screen, y int) {
@@ -157,27 +225,26 @@ func drawNewGrid(s tcell.Screen) {
 	}
 }
 
-func drawBox(s tcell.Screen, w, h int, title string) {
-	boxWidth = w
-	boxHeight = h
+func drawBox(s tcell.Screen, title string) {
+	boxWidth, boxHeight, livingCells = calcBoxDimesions(s)
 	sw, sh := s.Size()
-	x := (sw - w) / 2
-	y := (sh - h) / 2
+	x := (sw - boxWidth) / 2
+	y := (sh - boxHeight) / 2
 
-	for col := x; col < x+w; col++ {
+	for col := x; col < x+boxWidth; col++ {
 		s.SetContent(col, y, tcell.RuneHLine, nil, cellStyles.def)
-		s.SetContent(col, y+h-1, tcell.RuneHLine, nil, cellStyles.def)
+		s.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cellStyles.def)
 	}
 
-	for row := y; row < y+h; row++ {
+	for row := y; row < y+boxHeight; row++ {
 		s.SetContent(x, row, tcell.RuneVLine, nil, cellStyles.def)
-		s.SetContent(x+w-1, row, tcell.RuneVLine, nil, cellStyles.def)
+		s.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cellStyles.def)
 	}
 
 	s.SetContent(x, y, tcell.RuneULCorner, nil, cellStyles.def)
-	s.SetContent(x+w-1, y, tcell.RuneURCorner, nil, cellStyles.def)
-	s.SetContent(x, y+h-1, tcell.RuneLLCorner, nil, cellStyles.def)
-	s.SetContent(x+w-1, y+h-1, tcell.RuneLRCorner, nil, cellStyles.def)
+	s.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cellStyles.def)
+	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cellStyles.def)
+	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cellStyles.def)
 
 	drawText(s, 1, title)
 
@@ -304,26 +371,25 @@ func main() {
 			w, h = s.Size()
 			drawNewGrid(s)
 			if boxOpen {
-				drawBox(s, boxWidth, boxHeight, "Choose pattern")
+				drawBox(s, "Choose predefined pattern")
 			}
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
 			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning {
-				if boxOpen {
-					drawNewGrid(s)
-					s.EnableMouse()
-				} else {
-					s.DisableMouse()
-					livingCells = make(LivingCellsSet)
-					drawNewGrid(s)
-					drawBox(s, 30, 5, "Choose pattern")
-				}
-				boxOpen = !boxOpen
+				s.DisableMouse()
+				boxOpen = true
+				drawNewGrid(s)
+				drawBox(s, "Choose predefined pattern")
 			} else if ev.Key() == tcell.KeyCtrlS {
 				s.Sync()
-			} else if ev.Key() == tcell.KeyCtrlR && !boxOpen {
-				if livingCells.Len() == 0 {
+			} else if ev.Key() == tcell.KeyCtrlR {
+				if boxOpen {
+					s.EnableMouse()
+					drawNewGrid(s)
+					drawText(s, 1, "Chosen predefined pattern")
+					boxOpen = !boxOpen
+				} else if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
 					drawText(s, 1, gameText)
 				} else {
