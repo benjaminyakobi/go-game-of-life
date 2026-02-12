@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -109,7 +110,7 @@ var predefinedLivingCells = []LivingCellsSet{
 	},
 }
 
-var boxWidth, boxHeight = -1, -1
+var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
 var boxOpen = false
 var gameText = ""
@@ -219,32 +220,28 @@ func drawLivingCellsOnGrid(s tcell.Screen) {
 	}
 }
 
-func calcBoxDimesions(s tcell.Screen) (int, int) {
-	// TODO draw lc content inside the box
-	if predefinedLCIndex == len(predefinedLivingCells) {
-		predefinedLCIndex = 0
-	}
-	livingCells = predefinedLivingCells[predefinedLCIndex].Copy()
-	predefinedLCIndex++
+func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
+	livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 	sw, sh := s.Size()
-	minW, maxW := sw, -1
-	minH, maxH := sh, -1
-	if livingCells.Len() == 1 {
-		return 10, 10
-	}
+	minW, maxW := sw, math.MinInt32
+	minH, maxH := sh, math.MinInt32
 	for cell := range livingCells {
 		minW = min(minW, cell.posX)
 		maxW = max(maxW, cell.posX)
 		minH = min(minH, cell.posY)
 		maxH = max(maxH, cell.posY)
 	}
-	return maxW - minW + 10, maxH - minH + 10
+	if livingCells.Len() == 1 {
+		return 5, 5, minW, minH
+	}
+	return maxW - minW + 5, maxH - minH + 5, minW, minH
 }
 
 func drawBox(s tcell.Screen, title string, nextBox bool) {
 	if nextBox {
-		boxWidth, boxHeight = calcBoxDimesions(s)
+		predefinedLCIndex++
 	}
+	boxWidth, boxHeight, minWidth, minHeight = calcBoxDimesions(s)
 	sw, sh := s.Size()
 	x := (sw - boxWidth) / 2
 	y := (sh - boxHeight) / 2
@@ -264,6 +261,17 @@ func drawBox(s tcell.Screen, title string, nextBox bool) {
 	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cellStyles.def)
 	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cellStyles.def)
 
+	centeredLCS := make(LivingCellsSet)
+	centerLivingCells := func(lcs LivingCellsSet) LivingCellsSet {
+		for cell := range lcs {
+			posX := x + cell.posX - minWidth + 2
+			posY := y + cell.posY - minHeight + 2
+			centeredLCS.Add(LivingCell{posX: posX, posY: posY})
+		}
+		return centeredLCS
+	}
+
+	livingCells = centerLivingCells(livingCells)
 	drawLivingCellsOnGrid(s)
 	drawText(s, 1, title)
 }
@@ -411,6 +419,7 @@ func main() {
 					drawNewGrid(s)
 					drawLivingCellsOnGrid(s)
 					drawText(s, 1, "Chosen predefined pattern")
+					predefinedLCIndex--
 					boxOpen = !boxOpen
 				} else if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
