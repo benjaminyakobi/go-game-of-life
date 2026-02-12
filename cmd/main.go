@@ -119,25 +119,6 @@ var directions = [][]int{
 	{1, 1},   // bottom right
 }
 
-func calcBoxDimesions(s tcell.Screen) (int, int, LivingCellsSet) {
-	// TODO draw lc content inside the box
-	if predefinedLCIndex == len(predefinedLivingCells) {
-		predefinedLCIndex = 0
-	}
-	lc := predefinedLivingCells[predefinedLCIndex]
-	predefinedLCIndex++
-	sw, sh := s.Size()
-	minW, maxW := sw, -1
-	minH, maxH := sh, -1
-	for cell := range lc {
-		minW = min(minW, cell.posX)
-		maxW = max(maxW, cell.posX)
-		minH = min(minH, cell.posY)
-		maxH = max(maxH, cell.posY)
-	}
-	return maxW - minW + 10, maxH - minH + 10, lc
-}
-
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
 	for x := 0; x < w; x++ {
@@ -223,6 +204,25 @@ func drawNewGrid(s tcell.Screen) {
 			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
 		}
 	}
+}
+
+func calcBoxDimesions(s tcell.Screen) (int, int, LivingCellsSet) {
+	// TODO draw lc content inside the box
+	if predefinedLCIndex == len(predefinedLivingCells) {
+		predefinedLCIndex = 0
+	}
+	lc := predefinedLivingCells[predefinedLCIndex]
+	predefinedLCIndex++
+	sw, sh := s.Size()
+	minW, maxW := sw, -1
+	minH, maxH := sh, -1
+	for cell := range lc {
+		minW = min(minW, cell.posX)
+		maxW = max(maxW, cell.posX)
+		minH = min(minH, cell.posY)
+		maxH = max(maxH, cell.posY)
+	}
+	return maxW - minW + 10, maxH - minH + 10, lc
 }
 
 func drawBox(s tcell.Screen, title string) {
