@@ -64,11 +64,16 @@ const screenOffset = 1
 
 var predefinedLivingCells = []LivingCellsSet{
 	{
+		{posX: 10, posY: 5}: {},
+	},
+	{
 		{posX: 30, posY: 30}: {},
 		{posX: 31, posY: 30}: {},
 	},
 	{
-		{posX: 10, posY: 5}: {},
+		{posX: 30, posY: 30}: {},
+		{posX: 30, posY: 31}: {},
+		{posX: 30, posY: 32}: {},
 	},
 	{
 		{posX: 30, posY: 30}: {},
