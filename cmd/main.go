@@ -221,7 +221,6 @@ func drawLivingCellsOnGrid(s tcell.Screen) {
 }
 
 func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
-	livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 	sw, sh := s.Size()
 	minW, maxW := sw, math.MinInt32
 	minH, maxH := sh, math.MinInt32
@@ -237,10 +236,7 @@ func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
 	return maxW - minW + 5, maxH - minH + 5, minW, minH
 }
 
-func drawBox(s tcell.Screen, title string, nextBox bool) {
-	if nextBox {
-		predefinedLCIndex++
-	}
+func drawBox(s tcell.Screen, title string) {
 	boxWidth, boxHeight, minWidth, minHeight = calcBoxDimesions(s)
 	sw, sh := s.Size()
 	x := (sw - boxWidth) / 2
@@ -261,8 +257,8 @@ func drawBox(s tcell.Screen, title string, nextBox bool) {
 	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cellStyles.def)
 	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cellStyles.def)
 
-	centeredLCS := make(LivingCellsSet)
 	centerLivingCells := func(lcs LivingCellsSet) LivingCellsSet {
+		centeredLCS := make(LivingCellsSet)
 		for cell := range lcs {
 			posX := x + cell.posX - minWidth + 2
 			posY := y + cell.posY - minHeight + 2
@@ -398,7 +394,7 @@ func main() {
 			w, h = s.Size()
 			if boxOpen {
 				drawNewGrid(s)
-				drawBox(s, "Choose predefined pattern", false)
+				drawBox(s, "Choose predefined pattern")
 			} else {
 				drawNewGrid(s)
 				drawLivingCellsOnGrid(s)
@@ -410,7 +406,9 @@ func main() {
 				s.DisableMouse()
 				boxOpen = true
 				drawNewGrid(s)
-				drawBox(s, "Choose predefined pattern", true)
+				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
+				drawBox(s, "Choose predefined pattern")
+				predefinedLCIndex++
 			} else if ev.Key() == tcell.KeyCtrlS {
 				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
