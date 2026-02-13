@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -48,8 +49,75 @@ func (lcs LivingCellsSet) Len() int {
 	return len(lcs)
 }
 
+func (lcs LivingCellsSet) Copy() LivingCellsSet {
+	if lcs == nil {
+		return nil
+	}
+	lcsCopy := make(LivingCellsSet, lcs.Len())
+	for cell := range lcs {
+		lcsCopy[cell] = struct{}{}
+	}
+	return lcsCopy
+}
+
 const screenOffset = 1
 
+var predefinedLivingCells = []LivingCellsSet{
+	{
+		{posX: 10, posY: 5}: {},
+	},
+	{
+		{posX: 30, posY: 30}: {},
+		{posX: 31, posY: 30}: {},
+	},
+	{
+		{posX: 30, posY: 30}: {},
+		{posX: 30, posY: 31}: {},
+		{posX: 30, posY: 32}: {},
+	},
+	{
+		{posX: 30, posY: 30}: {},
+		{posX: 31, posY: 30}: {},
+		{posX: 32, posY: 30}: {},
+		{posX: 33, posY: 30}: {},
+		{posX: 28, posY: 32}: {},
+		{posX: 29, posY: 32}: {},
+		{posX: 30, posY: 32}: {},
+		{posX: 31, posY: 32}: {},
+		{posX: 32, posY: 32}: {},
+		{posX: 33, posY: 32}: {},
+		{posX: 34, posY: 32}: {},
+		{posX: 35, posY: 32}: {},
+		{posX: 26, posY: 34}: {},
+		{posX: 27, posY: 34}: {},
+		{posX: 28, posY: 34}: {},
+		{posX: 29, posY: 34}: {},
+		{posX: 30, posY: 34}: {},
+		{posX: 31, posY: 34}: {},
+		{posX: 32, posY: 34}: {},
+		{posX: 33, posY: 34}: {},
+		{posX: 34, posY: 34}: {},
+		{posX: 35, posY: 34}: {},
+		{posX: 36, posY: 34}: {},
+		{posX: 37, posY: 34}: {},
+		{posX: 28, posY: 36}: {},
+		{posX: 29, posY: 36}: {},
+		{posX: 30, posY: 36}: {},
+		{posX: 31, posY: 36}: {},
+		{posX: 32, posY: 36}: {},
+		{posX: 33, posY: 36}: {},
+		{posX: 34, posY: 36}: {},
+		{posX: 35, posY: 36}: {},
+		{posX: 30, posY: 38}: {},
+		{posX: 31, posY: 38}: {},
+		{posX: 32, posY: 38}: {},
+		{posX: 33, posY: 38}: {},
+	},
+}
+
+var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
+var predefinedLCIndex = 0
+var boxOpen = false
 var gameText = ""
 var livingCells = make(LivingCellsSet)
 var generation = 0
@@ -136,8 +204,8 @@ func updateCellStyle(s tcell.Screen, x, y int) {
 }
 
 func drawNewGrid(s tcell.Screen) {
-	w, h := s.Size()
-	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+C exit")
+	_, h := s.Size()
+	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+F Clear & Choose Pattern | Ctrl+C exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := screenOffset; h < height; h++ {
@@ -146,12 +214,67 @@ func drawNewGrid(s tcell.Screen) {
 	}
 	drawText(s, 1, gameText)
 	drawText(s, h-1, "Conway's Game Of Life")
+}
 
+func drawLivingCellsOnGrid(s tcell.Screen) {
+	w, h := s.Size()
 	for lc := range livingCells {
 		if lc.posY > screenOffset && lc.posY < h-1 && lc.posX > 0 && lc.posX < w-1 {
 			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
 		}
 	}
+}
+
+func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
+	sw, sh := s.Size()
+	minW, maxW := sw, math.MinInt32
+	minH, maxH := sh, math.MinInt32
+	for cell := range livingCells {
+		minW = min(minW, cell.posX)
+		maxW = max(maxW, cell.posX)
+		minH = min(minH, cell.posY)
+		maxH = max(maxH, cell.posY)
+	}
+	if livingCells.Len() == 1 {
+		return 5, 5, minW, minH
+	}
+	return maxW - minW + 5, maxH - minH + 5, minW, minH
+}
+
+func drawBox(s tcell.Screen, title string) {
+	boxWidth, boxHeight, minWidth, minHeight = calcBoxDimesions(s)
+	sw, sh := s.Size()
+	x := (sw - boxWidth) / 2
+	y := (sh - boxHeight) / 2
+
+	for col := x; col < x+boxWidth; col++ {
+		s.SetContent(col, y, tcell.RuneHLine, nil, cellStyles.def)
+		s.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cellStyles.def)
+	}
+
+	for row := y; row < y+boxHeight; row++ {
+		s.SetContent(x, row, tcell.RuneVLine, nil, cellStyles.def)
+		s.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cellStyles.def)
+	}
+
+	s.SetContent(x, y, tcell.RuneULCorner, nil, cellStyles.def)
+	s.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cellStyles.def)
+	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cellStyles.def)
+	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cellStyles.def)
+
+	centerLivingCells := func(lcs LivingCellsSet) LivingCellsSet {
+		centeredLCS := make(LivingCellsSet)
+		for cell := range lcs {
+			posX := x + cell.posX - minWidth + 2
+			posY := y + cell.posY - minHeight + 2
+			centeredLCS.Add(LivingCell{posX: posX, posY: posY})
+		}
+		return centeredLCS
+	}
+
+	livingCells = centerLivingCells(livingCells)
+	drawLivingCellsOnGrid(s)
+	drawText(s, 1, title)
 }
 
 func runGameOfLife(s tcell.Screen, ctx context.Context) {
@@ -256,6 +379,7 @@ func main() {
 	defer quit()
 
 	drawNewGrid(s)
+	drawLivingCellsOnGrid(s)
 
 	var (
 		lastClickTime time.Time
@@ -273,17 +397,37 @@ func main() {
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			w, h = s.Size()
-			drawNewGrid(s)
+			if boxOpen {
+				drawNewGrid(s)
+				drawBox(s, "Choose predefined pattern")
+			} else {
+				drawNewGrid(s)
+				drawLivingCellsOnGrid(s)
+			}
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
+			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning {
+				s.DisableMouse()
+				boxOpen = true
+				drawNewGrid(s)
+				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
+				drawBox(s, "Choose predefined pattern")
+				predefinedLCIndex++
 			} else if ev.Key() == tcell.KeyCtrlS {
 				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
-				if livingCells.Len() == 0 {
+				if boxOpen {
+					s.EnableMouse()
+					drawNewGrid(s)
+					drawLivingCellsOnGrid(s)
+					drawText(s, 1, "Chosen predefined pattern")
+					predefinedLCIndex--
+					boxOpen = !boxOpen
+				} else if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
 					drawText(s, 1, gameText)
-				} else {
+				} else if !gameIsRuning {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
 					go runGameOfLife(s, ctx)
