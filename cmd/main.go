@@ -66,7 +66,6 @@ func (lcs LivingCellsSet) Copy() LivingCellsSet {
 const screenOffset = 1
 
 // TODO add history object of the last 100 generations
-// TODO move patterns into a json file
 
 type Config struct {
 	Patterns map[string][]LivingCell `json:"patterns"`
@@ -393,7 +392,7 @@ func main() {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
-			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning {
+			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				s.DisableMouse()
 				boxOpen = true
 				drawNewGrid(s)
