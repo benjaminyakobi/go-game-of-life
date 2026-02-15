@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math"
+	"os"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -26,8 +29,8 @@ var cellStyles = CellStyles{
 }
 
 type LivingCell struct {
-	posX int
-	posY int
+	PosX int `json:"x"`
+	PosY int `json:"y"`
 }
 
 type LivingCellsSet map[LivingCell]struct{}
@@ -62,58 +65,14 @@ func (lcs LivingCellsSet) Copy() LivingCellsSet {
 
 const screenOffset = 1
 
-var predefinedLivingCells = []LivingCellsSet{
-	{
-		{posX: 10, posY: 5}: {},
-	},
-	{
-		{posX: 30, posY: 30}: {},
-		{posX: 31, posY: 30}: {},
-	},
-	{
-		{posX: 30, posY: 30}: {},
-		{posX: 30, posY: 31}: {},
-		{posX: 30, posY: 32}: {},
-	},
-	{
-		{posX: 30, posY: 30}: {},
-		{posX: 31, posY: 30}: {},
-		{posX: 32, posY: 30}: {},
-		{posX: 33, posY: 30}: {},
-		{posX: 28, posY: 32}: {},
-		{posX: 29, posY: 32}: {},
-		{posX: 30, posY: 32}: {},
-		{posX: 31, posY: 32}: {},
-		{posX: 32, posY: 32}: {},
-		{posX: 33, posY: 32}: {},
-		{posX: 34, posY: 32}: {},
-		{posX: 35, posY: 32}: {},
-		{posX: 26, posY: 34}: {},
-		{posX: 27, posY: 34}: {},
-		{posX: 28, posY: 34}: {},
-		{posX: 29, posY: 34}: {},
-		{posX: 30, posY: 34}: {},
-		{posX: 31, posY: 34}: {},
-		{posX: 32, posY: 34}: {},
-		{posX: 33, posY: 34}: {},
-		{posX: 34, posY: 34}: {},
-		{posX: 35, posY: 34}: {},
-		{posX: 36, posY: 34}: {},
-		{posX: 37, posY: 34}: {},
-		{posX: 28, posY: 36}: {},
-		{posX: 29, posY: 36}: {},
-		{posX: 30, posY: 36}: {},
-		{posX: 31, posY: 36}: {},
-		{posX: 32, posY: 36}: {},
-		{posX: 33, posY: 36}: {},
-		{posX: 34, posY: 36}: {},
-		{posX: 35, posY: 36}: {},
-		{posX: 30, posY: 38}: {},
-		{posX: 31, posY: 38}: {},
-		{posX: 32, posY: 38}: {},
-		{posX: 33, posY: 38}: {},
-	},
+// TODO add history object of the last 100 generations
+// TODO move patterns into a json file
+
+type Config struct {
+	Patterns map[string][]LivingCell `json:"patterns"`
 }
+
+var predefinedLivingCells []LivingCellsSet
 
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
@@ -133,6 +92,32 @@ var directions = [][]int{
 	{-1, 1},  // bottom left
 	{0, 1},   // bottom mid
 	{1, 1},   // bottom right
+}
+
+func loadConfig() {
+	file, err := os.Open("./conf.json")
+	if err != nil {
+		log.Fatalf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	var conf Config
+	if err := decoder.Decode(&conf); err != nil {
+		if err == io.EOF {
+			fmt.Println("finished decoding config file")
+		} else {
+			log.Fatalf("failed to open file: %v", err)
+		}
+	}
+
+	for _, points := range conf.Patterns {
+		var lcs = make(LivingCellsSet)
+		for i := 0; i < len(points); i++ {
+			lcs.Add(LivingCell{PosX: points[i].PosX, PosY: points[i].PosY})
+		}
+		predefinedLivingCells = append(predefinedLivingCells, lcs)
+	}
 }
 
 func clearLine(s tcell.Screen, y int) {
@@ -219,8 +204,8 @@ func drawNewGrid(s tcell.Screen) {
 func drawLivingCellsOnGrid(s tcell.Screen) {
 	w, h := s.Size()
 	for lc := range livingCells {
-		if lc.posY > screenOffset && lc.posY < h-1 && lc.posX > 0 && lc.posX < w-1 {
-			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
+		if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
+			s.Put(lc.PosX, lc.PosY, "@", cellStyles.greenYellow)
 		}
 	}
 }
@@ -230,10 +215,10 @@ func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
 	minW, maxW := sw, math.MinInt32
 	minH, maxH := sh, math.MinInt32
 	for cell := range livingCells {
-		minW = min(minW, cell.posX)
-		maxW = max(maxW, cell.posX)
-		minH = min(minH, cell.posY)
-		maxH = max(maxH, cell.posY)
+		minW = min(minW, cell.PosX)
+		maxW = max(maxW, cell.PosX)
+		minH = min(minH, cell.PosY)
+		maxH = max(maxH, cell.PosY)
 	}
 	if livingCells.Len() == 1 {
 		return 5, 5, minW, minH
@@ -265,9 +250,9 @@ func drawBox(s tcell.Screen, title string) {
 	centerLivingCells := func(lcs LivingCellsSet) LivingCellsSet {
 		centeredLCS := make(LivingCellsSet)
 		for cell := range lcs {
-			posX := x + cell.posX - minWidth + 2
-			posY := y + cell.posY - minHeight + 2
-			centeredLCS.Add(LivingCell{posX: posX, posY: posY})
+			PosX := x + cell.PosX - minWidth + 2
+			PosY := y + cell.PosY - minHeight + 2
+			centeredLCS.Add(LivingCell{PosX: PosX, PosY: PosY})
 		}
 		return centeredLCS
 	}
@@ -303,7 +288,7 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 	w, h := s.Size()
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
-		if livingCells.Contains(LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}) {
+		if livingCells.Contains(LivingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
 			count++
 		}
 		if count > 3 {
@@ -311,8 +296,8 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 		}
 	}
 	if count == 3 {
-		if lc.posY > screenOffset && lc.posY < h-1 && lc.posX > 0 && lc.posX < w-1 {
-			s.Put(lc.posX, lc.posY, "@", cellStyles.greenYellow)
+		if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
+			s.Put(lc.PosX, lc.PosY, "@", cellStyles.greenYellow)
 		}
 		return true
 	}
@@ -326,7 +311,7 @@ func calcNextGeneration(s tcell.Screen) {
 		count := 0
 		for _, d := range directions {
 			dx, dy := d[0], d[1]
-			neighborCell := LivingCell{posX: lc.posX + dx, posY: lc.posY + dy}
+			neighborCell := LivingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
 			if livingCells.Contains(neighborCell) {
 				count++
 			} else {
@@ -337,8 +322,8 @@ func calcNextGeneration(s tcell.Screen) {
 			}
 		}
 		if count < 2 || count > 3 {
-			if lc.posY > screenOffset && lc.posY < h-1 && lc.posX > 0 && lc.posX < w-1 {
-				updateCellStyle(s, lc.posX, lc.posY)
+			if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
+				updateCellStyle(s, lc.PosX, lc.PosY)
 			}
 		} else if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
@@ -378,6 +363,7 @@ func main() {
 	}
 	defer quit()
 
+	loadConfig()
 	drawNewGrid(s)
 	drawLivingCellsOnGrid(s)
 
@@ -442,12 +428,12 @@ func main() {
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY && y > screenOffset && y < h-1 && x > 0 && x < w-1 { // double-click
-					livingCells.Remove(LivingCell{posX: x, posY: y})
+					livingCells.Remove(LivingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len())
 					drawText(s, 1, gameText)
 					updateCellStyle(s, x, y)
 				} else if y > screenOffset && y < h-1 && x > 0 && x < w-1 { // single-click
-					livingCells.Add(LivingCell{posX: x, posY: y})
+					livingCells.Add(LivingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len())
 					drawText(s, 1, gameText)
 					s.Put(x, y, "@", cellStyles.greenYellow)
