@@ -66,9 +66,6 @@ func (lcs LivingCellsSet) Copy() LivingCellsSet {
 
 const screenOffset = 1
 
-// TODO add history object of the last 100 generations
-// TODO reorganize the code after implementing the conf.json feat
-
 type Config struct {
 	Patterns map[string][]LivingCell `json:"patterns"`
 }
