@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -66,12 +67,14 @@ func (lcs LivingCellsSet) Copy() LivingCellsSet {
 const screenOffset = 1
 
 // TODO add history object of the last 100 generations
+// TODO reorganize the code after implementing the conf.json feat
 
 type Config struct {
 	Patterns map[string][]LivingCell `json:"patterns"`
 }
 
 var predefinedLivingCells []LivingCellsSet
+var historyLivingCells = list.New()
 
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
@@ -261,7 +264,7 @@ func drawBox(s tcell.Screen, title string) {
 	drawText(s, 1, title)
 }
 
-func runGameOfLife(s tcell.Screen, ctx context.Context) {
+func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool) {
 	ticker := time.NewTicker(500 * time.Millisecond)
 	s.DisableMouse() // disabling mouse before running the game
 	defer ticker.Stop()
@@ -277,6 +280,9 @@ func runGameOfLife(s tcell.Screen, ctx context.Context) {
 			s.Show()
 			gameIsRuning = false
 			generation = 0
+			return
+		case <-pauseChan:
+			gameIsRuning = false
 			return
 		}
 	}
@@ -305,6 +311,10 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 
 func calcNextGeneration(s tcell.Screen) {
 	w, h := s.Size()
+	if historyLivingCells.Len() > 50 {
+		historyLivingCells.Remove(historyLivingCells.Front())
+	}
+	historyLivingCells.PushBack(livingCells)
 	livingCellsNextGen := make(LivingCellsSet)
 	for lc := range livingCells {
 		count := 0
@@ -371,6 +381,7 @@ func main() {
 		lastX, lastY  int
 		dblClickDelay = 500 * time.Millisecond
 		w, h          = s.Size()
+		pauseChan     = make(chan bool)
 	)
 
 	// Event loop
@@ -392,6 +403,19 @@ func main() {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				return
+			} else if ev.Key() == tcell.KeyCtrlB && boxOpen == false && historyLivingCells.Len() > 0 {
+				historyVal := historyLivingCells.Back()
+				historyLivingCells.Remove(historyVal)
+				livingCells = historyVal.Value.(LivingCellsSet)
+				if gameIsRuning {
+					pauseChan <- true
+				}
+				if generation > 0 {
+					generation--
+				}
+				drawNewGrid(s)
+				drawLivingCellsOnGrid(s)
+				gameText = fmt.Sprintf("history - generation: %v", generation)
 			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				s.DisableMouse()
 				boxOpen = true
@@ -415,7 +439,7 @@ func main() {
 				} else if !gameIsRuning {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
-					go runGameOfLife(s, ctx)
+					go runGameOfLife(s, ctx, pauseChan)
 				}
 			} else if ev.Key() == tcell.KeyCtrlP && gameIsRuning {
 				cancel()
