@@ -279,6 +279,9 @@ func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool) {
 			generation = 0
 			return
 		case <-pauseChan:
+			gameText = fmt.Sprintf("paused after %v generations", generation)
+			drawText(s, 1, gameText)
+			s.Show()
 			gameIsRuning = false
 			return
 		}
