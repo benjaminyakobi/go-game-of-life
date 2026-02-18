@@ -189,7 +189,7 @@ func updateCellStyle(s tcell.Screen, x, y int) {
 
 func drawNewGrid(s tcell.Screen) {
 	_, h := s.Size()
-	drawText(s, 0, "Click select | Double click unselect | Ctrl+R run | Ctrl+P pause | Ctrl+F Clear & Choose Pattern | Ctrl+B Undo | Ctrl+C exit")
+	drawText(s, 0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop | b: Clear & Choose Pattern | Left Arrow: Undo | Escapse: Exit")
 	width, height := s.Size()
 	for w := 0; w < width; w++ {
 		for h := screenOffset; h < height; h++ {
@@ -398,29 +398,30 @@ func main() {
 				drawLivingCellsOnGrid(s)
 			}
 		case *tcell.EventKey:
-			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+			if ev.Key() == tcell.KeyEscape {
 				return
-			} else if ev.Key() == tcell.KeyCtrlB && boxOpen == false && historyLivingCells.Len() > 0 {
-				historyVal := historyLivingCells.Back()
-				historyLivingCells.Remove(historyVal)
-				livingCells = historyVal.Value.(LivingCellsSet)
+			} else if ev.Key() == tcell.KeyRune && ev.Str() == "p" && boxOpen == false && historyLivingCells.Len() > 0 {
 				if gameIsRuning {
 					pauseChan <- true
 				}
+			} else if ev.Key() == tcell.KeyLeft && !gameIsRuning && !boxOpen && historyLivingCells.Len() > 0 {
+				historyVal := historyLivingCells.Back()
+				historyLivingCells.Remove(historyVal)
+				livingCells = historyVal.Value.(LivingCellsSet)
 				if generation > 0 {
 					generation--
 				}
-				gameText = fmt.Sprintf("history - generation: %v", generation)
+				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", generation, livingCells.Len())
 				drawNewGrid(s)
 				drawLivingCellsOnGrid(s)
-			} else if ev.Key() == tcell.KeyCtrlF && !gameIsRuning && len(predefinedLivingCells) > 0 {
+			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				s.DisableMouse()
 				boxOpen = true
 				drawNewGrid(s)
 				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 				drawBox(s, "Choose predefined pattern")
 				predefinedLCIndex++
-			} else if ev.Key() == tcell.KeyCtrlR {
+			} else if ev.Key() == tcell.KeyRune && ev.Str() == "r" {
 				if boxOpen {
 					s.EnableMouse()
 					drawNewGrid(s)
@@ -436,7 +437,7 @@ func main() {
 					ctx, cancel = context.WithCancel(context.Background())
 					go runGameOfLife(s, ctx, pauseChan)
 				}
-			} else if ev.Key() == tcell.KeyCtrlP && gameIsRuning {
+			} else if ev.Key() == tcell.KeyRune && ev.Str() == "s" && gameIsRuning {
 				cancel()
 			}
 		case *tcell.EventMouse:
