@@ -414,6 +414,9 @@ func main() {
 				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", generation, livingCells.Len())
 				drawNewGrid(s)
 				drawLivingCellsOnGrid(s)
+			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
+				calcNextGeneration(s)
+				s.Show()
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				s.DisableMouse()
 				boxOpen = true
