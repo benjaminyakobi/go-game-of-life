@@ -420,8 +420,6 @@ func main() {
 				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 				drawBox(s, "Choose predefined pattern")
 				predefinedLCIndex++
-			} else if ev.Key() == tcell.KeyCtrlS {
-				s.Sync()
 			} else if ev.Key() == tcell.KeyCtrlR {
 				if boxOpen {
 					s.EnableMouse()
