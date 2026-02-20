@@ -65,14 +65,15 @@ func (lcs LivingCellsSet) Copy() LivingCellsSet {
 }
 
 const screenOffset = 1
+const historySize = 50
 
 type Config struct {
 	Patterns map[string][]LivingCell `json:"patterns"`
 }
 
+var m time.Duration = 500
 var predefinedLivingCells []LivingCellsSet
 var historyLivingCells = list.New()
-
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
 var boxOpen = false
@@ -261,8 +262,8 @@ func drawBox(s tcell.Screen, title string) {
 	drawText(s, 1, title)
 }
 
-func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool) {
-	ticker := time.NewTicker(500 * time.Millisecond)
+func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
+	ticker := time.NewTicker(m * time.Millisecond)
 	s.DisableMouse() // disabling mouse before running the game
 	defer ticker.Stop()
 	defer s.EnableMouse() // enabling mouse before returning
@@ -284,6 +285,8 @@ func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool) {
 			s.Show()
 			gameIsRuning = false
 			return
+		case <-millisChan:
+			ticker = time.NewTicker(m * time.Millisecond)
 		}
 	}
 }
@@ -311,7 +314,7 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 
 func calcNextGeneration(s tcell.Screen) {
 	w, h := s.Size()
-	if historyLivingCells.Len() > 50 {
+	if historyLivingCells.Len() > historySize {
 		historyLivingCells.Remove(historyLivingCells.Front())
 	}
 	historyLivingCells.PushBack(livingCells)
@@ -378,10 +381,12 @@ func main() {
 
 	var (
 		lastClickTime time.Time
+		lastKeyTime   time.Time
 		lastX, lastY  int
 		dblClickDelay = 500 * time.Millisecond
 		w, h          = s.Size()
 		pauseChan     = make(chan bool)
+		millisChan    = make(chan time.Duration)
 	)
 
 	// Event loop
@@ -401,6 +406,7 @@ func main() {
 				drawLivingCellsOnGrid(s)
 			}
 		case *tcell.EventKey:
+			keyNow := time.Now()
 			if ev.Key() == tcell.KeyEscape {
 				return
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "p" && boxOpen == false && historyLivingCells.Len() > 0 {
@@ -441,11 +447,22 @@ func main() {
 				} else if !gameIsRuning {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
-					go runGameOfLife(s, ctx, pauseChan)
+					go runGameOfLife(s, ctx, pauseChan, millisChan)
+				}
+			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "=" {
+				if m > 100 && gameIsRuning {
+					m -= 100
+					millisChan <- m
+				}
+			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "-" {
+				if m < 1000 && gameIsRuning {
+					m += 100
+					millisChan <- m
 				}
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "s" && gameIsRuning {
 				cancel()
 			}
+			lastKeyTime = keyNow
 		case *tcell.EventMouse:
 			x, y := ev.Position()
 			switch ev.Buttons() {
