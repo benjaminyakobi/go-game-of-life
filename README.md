@@ -14,3 +14,15 @@ Every cell interacts with its eight neighbours, which are the cells that are hor
 - Any live cell with more than three live neighbours dies, as if by overpopulation.
 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
+## Key Bindings
+- `Mouse Left Click` - Choose cell
+- `Mouse Right Click` - Unchoose cell
+- `b` - Clear Grid & Choose Predefined Patterns
+- `r` - Run
+- `p` - Pause
+- `s` - Stop & Reset Generations
+- `=` - Increase Speed
+- `-` - Decrease Speed
+- `Left Arrow` - When game is paused: Previous Generation
+- `Right Arrow` - When game is paused: Next Generation
+
