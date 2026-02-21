@@ -449,13 +449,13 @@ func main() {
 					ctx, cancel = context.WithCancel(context.Background())
 					go runGameOfLife(s, ctx, pauseChan, millisChan)
 				}
-			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "=" {
-				if m > 100 && gameIsRuning {
+			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "=" && gameIsRuning {
+				if m > 100 {
 					m -= 100
 					millisChan <- m
 				}
-			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "-" {
-				if m < 1000 && gameIsRuning {
+			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "-" && gameIsRuning {
+				if m < 1000 {
 					m += 100
 					millisChan <- m
 				}
