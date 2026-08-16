@@ -430,6 +430,7 @@ func main() {
 				s.DisableMouse()
 				boxOpen = true
 				historyLivingCells = list.New()
+				generation = 0
 				drawNewGrid(s)
 				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 				drawBox(s, "Choose predefined pattern")
