@@ -113,7 +113,7 @@ func loadConfig() {
 
 	for _, points := range conf.Patterns {
 		var lcs = make(LivingCellsSet)
-		for i := 0; i < len(points); i++ {
+		for i := range points {
 			lcs.Add(LivingCell{PosX: points[i].PosX, PosY: points[i].PosY})
 		}
 		predefinedLivingCells = append(predefinedLivingCells, lcs)
@@ -122,7 +122,7 @@ func loadConfig() {
 
 func clearLine(s tcell.Screen, y int) {
 	w, _ := s.Size()
-	for x := 0; x < w; x++ {
+	for x := range w {
 		s.SetContent(x, y, ' ', nil, tcell.StyleDefault)
 	}
 }
@@ -134,7 +134,7 @@ func drawText(s tcell.Screen, y int, text string) {
 
 	calcX := (w - textWidth) / 2
 
-	for r := 0; r < calcX; r++ {
+	for r := range calcX {
 		if r == 0 && y == screenOffset {
 			s.Put(r, y, string(tcell.RuneULCorner), cellStyles.def)
 		} else if r > 0 && y == screenOffset {
@@ -192,7 +192,7 @@ func drawNewGrid(s tcell.Screen) {
 	_, h := s.Size()
 	drawText(s, 0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
 	width, height := s.Size()
-	for w := 0; w < width; w++ {
+	for w := range width {
 		for h := screenOffset; h < height; h++ {
 			updateCellStyle(s, w, h)
 		}
