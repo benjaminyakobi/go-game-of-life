@@ -429,6 +429,7 @@ func main() {
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				s.DisableMouse()
 				boxOpen = true
+				historyLivingCells = list.New()
 				drawNewGrid(s)
 				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 				drawBox(s, "Choose predefined pattern")
