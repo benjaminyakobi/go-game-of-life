@@ -17,7 +17,7 @@ import (
 const screenOffset = 1
 const historySize = 50
 
-type Config struct {
+type config struct {
 	Patterns map[string][]livingCell `json:"patterns"`
 }
 
@@ -52,7 +52,7 @@ func loadConfig() {
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	var conf Config
+	var conf config
 	if err := decoder.Decode(&conf); err != nil {
 		if err == io.EOF {
 			fmt.Println("finished decoding config file")
