@@ -88,7 +88,7 @@ func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
 	}
 	if count == 3 {
 		if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
-			s.Put(lc.PosX, lc.PosY, "@", cellStyles.greenYellow)
+			s.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
 		}
 		return true
 	}

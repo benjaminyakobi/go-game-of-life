@@ -21,7 +21,7 @@ func Run() {
 	if err := s.Init(); err != nil {
 		log.Fatalf("%+v", err)
 	}
-	s.SetStyle(cellStyles.def)
+	s.SetStyle(cs.def)
 	s.EnableMouse()
 	s.Clear()
 
@@ -142,7 +142,7 @@ func Run() {
 					livingCells.Add(LivingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len())
 					drawText(s, 1, gameText)
-					s.Put(x, y, "@", cellStyles.greenYellow)
+					s.Put(x, y, "@", cs.greenYellow)
 				}
 				lastClickTime = now
 				lastX, lastY = x, y
