@@ -10,22 +10,22 @@ import (
 	"github.com/gdamore/tcell/v3"
 )
 
-type LivingCell struct {
+type livingCell struct {
 	PosX int `json:"x"`
 	PosY int `json:"y"`
 }
 
-type LivingCellsSet map[LivingCell]struct{}
+type LivingCellsSet map[livingCell]struct{}
 
-func (lcs LivingCellsSet) Add(lc LivingCell) {
+func (lcs LivingCellsSet) Add(lc livingCell) {
 	lcs[lc] = struct{}{}
 }
 
-func (lcs LivingCellsSet) Remove(lc LivingCell) {
+func (lcs LivingCellsSet) Remove(lc livingCell) {
 	delete(lcs, lc)
 }
 
-func (lcs LivingCellsSet) Contains(lc LivingCell) bool {
+func (lcs LivingCellsSet) Contains(lc livingCell) bool {
 	_, ok := lcs[lc]
 	return ok
 }
@@ -74,12 +74,12 @@ func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool, m
 	}
 }
 
-func calcNextGenDeadCells(s tcell.Screen, lc LivingCell) bool {
+func calcNextGenDeadCells(s tcell.Screen, lc livingCell) bool {
 	count := 0
 	w, h := s.Size()
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
-		if livingCells.Contains(LivingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
+		if livingCells.Contains(livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
 			count++
 		}
 		if count > 3 {
@@ -106,7 +106,7 @@ func calcNextGeneration(s tcell.Screen) {
 		count := 0
 		for _, d := range directions {
 			dx, dy := d[0], d[1]
-			neighborCell := LivingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
+			neighborCell := livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
 			if livingCells.Contains(neighborCell) {
 				count++
 			} else {
