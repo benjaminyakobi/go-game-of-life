@@ -155,7 +155,7 @@ func drawBox(s tcell.Screen, title string) {
 		for cell := range lcs {
 			PosX := x + cell.PosX - minWidth + 2
 			PosY := y + cell.PosY - minHeight + 2
-			centeredLCS.Add(LivingCell{PosX: PosX, PosY: PosY})
+			centeredLCS.Add(livingCell{PosX: PosX, PosY: PosY})
 		}
 		return centeredLCS
 	}

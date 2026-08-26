@@ -18,7 +18,7 @@ const screenOffset = 1
 const historySize = 50
 
 type Config struct {
-	Patterns map[string][]LivingCell `json:"patterns"`
+	Patterns map[string][]livingCell `json:"patterns"`
 }
 
 var m time.Duration = 500
@@ -64,7 +64,7 @@ func loadConfig() {
 	for _, points := range conf.Patterns {
 		var lcs = make(LivingCellsSet)
 		for i := range points {
-			lcs.Add(LivingCell{PosX: points[i].PosX, PosY: points[i].PosY})
+			lcs.Add(livingCell{PosX: points[i].PosX, PosY: points[i].PosY})
 		}
 		predefinedLivingCells = append(predefinedLivingCells, lcs)
 	}

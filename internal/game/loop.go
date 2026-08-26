@@ -134,12 +134,12 @@ func Run() {
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY && y > screenOffset && y < h-1 && x > 0 && x < w-1 { // double-click
-					livingCells.Remove(LivingCell{PosX: x, PosY: y})
+					livingCells.Remove(livingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len())
 					drawText(s, 1, gameText)
 					updateCellStyle(s, x, y)
 				} else if y > screenOffset && y < h-1 && x > 0 && x < w-1 { // single-click
-					livingCells.Add(LivingCell{PosX: x, PosY: y})
+					livingCells.Add(livingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len())
 					drawText(s, 1, gameText)
 					s.Put(x, y, "@", cs.greenYellow)
