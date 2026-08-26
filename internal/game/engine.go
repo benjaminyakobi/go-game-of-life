@@ -15,30 +15,30 @@ type livingCell struct {
 	PosY int `json:"y"`
 }
 
-type LivingCellsSet map[livingCell]struct{}
+type livingCellsSet map[livingCell]struct{}
 
-func (lcs LivingCellsSet) Add(lc livingCell) {
+func (lcs livingCellsSet) Add(lc livingCell) {
 	lcs[lc] = struct{}{}
 }
 
-func (lcs LivingCellsSet) Remove(lc livingCell) {
+func (lcs livingCellsSet) Remove(lc livingCell) {
 	delete(lcs, lc)
 }
 
-func (lcs LivingCellsSet) Contains(lc livingCell) bool {
+func (lcs livingCellsSet) Contains(lc livingCell) bool {
 	_, ok := lcs[lc]
 	return ok
 }
 
-func (lcs LivingCellsSet) Len() int {
+func (lcs livingCellsSet) Len() int {
 	return len(lcs)
 }
 
-func (lcs LivingCellsSet) Copy() LivingCellsSet {
+func (lcs livingCellsSet) Copy() livingCellsSet {
 	if lcs == nil {
 		return nil
 	}
-	lcsCopy := make(LivingCellsSet, lcs.Len())
+	lcsCopy := make(livingCellsSet, lcs.Len())
 	for cell := range lcs {
 		lcsCopy[cell] = struct{}{}
 	}
@@ -101,7 +101,7 @@ func calcNextGeneration(s tcell.Screen) {
 		historyLivingCells.Remove(historyLivingCells.Front())
 	}
 	historyLivingCells.PushBack(livingCells)
-	livingCellsNextGen := make(LivingCellsSet)
+	livingCellsNextGen := make(livingCellsSet)
 	for lc := range livingCells {
 		count := 0
 		for _, d := range directions {
