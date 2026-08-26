@@ -78,7 +78,7 @@ func Run() {
 			} else if ev.Key() == tcell.KeyLeft && !gameIsRuning && !boxOpen && historyLivingCells.Len() > 0 {
 				historyVal := historyLivingCells.Back()
 				historyLivingCells.Remove(historyVal)
-				livingCells = historyVal.Value.(LivingCellsSet)
+				livingCells = historyVal.Value.(livingCellsSet)
 				if generation > 0 {
 					generation--
 				}

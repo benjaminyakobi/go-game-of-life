@@ -22,13 +22,13 @@ type config struct {
 }
 
 var m time.Duration = 500
-var predefinedLivingCells []LivingCellsSet
+var predefinedLivingCells []livingCellsSet
 var historyLivingCells = list.New()
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
 var boxOpen = false
 var gameText = ""
-var livingCells = make(LivingCellsSet)
+var livingCells = make(livingCellsSet)
 var generation = 0
 var ctx context.Context
 var cancel context.CancelFunc
@@ -62,7 +62,7 @@ func loadConfig() {
 	}
 
 	for _, points := range conf.Patterns {
-		var lcs = make(LivingCellsSet)
+		var lcs = make(livingCellsSet)
 		for i := range points {
 			lcs.Add(livingCell{PosX: points[i].PosX, PosY: points[i].PosY})
 		}

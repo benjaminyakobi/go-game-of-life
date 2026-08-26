@@ -150,8 +150,8 @@ func drawBox(s tcell.Screen, title string) {
 	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
 	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
 
-	centerLivingCells := func(lcs LivingCellsSet) LivingCellsSet {
-		centeredLCS := make(LivingCellsSet)
+	centerLivingCells := func(lcs livingCellsSet) livingCellsSet {
+		centeredLCS := make(livingCellsSet)
 		for cell := range lcs {
 			PosX := x + cell.PosX - minWidth + 2
 			PosY := y + cell.PosY - minHeight + 2
