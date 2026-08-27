@@ -6,8 +6,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/gdamore/tcell/v3"
 )
 
 type livingCell struct {
@@ -45,27 +43,27 @@ func (lcs livingCellsSet) Copy() livingCellsSet {
 	return lcsCopy
 }
 
-func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
+func runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
 	ticker := time.NewTicker(m * time.Millisecond)
-	s.DisableMouse() // disabling mouse before running the game
+	r.screen.DisableMouse() // disabling mouse before running the game
 	defer ticker.Stop()
-	defer s.EnableMouse() // enabling mouse before returning
+	defer r.screen.EnableMouse() // enabling mouse before returning
 	for {
 		select {
 		case <-ticker.C:
-			calcNextGeneration(s)
-			s.Show()
+			calcNextGeneration(r)
+			r.screen.Show()
 		case <-ctx.Done():
 			gameText = fmt.Sprintf("stopped after %v generations", generation)
-			drawText(s, 1, gameText)
-			s.Show()
+			r.drawText(1, gameText)
+			r.screen.Show()
 			gameIsRuning = false
 			generation = 0
 			return
 		case <-pauseChan:
 			gameText = fmt.Sprintf("paused after %v generations", generation)
-			drawText(s, 1, gameText)
-			s.Show()
+			r.drawText(1, gameText)
+			r.screen.Show()
 			gameIsRuning = false
 			return
 		case <-millisChan:
@@ -74,9 +72,9 @@ func runGameOfLife(s tcell.Screen, ctx context.Context, pauseChan <-chan bool, m
 	}
 }
 
-func calcNextGenDeadCells(s tcell.Screen, lc livingCell) bool {
+func calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 	count := 0
-	w, h := s.Size()
+	// w, h := s.Size()
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
 		if livingCells.Contains(livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
@@ -87,16 +85,16 @@ func calcNextGenDeadCells(s tcell.Screen, lc livingCell) bool {
 		}
 	}
 	if count == 3 {
-		if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
-			s.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
+		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
 		}
 		return true
 	}
 	return false
 }
 
-func calcNextGeneration(s tcell.Screen) {
-	w, h := s.Size()
+func calcNextGeneration(r *renderer) {
+	// w, h := s.Size()
 	if historyLivingCells.Len() > historySize {
 		historyLivingCells.Remove(historyLivingCells.Front())
 	}
@@ -110,15 +108,15 @@ func calcNextGeneration(s tcell.Screen) {
 			if livingCells.Contains(neighborCell) {
 				count++
 			} else {
-				ok := calcNextGenDeadCells(s, neighborCell)
+				ok := calcNextGenDeadCells(r, neighborCell)
 				if ok {
 					livingCellsNextGen.Add(neighborCell)
 				}
 			}
 		}
 		if count < 2 || count > 3 {
-			if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
-				updateCellStyle(s, lc.PosX, lc.PosY)
+			if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+				r.updateCellStyle(lc.PosX, lc.PosY)
 			}
 		} else if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
@@ -127,7 +125,7 @@ func calcNextGeneration(s tcell.Screen) {
 	livingCells = livingCellsNextGen
 	generation++
 	gameText = fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len())
-	drawText(s, 1, gameText)
+	r.drawText(1, gameText)
 	if livingCells.Len() == 0 {
 		cancel()
 	}
