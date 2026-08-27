@@ -54,7 +54,6 @@ func initRenderer() (*renderer, error) {
 }
 
 func (r *renderer) clearLine(y int) {
-	// w, _ := s.Size()
 	for x := range r.gridWidth {
 		r.screen.SetContent(x, y, ' ', nil, tcell.StyleDefault)
 	}
@@ -62,7 +61,6 @@ func (r *renderer) clearLine(y int) {
 
 func (r *renderer) drawText(y int, text string) {
 	r.clearLine(y)
-	// w, h := s.Size()
 	textWidth := runewidth.StringWidth(text)
 
 	calcX := (r.gridWidth - textWidth) / 2
@@ -101,7 +99,6 @@ func (r *renderer) drawText(y int, text string) {
 }
 
 func (r *renderer) updateCellStyle(x, y int) {
-	// w, h := s.Size()
 	if y == screenOffset || y == r.gridHeight-1 {
 		r.screen.Put(x, y, string(tcell.RuneHLine), cs.def)
 	} else if x == 0 || x == r.gridWidth-1 {
@@ -122,9 +119,7 @@ func (r *renderer) updateCellStyle(x, y int) {
 }
 
 func (r *renderer) drawNewGrid() {
-	// _, h := s.Size()
 	r.drawText(0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
-	// width, height := s.Size()
 	for w := range r.gridWidth {
 		for h := screenOffset; h < r.gridHeight; h++ {
 			r.updateCellStyle(w, h)
@@ -135,7 +130,6 @@ func (r *renderer) drawNewGrid() {
 }
 
 func (r *renderer) drawLivingCellsOnGrid() {
-	// w, h := s.Size()
 	for lc := range livingCells {
 		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
 			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
@@ -144,7 +138,6 @@ func (r *renderer) drawLivingCellsOnGrid() {
 }
 
 func (r *renderer) calcBoxDimesions() (int, int, int, int) {
-	// sw, sh := s.Size()
 	minW, maxW := r.gridWidth, math.MinInt32
 	minH, maxH := r.gridHeight, math.MinInt32
 	for cell := range livingCells {
@@ -161,7 +154,6 @@ func (r *renderer) calcBoxDimesions() (int, int, int, int) {
 
 func (r *renderer) drawBox(title string) {
 	boxWidth, boxHeight, minWidth, minHeight = r.calcBoxDimesions()
-	// sw, sh := s.Size()
 	x := (r.gridWidth - boxWidth) / 2
 	y := (r.gridHeight - boxHeight) / 2
 

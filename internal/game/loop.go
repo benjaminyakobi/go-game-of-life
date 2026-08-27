@@ -14,16 +14,9 @@ import (
 
 func Run() {
 	renderer, err := initRenderer()
-	// s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
-	// if err := s.Init(); err != nil {
-	// 	log.Fatalf("%+v", err)
-	// }
-	// s.SetStyle(cs.def)
-	// s.EnableMouse()
-	// s.Clear()
 
 	quit := func() {
 		// You have to catch panics in a defer, clean up, and
@@ -46,9 +39,8 @@ func Run() {
 		lastKeyTime   time.Time
 		lastX, lastY  int
 		dblClickDelay = 500 * time.Millisecond
-		// w, h          = s.Size()
-		pauseChan  = make(chan bool)
-		millisChan = make(chan time.Duration)
+		pauseChan     = make(chan bool)
+		millisChan    = make(chan time.Duration)
 	)
 
 	// Event loop
@@ -59,7 +51,6 @@ func Run() {
 		// Processing the events
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
-			// w, h = s.Size()
 			if boxOpen {
 				renderer.drawNewGrid()
 				renderer.drawBox("Choose predefined pattern")

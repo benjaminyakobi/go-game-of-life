@@ -74,7 +74,6 @@ func runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, mill
 
 func calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 	count := 0
-	// w, h := s.Size()
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
 		if livingCells.Contains(livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
@@ -94,7 +93,6 @@ func calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 }
 
 func calcNextGeneration(r *renderer) {
-	// w, h := s.Size()
 	if historyLivingCells.Len() > historySize {
 		historyLivingCells.Remove(historyLivingCells.Front())
 	}
