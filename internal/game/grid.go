@@ -17,106 +17,136 @@ type cellStyles struct {
 	greenYellow    tcell.Style
 }
 
+type renderer struct {
+	gridWidth  int
+	gridHeight int
+	screen     tcell.Screen
+}
+
 var cs = cellStyles{
 	def:            tcell.StyleDefault.Background(color.Reset).Foreground(color.Default),
 	lightSlateGrey: tcell.StyleDefault.Background(color.Reset).Foreground(color.LightSlateGrey),
 	greenYellow:    tcell.StyleDefault.Background(color.Reset).Foreground(color.GreenYellow),
 }
 
-func clearLine(s tcell.Screen, y int) {
-	w, _ := s.Size()
-	for x := range w {
-		s.SetContent(x, y, ' ', nil, tcell.StyleDefault)
+func initRenderer() (*renderer, error) {
+	// Screen must be initialized before we read its size.
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		return nil, err
+	}
+	if err := screen.Init(); err != nil {
+		return nil, err
+	}
+
+	screen.SetStyle(cs.def)
+	screen.EnableMouse()
+	screen.Clear()
+
+	w, h := screen.Size() // usually int
+
+	// tcell uses terminal cells.
+	return &renderer{
+		gridWidth:  w,
+		gridHeight: h,
+		screen:     screen,
+	}, nil
+}
+
+func (r *renderer) clearLine(y int) {
+	// w, _ := s.Size()
+	for x := range r.gridWidth {
+		r.screen.SetContent(x, y, ' ', nil, tcell.StyleDefault)
 	}
 }
 
-func drawText(s tcell.Screen, y int, text string) {
-	clearLine(s, y)
-	w, h := s.Size()
+func (r *renderer) drawText(y int, text string) {
+	r.clearLine(y)
+	// w, h := s.Size()
 	textWidth := runewidth.StringWidth(text)
 
-	calcX := (w - textWidth) / 2
+	calcX := (r.gridWidth - textWidth) / 2
 
-	for r := range calcX {
-		if r == 0 && y == screenOffset {
-			s.Put(r, y, string(tcell.RuneULCorner), cs.def)
-		} else if r > 0 && y == screenOffset {
-			s.Put(r, y, string(tcell.RuneHLine), cs.def)
-		} else if r == 0 && y == h-1 {
-			s.Put(r, y, string(tcell.RuneLLCorner), cs.def)
-		} else if r > 0 && y == h-1 {
-			s.Put(r, y, string(tcell.RuneHLine), cs.def)
+	for row := range calcX {
+		if row == 0 && y == screenOffset {
+			r.screen.Put(row, y, string(tcell.RuneULCorner), cs.def)
+		} else if row > 0 && y == screenOffset {
+			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
+		} else if row == 0 && y == r.gridHeight-1 {
+			r.screen.Put(row, y, string(tcell.RuneLLCorner), cs.def)
+		} else if row > 0 && y == r.gridHeight-1 {
+			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
 		}
 	}
 
 	col := calcX
-	for _, r := range text {
-		rw := runewidth.RuneWidth(r)
-		s.SetContent(col, y, r, nil, cs.def)
+	for _, row := range text {
+		rw := runewidth.RuneWidth(row)
+		r.screen.SetContent(col, y, row, nil, cs.def)
 		col += rw
 	}
 
-	for r := col; r < w; r++ {
-		if r == w-1 && y == screenOffset {
-			s.Put(r, y, string(tcell.RuneURCorner), cs.def)
-		} else if r < w-1 && y == screenOffset {
-			s.Put(r, y, string(tcell.RuneHLine), cs.def)
-		} else if r == w-1 && y == h-1 {
-			s.Put(r, y, string(tcell.RuneLRCorner), cs.def)
-		} else if r < w-1 && y == h-1 {
-			s.Put(r, y, string(tcell.RuneHLine), cs.def)
+	for row := col; row < r.gridWidth; row++ {
+		if row == r.gridWidth-1 && y == screenOffset {
+			r.screen.Put(row, y, string(tcell.RuneURCorner), cs.def)
+		} else if row < r.gridWidth-1 && y == screenOffset {
+			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
+		} else if row == r.gridWidth-1 && y == r.gridHeight-1 {
+			r.screen.Put(row, y, string(tcell.RuneLRCorner), cs.def)
+		} else if row < r.gridWidth-1 && y == r.gridHeight-1 {
+			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
 		}
 
 	}
 }
 
-func updateCellStyle(s tcell.Screen, x, y int) {
-	w, h := s.Size()
-	if y == screenOffset || y == h-1 {
-		s.Put(x, y, string(tcell.RuneHLine), cs.def)
-	} else if x == 0 || x == w-1 {
-		s.Put(x, y, string(tcell.RuneVLine), cs.def)
+func (r *renderer) updateCellStyle(x, y int) {
+	// w, h := s.Size()
+	if y == screenOffset || y == r.gridHeight-1 {
+		r.screen.Put(x, y, string(tcell.RuneHLine), cs.def)
+	} else if x == 0 || x == r.gridWidth-1 {
+		r.screen.Put(x, y, string(tcell.RuneVLine), cs.def)
 	} else {
-		s.Put(x, y, ".", cs.lightSlateGrey)
+		r.screen.Put(x, y, ".", cs.lightSlateGrey)
 	}
 
 	if x == 0 && y == screenOffset {
-		s.Put(x, y, string(tcell.RuneULCorner), cs.def)
-	} else if x == w-1 && y == screenOffset {
-		s.Put(x, y, string(tcell.RuneURCorner), cs.def)
-	} else if x == 0 && y == h-1 {
-		s.Put(x, y, string(tcell.RuneLLCorner), cs.def)
-	} else if x == w-1 && y == h-1 {
-		s.Put(x, y, string(tcell.RuneLRCorner), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneULCorner), cs.def)
+	} else if x == r.gridWidth-1 && y == screenOffset {
+		r.screen.Put(x, y, string(tcell.RuneURCorner), cs.def)
+	} else if x == 0 && y == r.gridHeight-1 {
+		r.screen.Put(x, y, string(tcell.RuneLLCorner), cs.def)
+	} else if x == r.gridWidth-1 && y == r.gridHeight-1 {
+		r.screen.Put(x, y, string(tcell.RuneLRCorner), cs.def)
 	}
 }
 
-func drawNewGrid(s tcell.Screen) {
-	_, h := s.Size()
-	drawText(s, 0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
-	width, height := s.Size()
-	for w := range width {
-		for h := screenOffset; h < height; h++ {
-			updateCellStyle(s, w, h)
+func (r *renderer) drawNewGrid() {
+	// _, h := s.Size()
+	r.drawText(0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
+	// width, height := s.Size()
+	for w := range r.gridWidth {
+		for h := screenOffset; h < r.gridHeight; h++ {
+			r.updateCellStyle(w, h)
 		}
 	}
-	drawText(s, 1, gameText)
-	drawText(s, h-1, "Conway's Game Of Life")
+	r.drawText(1, gameText)
+	r.drawText(r.gridHeight-1, "Conway's Game Of Life")
 }
 
-func drawLivingCellsOnGrid(s tcell.Screen) {
-	w, h := s.Size()
+func (r *renderer) drawLivingCellsOnGrid() {
+	// w, h := s.Size()
 	for lc := range livingCells {
-		if lc.PosY > screenOffset && lc.PosY < h-1 && lc.PosX > 0 && lc.PosX < w-1 {
-			s.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
+		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
 		}
 	}
 }
 
-func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
-	sw, sh := s.Size()
-	minW, maxW := sw, math.MinInt32
-	minH, maxH := sh, math.MinInt32
+func (r *renderer) calcBoxDimesions() (int, int, int, int) {
+	// sw, sh := s.Size()
+	minW, maxW := r.gridWidth, math.MinInt32
+	minH, maxH := r.gridHeight, math.MinInt32
 	for cell := range livingCells {
 		minW = min(minW, cell.PosX)
 		maxW = max(maxW, cell.PosX)
@@ -129,26 +159,26 @@ func calcBoxDimesions(s tcell.Screen) (int, int, int, int) {
 	return maxW - minW + 5, maxH - minH + 5, minW, minH
 }
 
-func drawBox(s tcell.Screen, title string) {
-	boxWidth, boxHeight, minWidth, minHeight = calcBoxDimesions(s)
-	sw, sh := s.Size()
-	x := (sw - boxWidth) / 2
-	y := (sh - boxHeight) / 2
+func (r *renderer) drawBox(title string) {
+	boxWidth, boxHeight, minWidth, minHeight = r.calcBoxDimesions()
+	// sw, sh := s.Size()
+	x := (r.gridWidth - boxWidth) / 2
+	y := (r.gridHeight - boxHeight) / 2
 
 	for col := x; col < x+boxWidth; col++ {
-		s.SetContent(col, y, tcell.RuneHLine, nil, cs.def)
-		s.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cs.def)
+		r.screen.SetContent(col, y, tcell.RuneHLine, nil, cs.def)
+		r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cs.def)
 	}
 
 	for row := y; row < y+boxHeight; row++ {
-		s.SetContent(x, row, tcell.RuneVLine, nil, cs.def)
-		s.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cs.def)
+		r.screen.SetContent(x, row, tcell.RuneVLine, nil, cs.def)
+		r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cs.def)
 	}
 
-	s.SetContent(x, y, tcell.RuneULCorner, nil, cs.def)
-	s.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cs.def)
-	s.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
-	s.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
+	r.screen.SetContent(x, y, tcell.RuneULCorner, nil, cs.def)
+	r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cs.def)
+	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
+	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
 
 	centerLivingCells := func(lcs livingCellsSet) livingCellsSet {
 		centeredLCS := make(livingCellsSet)
@@ -161,6 +191,6 @@ func drawBox(s tcell.Screen, title string) {
 	}
 
 	livingCells = centerLivingCells(livingCells)
-	drawLivingCellsOnGrid(s)
-	drawText(s, 1, title)
+	r.drawLivingCellsOnGrid()
+	r.drawText(1, title)
 }
