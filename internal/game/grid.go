@@ -120,6 +120,7 @@ func (r *renderer) updateCellStyle(x, y int) {
 
 func (r *renderer) drawNewGrid() {
 	r.drawText(0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
+	r.gridWidth, r.gridHeight = r.screen.Size()
 	for w := range r.gridWidth {
 		for h := screenOffset; h < r.gridHeight; h++ {
 			r.updateCellStyle(w, h)
