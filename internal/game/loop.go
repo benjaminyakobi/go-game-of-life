@@ -13,24 +13,24 @@ import (
 )
 
 func Run() {
-	// Initialize screen
-	s, err := tcell.NewScreen()
+	renderer, err := initRenderer()
+	// s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
-	if err := s.Init(); err != nil {
-		log.Fatalf("%+v", err)
-	}
-	s.SetStyle(cs.def)
-	s.EnableMouse()
-	s.Clear()
+	// if err := s.Init(); err != nil {
+	// 	log.Fatalf("%+v", err)
+	// }
+	// s.SetStyle(cs.def)
+	// s.EnableMouse()
+	// s.Clear()
 
 	quit := func() {
 		// You have to catch panics in a defer, clean up, and
 		// re-raise them - otherwise your application can
 		// die without leaving any diagnostic trace.
 		maybePanic := recover()
-		s.Fini()
+		renderer.screen.Fini()
 		if maybePanic != nil {
 			panic(maybePanic)
 		}
@@ -38,34 +38,34 @@ func Run() {
 	defer quit()
 
 	loadConfig()
-	drawNewGrid(s)
-	drawLivingCellsOnGrid(s)
+	renderer.drawNewGrid()
+	renderer.drawLivingCellsOnGrid()
 
 	var (
 		lastClickTime time.Time
 		lastKeyTime   time.Time
 		lastX, lastY  int
 		dblClickDelay = 500 * time.Millisecond
-		w, h          = s.Size()
-		pauseChan     = make(chan bool)
-		millisChan    = make(chan time.Duration)
+		// w, h          = s.Size()
+		pauseChan  = make(chan bool)
+		millisChan = make(chan time.Duration)
 	)
 
 	// Event loop
 	for {
-		s.Show()           // Updating screen
-		ev := <-s.EventQ() // Polling event
+		renderer.screen.Show()           // Updating screen
+		ev := <-renderer.screen.EventQ() // Polling event
 
 		// Processing the events
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
-			w, h = s.Size()
+			// w, h = s.Size()
 			if boxOpen {
-				drawNewGrid(s)
-				drawBox(s, "Choose predefined pattern")
+				renderer.drawNewGrid()
+				renderer.drawBox("Choose predefined pattern")
 			} else {
-				drawNewGrid(s)
-				drawLivingCellsOnGrid(s)
+				renderer.drawNewGrid()
+				renderer.drawLivingCellsOnGrid()
 			}
 		case *tcell.EventKey:
 			keyNow := time.Now()
@@ -83,35 +83,35 @@ func Run() {
 					generation--
 				}
 				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", generation, livingCells.Len())
-				drawNewGrid(s)
-				drawLivingCellsOnGrid(s)
+				renderer.drawNewGrid()
+				renderer.drawLivingCellsOnGrid()
 			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
-				calcNextGeneration(s)
-				s.Show()
+				calcNextGeneration(renderer)
+				renderer.screen.Show()
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
-				s.DisableMouse()
+				renderer.screen.DisableMouse()
 				boxOpen = true
 				historyLivingCells = list.New()
 				generation = 0
-				drawNewGrid(s)
+				renderer.drawNewGrid()
 				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
-				drawBox(s, "Choose predefined pattern")
+				renderer.drawBox("Choose predefined pattern")
 				predefinedLCIndex++
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "r" {
 				if boxOpen {
-					s.EnableMouse()
-					drawNewGrid(s)
-					drawLivingCellsOnGrid(s)
-					drawText(s, 1, "Chosen predefined pattern")
+					renderer.screen.EnableMouse()
+					renderer.drawNewGrid()
+					renderer.drawLivingCellsOnGrid()
+					renderer.drawText(1, "Chosen predefined pattern")
 					predefinedLCIndex--
 					boxOpen = !boxOpen
 				} else if livingCells.Len() == 0 {
 					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
-					drawText(s, 1, gameText)
+					renderer.drawText(1, gameText)
 				} else if !gameIsRuning {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
-					go runGameOfLife(s, ctx, pauseChan, millisChan)
+					go runGameOfLife(renderer, ctx, pauseChan, millisChan)
 				}
 			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "=" && gameIsRuning {
 				if m > 100 {
@@ -133,16 +133,16 @@ func Run() {
 			case tcell.ButtonPrimary:
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
-					x == lastX && y == lastY && y > screenOffset && y < h-1 && x > 0 && x < w-1 { // double-click
+					x == lastX && y == lastY && y > screenOffset && y < renderer.gridHeight-1 && x > 0 && x < renderer.gridWidth-1 { // double-click
 					livingCells.Remove(livingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len())
-					drawText(s, 1, gameText)
-					updateCellStyle(s, x, y)
-				} else if y > screenOffset && y < h-1 && x > 0 && x < w-1 { // single-click
+					renderer.drawText(1, gameText)
+					renderer.updateCellStyle(x, y)
+				} else if y > screenOffset && y < renderer.gridHeight-1 && x > 0 && x < renderer.gridWidth-1 { // single-click
 					livingCells.Add(livingCell{PosX: x, PosY: y})
 					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len())
-					drawText(s, 1, gameText)
-					s.Put(x, y, "@", cs.greenYellow)
+					renderer.drawText(1, gameText)
+					renderer.screen.Put(x, y, "@", cs.greenYellow)
 				}
 				lastClickTime = now
 				lastX, lastY = x, y
