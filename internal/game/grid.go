@@ -21,6 +21,7 @@ type renderer struct {
 	gridWidth  int
 	gridHeight int
 	screen     tcell.Screen
+	engine     *engine
 }
 
 var cs = cellStyles{
@@ -29,7 +30,7 @@ var cs = cellStyles{
 	greenYellow:    tcell.StyleDefault.Background(color.Reset).Foreground(color.GreenYellow),
 }
 
-func initRenderer() (*renderer, error) {
+func initRenderer(e *engine) (*renderer, error) {
 	// Screen must be initialized before we read its size.
 	screen, err := tcell.NewScreen()
 	if err != nil {
@@ -50,6 +51,7 @@ func initRenderer() (*renderer, error) {
 		gridWidth:  w,
 		gridHeight: h,
 		screen:     screen,
+		engine:     e,
 	}, nil
 }
 
@@ -131,7 +133,7 @@ func (r *renderer) drawNewGrid() {
 }
 
 func (r *renderer) drawLivingCellsOnGrid() {
-	for lc := range livingCells {
+	for lc := range r.engine.livingCells {
 		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
 			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
 		}
@@ -141,13 +143,13 @@ func (r *renderer) drawLivingCellsOnGrid() {
 func (r *renderer) calcBoxDimesions() (int, int, int, int) {
 	minW, maxW := r.gridWidth, math.MinInt32
 	minH, maxH := r.gridHeight, math.MinInt32
-	for cell := range livingCells {
+	for cell := range r.engine.livingCells {
 		minW = min(minW, cell.PosX)
 		maxW = max(maxW, cell.PosX)
 		minH = min(minH, cell.PosY)
 		maxH = max(maxH, cell.PosY)
 	}
-	if livingCells.Len() == 1 {
+	if r.engine.livingCells.Len() == 1 {
 		return 5, 5, minW, minH
 	}
 	return maxW - minW + 5, maxH - minH + 5, minW, minH
@@ -183,7 +185,7 @@ func (r *renderer) drawBox(title string) {
 		return centeredLCS
 	}
 
-	livingCells = centerLivingCells(livingCells)
+	r.engine.livingCells = centerLivingCells(r.engine.livingCells)
 	r.drawLivingCellsOnGrid()
 	r.drawText(1, title)
 }
