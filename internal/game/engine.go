@@ -99,15 +99,16 @@ func (e *engine) calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 			return false
 		}
 	}
-	if count == 3 {
-		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
-			// TODO: add to renderer.livingCells (after next refactor)
-			// e.livingCells.Add(livingCell{PosX: lc.PosX, PosY: lc.PosY})
-			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
-		}
-		return true
-	}
-	return false
+	return count == 3
+	// if count == 3 {
+	// 	if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+	// 		// TODO: add to renderer.livingCells (after next refactor)
+	// 		// e.livingCells.Add(livingCell{PosX: lc.PosX, PosY: lc.PosY})
+	// 		// r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
+	// 	}
+	// 	return true
+	// }
+	// return false
 }
 
 // TODO: remove renderer after refactor, engine should now know about the renderer
@@ -145,5 +146,7 @@ func (e *engine) calcNextGeneration(r *renderer) {
 	r.drawText(1, gameText)
 	if e.livingCells.Len() == 0 {
 		cancel()
+	} else {
+		r.drawLivingCellsOnGrid()
 	}
 }
