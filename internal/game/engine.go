@@ -3,6 +3,8 @@ package game
 // Contains game engine code
 
 import (
+	"container/list"
+
 	"context"
 	"fmt"
 	"time"
@@ -14,6 +16,11 @@ type livingCell struct {
 }
 
 type livingCellsSet map[livingCell]struct{}
+
+type engine struct {
+	livingCells        livingCellsSet
+	livingCellsHistory *list.List
+}
 
 func (lcs livingCellsSet) Add(lc livingCell) {
 	lcs[lc] = struct{}{}
@@ -43,7 +50,15 @@ func (lcs livingCellsSet) Copy() livingCellsSet {
 	return lcsCopy
 }
 
-func runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
+func initEngine() *engine {
+	return &engine{
+		livingCells:        make(livingCellsSet, 0),
+		livingCellsHistory: list.New(),
+	}
+}
+
+// TODO: remove renderer after refactor, engine should now know about the renderer
+func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
 	ticker := time.NewTicker(m * time.Millisecond)
 	r.screen.DisableMouse() // disabling mouse before running the game
 	defer ticker.Stop()
@@ -51,7 +66,7 @@ func runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, mill
 	for {
 		select {
 		case <-ticker.C:
-			calcNextGeneration(r)
+			e.calcNextGeneration(r)
 			r.screen.Show()
 		case <-ctx.Done():
 			gameText = fmt.Sprintf("stopped after %v generations", generation)
@@ -72,11 +87,12 @@ func runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, mill
 	}
 }
 
-func calcNextGenDeadCells(r *renderer, lc livingCell) bool {
+// TODO: remove renderer after refactor, engine should now know about the renderer
+func (e *engine) calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 	count := 0
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
-		if livingCells.Contains(livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
+		if e.livingCells.Contains(livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
 			count++
 		}
 		if count > 3 {
@@ -85,6 +101,8 @@ func calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 	}
 	if count == 3 {
 		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+			// TODO: add to renderer.livingCells (after next refactor)
+			// e.livingCells.Add(livingCell{PosX: lc.PosX, PosY: lc.PosY})
 			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
 		}
 		return true
@@ -92,21 +110,22 @@ func calcNextGenDeadCells(r *renderer, lc livingCell) bool {
 	return false
 }
 
-func calcNextGeneration(r *renderer) {
-	if historyLivingCells.Len() > historySize {
-		historyLivingCells.Remove(historyLivingCells.Front())
+// TODO: remove renderer after refactor, engine should now know about the renderer
+func (e *engine) calcNextGeneration(r *renderer) {
+	if e.livingCellsHistory.Len() > historySize {
+		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
 	}
-	historyLivingCells.PushBack(livingCells)
+	e.livingCellsHistory.PushBack(e.livingCells)
 	livingCellsNextGen := make(livingCellsSet)
-	for lc := range livingCells {
+	for lc := range e.livingCells {
 		count := 0
 		for _, d := range directions {
 			dx, dy := d[0], d[1]
 			neighborCell := livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
-			if livingCells.Contains(neighborCell) {
+			if e.livingCells.Contains(neighborCell) {
 				count++
 			} else {
-				ok := calcNextGenDeadCells(r, neighborCell)
+				ok := e.calcNextGenDeadCells(r, neighborCell)
 				if ok {
 					livingCellsNextGen.Add(neighborCell)
 				}
@@ -120,11 +139,11 @@ func calcNextGeneration(r *renderer) {
 			livingCellsNextGen.Add(lc)
 		}
 	}
-	livingCells = livingCellsNextGen
+	e.livingCells = livingCellsNextGen
 	generation++
-	gameText = fmt.Sprintf("generation: %v, living cells: %v", generation, livingCells.Len())
+	gameText = fmt.Sprintf("generation: %v, living cells: %v", generation, e.livingCells.Len())
 	r.drawText(1, gameText)
-	if livingCells.Len() == 0 {
+	if e.livingCells.Len() == 0 {
 		cancel()
 	}
 }
