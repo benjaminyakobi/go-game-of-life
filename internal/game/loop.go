@@ -12,8 +12,10 @@ import (
 	"github.com/gdamore/tcell/v3"
 )
 
+// TODO: loop only should orchestrate (not knowing about tcell!)
 func Run() {
-	renderer, err := initRenderer()
+	engine := initEngine()
+	renderer, err := initRenderer(engine)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
@@ -62,30 +64,30 @@ func Run() {
 			keyNow := time.Now()
 			if ev.Key() == tcell.KeyEscape {
 				return
-			} else if ev.Key() == tcell.KeyRune && ev.Str() == "p" && boxOpen == false && historyLivingCells.Len() > 0 {
+			} else if ev.Key() == tcell.KeyRune && ev.Str() == "p" && boxOpen == false && engine.livingCellsHistory.Len() > 0 {
 				if gameIsRuning {
 					pauseChan <- true
 				}
-			} else if ev.Key() == tcell.KeyLeft && !gameIsRuning && !boxOpen && historyLivingCells.Len() > 0 {
-				historyVal := historyLivingCells.Back()
-				historyLivingCells.Remove(historyVal)
-				livingCells = historyVal.Value.(livingCellsSet)
+			} else if ev.Key() == tcell.KeyLeft && !gameIsRuning && !boxOpen && engine.livingCellsHistory.Len() > 0 {
+				historyVal := engine.livingCellsHistory.Back()
+				engine.livingCellsHistory.Remove(historyVal)
+				engine.livingCells = historyVal.Value.(livingCellsSet)
 				if generation > 0 {
 					generation--
 				}
-				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", generation, livingCells.Len())
+				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", generation, engine.livingCells.Len())
 				renderer.drawNewGrid()
 				renderer.drawLivingCellsOnGrid()
 			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
-				calcNextGeneration(renderer)
+				engine.calcNextGeneration(renderer)
 				renderer.screen.Show()
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				renderer.screen.DisableMouse()
 				boxOpen = true
-				historyLivingCells = list.New()
+				engine.livingCellsHistory = list.New()
 				generation = 0
 				renderer.drawNewGrid()
-				livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
+				engine.livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 				renderer.drawBox("Choose predefined pattern")
 				predefinedLCIndex++
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "r" {
@@ -96,13 +98,13 @@ func Run() {
 					renderer.drawText(1, "Chosen predefined pattern")
 					predefinedLCIndex--
 					boxOpen = !boxOpen
-				} else if livingCells.Len() == 0 {
-					gameText = fmt.Sprintf("not starting, select cells first %v", livingCells.Len())
+				} else if engine.livingCells.Len() == 0 {
+					gameText = fmt.Sprintf("not starting, select cells first %v", engine.livingCells.Len())
 					renderer.drawText(1, gameText)
 				} else if !gameIsRuning {
 					gameIsRuning = true
 					ctx, cancel = context.WithCancel(context.Background())
-					go runGameOfLife(renderer, ctx, pauseChan, millisChan)
+					go engine.runGameOfLife(renderer, ctx, pauseChan, millisChan)
 				}
 			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "=" && gameIsRuning {
 				if m > 100 {
@@ -125,13 +127,13 @@ func Run() {
 				now := time.Now()
 				if now.Sub(lastClickTime) <= dblClickDelay &&
 					x == lastX && y == lastY && y > screenOffset && y < renderer.gridHeight-1 && x > 0 && x < renderer.gridWidth-1 { // double-click
-					livingCells.Remove(livingCell{PosX: x, PosY: y})
-					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, livingCells.Len())
+					engine.livingCells.Remove(livingCell{PosX: x, PosY: y})
+					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, engine.livingCells.Len())
 					renderer.drawText(1, gameText)
 					renderer.updateCellStyle(x, y)
 				} else if y > screenOffset && y < renderer.gridHeight-1 && x > 0 && x < renderer.gridWidth-1 { // single-click
-					livingCells.Add(livingCell{PosX: x, PosY: y})
-					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, livingCells.Len())
+					engine.livingCells.Add(livingCell{PosX: x, PosY: y})
+					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, engine.livingCells.Len())
 					renderer.drawText(1, gameText)
 					renderer.screen.Put(x, y, "@", cs.greenYellow)
 				}
