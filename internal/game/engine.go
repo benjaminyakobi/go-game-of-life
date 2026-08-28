@@ -131,13 +131,19 @@ func (e *engine) calcNextGeneration(r *renderer) {
 				}
 			}
 		}
-		if count < 2 || count > 3 {
-			if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
-				r.updateCellStyle(lc.PosX, lc.PosY)
-			}
-		} else if count == 2 || count == 3 {
+		// if count < 2 || count > 3 {
+		// 	if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+		// 		r.updateCellStyle(lc.PosX, lc.PosY)
+		// 	}
+		// } else if count == 2 || count == 3 {
+		// 	livingCellsNextGen.Add(lc)
+		// }
+		if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
+		} else {
+			r.updateCellStyle(lc.PosX, lc.PosY)
 		}
+
 	}
 	e.livingCells = livingCellsNextGen
 	generation++
