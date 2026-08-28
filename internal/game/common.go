@@ -23,14 +23,10 @@ type config struct {
 
 var m time.Duration = 500
 var predefinedLivingCells []livingCellsSet
-
-// var historyLivingCells = list.New()     // moved to renderer
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
 var boxOpen = false
 var gameText = ""
-
-// var livingCells = make(livingCellsSet) // moved to renderer
 var generation = 0
 var ctx context.Context
 var cancel context.CancelFunc
