@@ -87,8 +87,7 @@ func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-cha
 	}
 }
 
-// TODO: remove renderer after refactor, engine should now know about the renderer
-func (e *engine) calcNextGenDeadCells(r *renderer, lc livingCell) bool {
+func (e *engine) calcNextGenDeadCells(lc livingCell) bool {
 	count := 0
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
@@ -126,7 +125,7 @@ func (e *engine) calcNextGeneration(r *renderer) {
 			if e.livingCells.Contains(neighborCell) {
 				count++
 			} else {
-				ok := e.calcNextGenDeadCells(r, neighborCell)
+				ok := e.calcNextGenDeadCells(neighborCell)
 				if ok {
 					livingCellsNextGen.Add(neighborCell)
 				}
