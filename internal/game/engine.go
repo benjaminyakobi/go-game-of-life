@@ -158,8 +158,8 @@ func (e *engine) calcNextGeneration(r *renderer) {
 	r.drawText(1, gameText)
 	if e.livingCells.Len() == 0 {
 		cancel()
-	} else {
-		// r.drawLivingCellsOnGrid()
-		// r.drawDeadCellsOnGrid()
-	}
+	} // else {
+	// r.drawLivingCellsOnGrid()
+	// r.drawDeadCellsOnGrid()
+	// }
 }
