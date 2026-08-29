@@ -70,7 +70,7 @@ func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-cha
 	for {
 		select {
 		case <-ticker.C:
-			e.calcNextGeneration(r)
+			e.calcNextGeneration()
 			r.drawLivingCellsOnGrid()
 			r.drawDeadCellsOnGrid()
 			// TODO: duplicate code 1
@@ -118,8 +118,7 @@ func (e *engine) calcNextGenDeadCells(lc livingCell) bool {
 	// return false
 }
 
-// TODO: remove renderer after refactor, engine should now know about the renderer
-func (e *engine) calcNextGeneration(r *renderer) {
+func (e *engine) calcNextGeneration() {
 	if e.livingCellsHistory.Len() > historySize {
 		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
 	}

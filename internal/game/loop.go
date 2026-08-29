@@ -79,7 +79,7 @@ func Run() {
 				renderer.drawNewGrid()
 				renderer.drawLivingCellsOnGrid()
 			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
-				engine.calcNextGeneration(renderer)
+				engine.calcNextGeneration()
 				renderer.drawLivingCellsOnGrid()
 				renderer.drawDeadCellsOnGrid()
 				// TODO: duplicate code 1
