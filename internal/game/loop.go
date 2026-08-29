@@ -80,6 +80,8 @@ func Run() {
 				renderer.drawLivingCellsOnGrid()
 			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
 				engine.calcNextGeneration(renderer)
+				renderer.drawLivingCellsOnGrid()
+				renderer.drawDeadCellsOnGrid()
 				renderer.screen.Show()
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				renderer.screen.DisableMouse()
