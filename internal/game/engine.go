@@ -18,6 +18,7 @@ type livingCell struct {
 type livingCellsSet map[livingCell]struct{}
 
 type engine struct {
+	generation         int
 	deadCells          livingCellsSet
 	livingCells        livingCellsSet
 	livingCellsHistory *list.List
@@ -53,6 +54,7 @@ func (lcs livingCellsSet) Copy() livingCellsSet {
 
 func initEngine() *engine {
 	return &engine{
+		generation:         0,
 		deadCells:          make(livingCellsSet, 0),
 		livingCells:        make(livingCellsSet, 0),
 		livingCellsHistory: list.New(),
@@ -73,14 +75,14 @@ func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-cha
 			r.drawDeadCellsOnGrid()
 			r.screen.Show()
 		case <-ctx.Done():
-			gameText = fmt.Sprintf("stopped after %v generations", generation)
+			gameText = fmt.Sprintf("stopped after %v generations", e.generation)
 			r.drawText(1, gameText)
 			r.screen.Show()
 			gameIsRuning = false
-			generation = 0
+			e.generation = 0
 			return
 		case <-pauseChan:
-			gameText = fmt.Sprintf("paused after %v generations", generation)
+			gameText = fmt.Sprintf("paused after %v generations", e.generation)
 			r.drawText(1, gameText)
 			r.screen.Show()
 			gameIsRuning = false
@@ -153,8 +155,8 @@ func (e *engine) calcNextGeneration(r *renderer) {
 	}
 	e.livingCells = livingCellsNextGen
 	e.deadCells = deadCellsNextGen
-	generation++
-	gameText = fmt.Sprintf("generation: %v, living cells: %v", generation, e.livingCells.Len())
+	e.generation++
+	gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
 	r.drawText(1, gameText)
 	if e.livingCells.Len() == 0 {
 		cancel()
