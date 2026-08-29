@@ -72,10 +72,10 @@ func Run() {
 				historyVal := engine.livingCellsHistory.Back()
 				engine.livingCellsHistory.Remove(historyVal)
 				engine.livingCells = historyVal.Value.(livingCellsSet)
-				if generation > 0 {
-					generation--
+				if engine.generation > 0 {
+					engine.generation--
 				}
-				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", generation, engine.livingCells.Len())
+				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", engine.generation, engine.livingCells.Len())
 				renderer.drawNewGrid()
 				renderer.drawLivingCellsOnGrid()
 			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
@@ -85,7 +85,7 @@ func Run() {
 				renderer.screen.DisableMouse()
 				boxOpen = true
 				engine.livingCellsHistory = list.New()
-				generation = 0
+				engine.generation = 0
 				renderer.drawNewGrid()
 				engine.livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 				renderer.drawBox("Choose predefined pattern")
