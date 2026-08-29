@@ -82,6 +82,9 @@ func Run() {
 				engine.calcNextGeneration(renderer)
 				renderer.drawLivingCellsOnGrid()
 				renderer.drawDeadCellsOnGrid()
+				// TODO: duplicate code 1
+				gameText = fmt.Sprintf("generation: %v, living cells: %v", engine.generation, engine.livingCells.Len())
+				renderer.drawText(1, gameText)
 				renderer.screen.Show()
 			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
 				renderer.screen.DisableMouse()
