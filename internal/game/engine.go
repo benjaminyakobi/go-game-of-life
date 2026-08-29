@@ -61,7 +61,6 @@ func initEngine() *engine {
 	}
 }
 
-// TODO: remove renderer after refactor, engine should now know about the renderer
 func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
 	ticker := time.NewTicker(m * time.Millisecond)
 	r.screen.DisableMouse() // disabling mouse before running the game
