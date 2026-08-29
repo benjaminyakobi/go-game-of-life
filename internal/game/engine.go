@@ -79,7 +79,6 @@ func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-cha
 			r.drawText(1, gameText)
 			r.screen.Show()
 			gameIsRuning = false
-			e.generation = 0
 			return
 		case <-pauseChan:
 			gameText = fmt.Sprintf("paused after %v generations", e.generation)
