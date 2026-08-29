@@ -22,12 +22,13 @@ type config struct {
 }
 
 var m time.Duration = 500
-var predefinedLivingCells []livingCellsSet
+var predefinedLivingCells []livingCellsSet // TODO: move to engine.go / grid.go
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 var predefinedLCIndex = 0
 var boxOpen = false
 var gameText = ""
-var generation = 0
+
+// var generation = 0
 var ctx context.Context
 var cancel context.CancelFunc
 var gameIsRuning = false
@@ -40,7 +41,7 @@ var directions = [][]int{
 	{-1, 1},  // bottom left
 	{0, 1},   // bottom mid
 	{1, 1},   // bottom right
-}
+} // TODO: move to engine.go / grid.go
 
 func loadConfig() {
 	file, err := os.Open("./conf.json")
