@@ -73,6 +73,9 @@ func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-cha
 			e.calcNextGeneration(r)
 			r.drawLivingCellsOnGrid()
 			r.drawDeadCellsOnGrid()
+			// TODO: duplicate code 1
+			gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
+			r.drawText(1, gameText)
 			r.screen.Show()
 		case <-ctx.Done():
 			gameText = fmt.Sprintf("stopped after %v generations", e.generation)
@@ -155,8 +158,8 @@ func (e *engine) calcNextGeneration(r *renderer) {
 	e.livingCells = livingCellsNextGen
 	e.deadCells = deadCellsNextGen
 	e.generation++
-	gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
-	r.drawText(1, gameText)
+	// gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
+	// r.drawText(1, gameText)
 	if e.livingCells.Len() == 0 {
 		cancel()
 	} // else {
