@@ -140,6 +140,12 @@ func (r *renderer) drawLivingCellsOnGrid() {
 	}
 }
 
+func (r *renderer) drawDeadCellsOnGrid() {
+	for lc := range r.engine.deadCells {
+		r.updateCellStyle(lc.PosX, lc.PosY)
+	}
+}
+
 func (r *renderer) calcBoxDimesions() (int, int, int, int) {
 	minW, maxW := r.gridWidth, math.MinInt32
 	minH, maxH := r.gridHeight, math.MinInt32
