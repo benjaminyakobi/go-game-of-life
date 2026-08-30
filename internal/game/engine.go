@@ -90,6 +90,7 @@ func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-cha
 			gameIsRuning = false
 			return
 		case <-millisChan:
+			ticker.Stop()
 			ticker = time.NewTicker(m * time.Millisecond)
 		}
 	}
