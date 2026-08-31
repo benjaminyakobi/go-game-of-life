@@ -4,10 +4,9 @@ package game
 
 import (
 	"container/list"
-
-	"context"
-	"fmt"
-	"time"
+	// "context"
+	// "fmt"
+	// "time"
 )
 
 type livingCell struct {
@@ -62,39 +61,39 @@ func initEngine() *engine {
 }
 
 // TODO: remove renderer after refactor, engine should now know about the renderer
-func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
-	ticker := time.NewTicker(m * time.Millisecond)
-	r.screen.DisableMouse() // disabling mouse before running the game
-	defer ticker.Stop()
-	defer r.screen.EnableMouse() // enabling mouse before returning
-	for {
-		select {
-		case <-ticker.C:
-			e.calcNextGeneration()
-			r.drawLivingCellsOnGrid()
-			r.drawDeadCellsOnGrid()
-			// TODO: duplicate code 1
-			gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
-			r.drawText(1, gameText)
-			r.screen.Show()
-		case <-ctx.Done():
-			gameText = fmt.Sprintf("stopped after %v generations", e.generation)
-			r.drawText(1, gameText)
-			r.screen.Show()
-			gameIsRuning = false
-			return
-		case <-pauseChan:
-			gameText = fmt.Sprintf("paused after %v generations", e.generation)
-			r.drawText(1, gameText)
-			r.screen.Show()
-			gameIsRuning = false
-			return
-		case <-millisChan:
-			ticker.Stop()
-			ticker = time.NewTicker(m * time.Millisecond)
-		}
-	}
-}
+// func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
+// 	ticker := time.NewTicker(m * time.Millisecond)
+// 	r.screen.DisableMouse() // disabling mouse before running the game
+// 	defer ticker.Stop()
+// 	defer r.screen.EnableMouse() // enabling mouse before returning
+// 	for {
+// 		select {
+// 		case <-ticker.C:
+// 			e.calcNextGeneration()
+// 			r.drawLivingCellsOnGrid()
+// 			r.drawDeadCellsOnGrid()
+// 			// TODO: duplicate code 1
+// 			gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
+// 			r.drawText(1, gameText)
+// 			r.screen.Show()
+// 		case <-ctx.Done():
+// 			gameText = fmt.Sprintf("stopped after %v generations", e.generation)
+// 			r.drawText(1, gameText)
+// 			r.screen.Show()
+// 			gameIsRuning = false
+// 			return
+// 		case <-pauseChan:
+// 			gameText = fmt.Sprintf("paused after %v generations", e.generation)
+// 			r.drawText(1, gameText)
+// 			r.screen.Show()
+// 			gameIsRuning = false
+// 			return
+// 		case <-millisChan:
+// 			ticker.Stop()
+// 			ticker = time.NewTicker(m * time.Millisecond)
+// 		}
+// 	}
+// }
 
 func (e *engine) calcNextGenDeadCells(lc livingCell) bool {
 	count := 0
@@ -160,9 +159,9 @@ func (e *engine) calcNextGeneration() {
 	e.generation++
 	// gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
 	// r.drawText(1, gameText)
-	if e.livingCells.Len() == 0 {
-		cancel()
-	} // else {
+	// if e.livingCells.Len() == 0 {
+	// 	cancel()
+	//	} // else {
 	// r.drawLivingCellsOnGrid()
 	// r.drawDeadCellsOnGrid()
 	// }
