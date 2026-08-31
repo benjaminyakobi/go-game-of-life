@@ -39,9 +39,11 @@ func Run() {
 		lastClickTime time.Time
 		lastKeyTime   time.Time
 		lastX, lastY  int
-		dblClickDelay = 500 * time.Millisecond
-		running       = false
-		ticker        = time.NewTicker(m * time.Millisecond)
+		dblClickDelay               = 500 * time.Millisecond
+		running                     = false
+		boxOpen                     = false
+		m             time.Duration = 500
+		ticker                      = time.NewTicker(m * time.Millisecond)
 	)
 
 	defer ticker.Stop()
