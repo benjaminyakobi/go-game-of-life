@@ -31,7 +31,8 @@ var gameText = ""
 // var generation = 0
 var ctx context.Context
 var cancel context.CancelFunc
-var gameIsRuning = false
+
+// var gameIsRuning = false
 var directions = [][]int{
 	{-1, -1}, // top left
 	{0, -1},  // top mid
