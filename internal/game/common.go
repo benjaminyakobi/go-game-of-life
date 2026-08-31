@@ -3,17 +3,15 @@ package game
 // Contains game common code
 
 import (
-	// "container/list"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"math"
 	"os"
-	"time"
 )
 
+// TODO: should be removed from here
 const screenOffset = 1
 const historySize = 50
 
@@ -21,18 +19,19 @@ type config struct {
 	Patterns map[string][]livingCell `json:"patterns"`
 }
 
-var m time.Duration = 500
-var predefinedLivingCells []livingCellsSet // TODO: move to engine.go / grid.go
+// TODO: move to engine.go / grid.go
+var predefinedLivingCells []livingCellsSet
+
+// TODO: should be moved to grid.go
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
+
+// TODO: should be removed from here
 var predefinedLCIndex = 0
-var boxOpen = false
+
+// TODO: should be removed from here
 var gameText = ""
 
-// var generation = 0
-var ctx context.Context
-var cancel context.CancelFunc
-
-// var gameIsRuning = false
+// TODO: move to engine.go / grid.go
 var directions = [][]int{
 	{-1, -1}, // top left
 	{0, -1},  // top mid
@@ -42,7 +41,7 @@ var directions = [][]int{
 	{-1, 1},  // bottom left
 	{0, 1},   // bottom mid
 	{1, 1},   // bottom right
-} // TODO: move to engine.go / grid.go
+}
 
 func loadConfig() {
 	file, err := os.Open("./conf.json")
