@@ -4,7 +4,7 @@ package game
 
 import (
 	"container/list"
-	"context"
+	// "context"
 	"fmt"
 	"log"
 	"time"
@@ -21,9 +21,6 @@ func Run() {
 	}
 
 	quit := func() {
-		// You have to catch panics in a defer, clean up, and
-		// re-raise them - otherwise your application can
-		// die without leaving any diagnostic trace.
 		maybePanic := recover()
 		renderer.screen.Fini()
 		if maybePanic != nil {
@@ -33,117 +30,325 @@ func Run() {
 	defer quit()
 
 	loadConfig()
+
 	renderer.drawNewGrid()
-	renderer.drawLivingCellsOnGrid()
+	renderer.drawLivingCellsOnGrid() // TODO: explicitly pass engine.livingCells
+	renderer.screen.Show()
 
 	var (
 		lastClickTime time.Time
 		lastKeyTime   time.Time
 		lastX, lastY  int
 		dblClickDelay = 500 * time.Millisecond
-		pauseChan     = make(chan bool)
-		millisChan    = make(chan time.Duration)
+		running       = false
+		ticker        = time.NewTicker(m * time.Millisecond)
 	)
 
-	// Event loop
-	for {
-		renderer.screen.Show()           // Updating screen
-		ev := <-renderer.screen.EventQ() // Polling event
+	defer ticker.Stop()
 
-		// Processing the events
-		switch ev := ev.(type) {
-		case *tcell.EventResize:
-			if boxOpen {
-				renderer.drawNewGrid()
-				renderer.drawBox("Choose predefined pattern")
+	for {
+		select {
+		// ============================================================
+		// GAME LOOP (originalt from engine.go before the refactor)
+		// ============================================================
+		case <-ticker.C:
+			if !running {
+				continue
+			}
+
+			engine.calcNextGeneration()
+
+			renderer.drawNewGrid()
+			renderer.drawLivingCellsOnGrid() // TODO: explicitly pass engine.livingCells
+			renderer.drawDeadCellsOnGrid()   // TODO: explicitly pass engine.deadCells
+
+			// Stopping when there is no more living cells
+			if engine.livingCells.Len() == 0 {
+				running = false
+				renderer.screen.EnableMouse()
+				gameText = fmt.Sprintf(
+					"stopped after %v generations",
+					engine.generation,
+				)
 			} else {
-				renderer.drawNewGrid()
-				renderer.drawLivingCellsOnGrid()
+				gameText = fmt.Sprintf(
+					"generation: %v, living cells: %v",
+					engine.generation,
+					engine.livingCells.Len(),
+				)
 			}
-		case *tcell.EventKey:
-			keyNow := time.Now()
-			if ev.Key() == tcell.KeyEscape {
-				return
-			} else if ev.Key() == tcell.KeyRune && ev.Str() == "p" && boxOpen == false && engine.livingCellsHistory.Len() > 0 {
-				if gameIsRuning {
-					pauseChan <- true
-				}
-			} else if ev.Key() == tcell.KeyLeft && !gameIsRuning && !boxOpen && engine.livingCellsHistory.Len() > 0 {
-				historyVal := engine.livingCellsHistory.Back()
-				engine.livingCellsHistory.Remove(historyVal)
-				engine.livingCells = historyVal.Value.(livingCellsSet)
-				if engine.generation > 0 {
-					engine.generation--
-				}
-				gameText = fmt.Sprintf("history | generation: %v, living cells: %v", engine.generation, engine.livingCells.Len())
+
+			renderer.drawText(1, gameText)
+			renderer.screen.Show()
+
+		// ============================================================
+		// Tcell EVENT LOOP
+		// ============================================================
+		case ev := <-renderer.screen.EventQ():
+			switch ev := ev.(type) {
+			case *tcell.EventResize:
 				renderer.drawNewGrid()
-				renderer.drawLivingCellsOnGrid()
-			} else if ev.Key() == tcell.KeyRight && !gameIsRuning && !boxOpen {
-				engine.calcNextGeneration()
-				renderer.drawLivingCellsOnGrid()
-				renderer.drawDeadCellsOnGrid()
-				// TODO: duplicate code 1
-				gameText = fmt.Sprintf("generation: %v, living cells: %v", engine.generation, engine.livingCells.Len())
-				renderer.drawText(1, gameText)
-				renderer.screen.Show()
-			} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" && !gameIsRuning && len(predefinedLivingCells) > 0 {
-				renderer.screen.DisableMouse()
-				boxOpen = true
-				engine.livingCellsHistory = list.New()
-				engine.generation = 0
-				renderer.drawNewGrid()
-				engine.livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
-				renderer.drawBox("Choose predefined pattern")
-				predefinedLCIndex++
-			} else if ev.Key() == tcell.KeyRune && ev.Str() == "r" {
 				if boxOpen {
-					renderer.screen.EnableMouse()
-					renderer.drawNewGrid()
+					renderer.drawBox("Choose predefined pattern")
+				} else {
 					renderer.drawLivingCellsOnGrid()
-					renderer.drawText(1, "Chosen predefined pattern")
-					predefinedLCIndex--
-					boxOpen = !boxOpen
-				} else if engine.livingCells.Len() == 0 {
-					gameText = fmt.Sprintf("not starting, select cells first %v", engine.livingCells.Len())
+				}
+				renderer.screen.Show()
+
+			case *tcell.EventKey:
+				keyNow := time.Now()
+
+				// Escape
+				if ev.Key() == tcell.KeyEscape {
+					return
+				}
+
+				// Pause
+				if ev.Key() == tcell.KeyRune &&
+					ev.Str() == "p" &&
+					!boxOpen &&
+					engine.livingCellsHistory.Len() > 0 {
+
+					if running {
+						running = false
+						// gameIsRuning = false
+
+						renderer.screen.EnableMouse()
+
+						gameText = fmt.Sprintf(
+							"paused after %v generations",
+							engine.generation,
+						)
+
+						renderer.drawText(1, gameText)
+						renderer.screen.Show()
+					}
+				}
+
+				// Previous generation
+				if ev.Key() == tcell.KeyLeft &&
+					!running &&
+					!boxOpen &&
+					engine.livingCellsHistory.Len() > 0 {
+
+					historyVal := engine.livingCellsHistory.Back()
+
+					engine.livingCellsHistory.Remove(historyVal)
+					engine.livingCells = historyVal.Value.(livingCellsSet)
+
+					if engine.generation > 0 {
+						engine.generation--
+					}
+
+					gameText = fmt.Sprintf(
+						"history | generation: %v, living cells: %v",
+						engine.generation,
+						engine.livingCells.Len(),
+					)
+
+					renderer.drawNewGrid() // TODO: should be optimized by just drawing dead cells instead a whole new grid
+					renderer.drawLivingCellsOnGrid()
 					renderer.drawText(1, gameText)
-				} else if !gameIsRuning {
-					gameIsRuning = true
-					ctx, cancel = context.WithCancel(context.Background())
-					go engine.runGameOfLife(renderer, ctx, pauseChan, millisChan)
+					renderer.screen.Show()
 				}
-			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "=" && gameIsRuning {
-				if m > 100 {
-					m -= 100
-					millisChan <- m
+
+				// Next generation
+				if ev.Key() == tcell.KeyRight &&
+					!running &&
+					!boxOpen {
+
+					engine.calcNextGeneration()
+
+					renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
+					renderer.drawLivingCellsOnGrid()
+					renderer.drawDeadCellsOnGrid()
+
+					gameText = fmt.Sprintf(
+						"generation: %v, living cells: %v",
+						engine.generation,
+						engine.livingCells.Len(),
+					)
+
+					renderer.drawText(1, gameText)
+					renderer.screen.Show()
 				}
-			} else if keyNow.Sub(lastKeyTime) <= dblClickDelay && ev.Key() == tcell.KeyRune && ev.Str() == "-" && gameIsRuning {
-				if m < 1000 {
-					m += 100
-					millisChan <- m
+
+				// Choose predefined pattern
+				if ev.Key() == tcell.KeyRune &&
+					ev.Str() == "b" &&
+					!running &&
+					len(predefinedLivingCells) > 0 {
+					boxOpen = true
+
+					engine.livingCellsHistory = list.New()
+					engine.generation = 0
+
+					renderer.screen.DisableMouse()
+					renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
+
+					engine.livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
+
+					renderer.drawBox("Choose predefined pattern")
+					renderer.screen.Show()
+
+					predefinedLCIndex++
 				}
-			} else if ev.Key() == tcell.KeyRune && ev.Str() == "s" && gameIsRuning {
-				cancel()
-			}
-			lastKeyTime = keyNow
-		case *tcell.EventMouse:
-			x, y := ev.Position()
-			switch ev.Buttons() {
-			case tcell.ButtonPrimary:
+
+				// Run / resume / accept predefined pattern
+				if ev.Key() == tcell.KeyRune &&
+					ev.Str() == "r" {
+
+					if boxOpen {
+						renderer.screen.EnableMouse()
+
+						renderer.drawNewGrid() // TODO: should be optimized by removing the box border instead of drawing a whole new grid
+						renderer.drawLivingCellsOnGrid()
+						renderer.drawText(
+							1,
+							"Chosen predefined pattern",
+						)
+
+						predefinedLCIndex--
+						boxOpen = false
+
+						renderer.screen.Show()
+					} else if engine.livingCells.Len() == 0 {
+						gameText = fmt.Sprintf(
+							"not starting, select cells first %v",
+							engine.livingCells.Len(),
+						)
+
+						renderer.drawText(1, gameText)
+						renderer.screen.Show()
+					} else if !running {
+						running = true
+						// gameIsRuning = true
+						renderer.screen.DisableMouse()
+					}
+				}
+
+				// Increase speed
+				if keyNow.Sub(lastKeyTime) <= dblClickDelay &&
+					ev.Key() == tcell.KeyRune &&
+					ev.Str() == "=" &&
+					running {
+
+					if m > 100 {
+						m -= 100
+
+						ticker.Stop()
+						ticker = time.NewTicker(
+							m * time.Millisecond,
+						)
+					}
+				}
+
+				// Decrease speed
+				if keyNow.Sub(lastKeyTime) <= dblClickDelay &&
+					ev.Key() == tcell.KeyRune &&
+					ev.Str() == "-" &&
+					running {
+
+					if m < 1000 {
+						m += 100
+
+						ticker.Stop()
+						ticker = time.NewTicker(
+							m * time.Millisecond,
+						)
+					}
+				}
+
+				// Stop
+				if ev.Key() == tcell.KeyRune &&
+					ev.Str() == "s" &&
+					running {
+
+					running = false
+					// gameIsRuning = false
+
+					renderer.screen.EnableMouse()
+
+					gameText = fmt.Sprintf(
+						"stopped after %v generations",
+						engine.generation,
+					)
+
+					renderer.drawText(1, gameText)
+					renderer.screen.Show()
+				}
+
+				lastKeyTime = keyNow
+
+			case *tcell.EventMouse:
+				x, y := ev.Position()
+
+				if ev.Buttons() != tcell.ButtonPrimary {
+					continue
+				}
+
 				now := time.Now()
+
+				validCell := y > screenOffset &&
+					y < renderer.gridHeight-1 &&
+					x > 0 &&
+					x < renderer.gridWidth-1
+
+				if !validCell || running || boxOpen {
+					continue
+				}
+
+				// Double click -> remove cell
 				if now.Sub(lastClickTime) <= dblClickDelay &&
-					x == lastX && y == lastY && y > screenOffset && y < renderer.gridHeight-1 && x > 0 && x < renderer.gridWidth-1 { // double-click
-					engine.livingCells.Remove(livingCell{PosX: x, PosY: y})
-					gameText = fmt.Sprintf("unselected [%v, %v] - living cells: %v", x, y, engine.livingCells.Len())
+					x == lastX &&
+					y == lastY {
+
+					engine.livingCells.Remove(
+						livingCell{
+							PosX: x,
+							PosY: y,
+						},
+					)
+
+					gameText = fmt.Sprintf(
+						"unselected [%v, %v] - living cells: %v",
+						x,
+						y,
+						engine.livingCells.Len(),
+					)
+
 					renderer.drawText(1, gameText)
 					renderer.updateCellStyle(x, y)
-				} else if y > screenOffset && y < renderer.gridHeight-1 && x > 0 && x < renderer.gridWidth-1 { // single-click
-					engine.livingCells.Add(livingCell{PosX: x, PosY: y})
-					gameText = fmt.Sprintf("selected [%v, %v] - living cells: %v", x, y, engine.livingCells.Len())
+				} else {
+					// Single click -> add cell
+					engine.livingCells.Add(
+						livingCell{
+							PosX: x,
+							PosY: y,
+						},
+					)
+
+					gameText = fmt.Sprintf(
+						"selected [%v, %v] - living cells: %v",
+						x,
+						y,
+						engine.livingCells.Len(),
+					)
+
 					renderer.drawText(1, gameText)
-					renderer.screen.Put(x, y, "@", cs.greenYellow)
+					renderer.screen.Put(
+						x,
+						y,
+						"@",
+						cs.greenYellow,
+					) // TODO: this should happend only inside the renderer
 				}
+
+				renderer.screen.Show()
+
 				lastClickTime = now
-				lastX, lastY = x, y
+				lastX = x
+				lastY = y
 			}
 		}
 	}
