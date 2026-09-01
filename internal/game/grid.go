@@ -100,6 +100,7 @@ func (r *renderer) drawText(y int, text string) {
 	}
 }
 
+// TODO: should be reviewed, currently it's working fine
 func (r *renderer) updateCellStyle(x, y int) {
 	if y == screenOffset || y == r.gridHeight-1 {
 		r.screen.Put(x, y, string(tcell.RuneHLine), cs.def)
@@ -130,6 +131,15 @@ func (r *renderer) drawNewGrid() {
 	}
 	r.drawText(1, gameText)
 	r.drawText(r.gridHeight-1, "Conway's Game Of Life")
+}
+
+// TODO: should be reviewed, currently it's working fine
+func (r *renderer) killLivingCellsOnGrid(lcs livingCellsSet) {
+	for lc := range lcs {
+		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
+			r.screen.Put(lc.PosX, lc.PosY, ".", cs.lightSlateGrey)
+		}
+	}
 }
 
 func (r *renderer) drawLivingCellsOnGrid() {
