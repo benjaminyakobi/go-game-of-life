@@ -161,9 +161,9 @@ func Run() {
 					!running &&
 					!boxOpen {
 
+					// renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
+					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.calcNextGeneration()
-
-					renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
 					renderer.drawLivingCellsOnGrid()
 					renderer.drawDeadCellsOnGrid()
 
