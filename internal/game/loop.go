@@ -58,9 +58,9 @@ func Run() {
 				continue
 			}
 
+			// renderer.drawNewGrid()
+			renderer.killLivingCellsOnGrid(engine.livingCells)
 			engine.calcNextGeneration()
-
-			renderer.drawNewGrid()
 			renderer.drawLivingCellsOnGrid() // TODO: explicitly pass engine.livingCells
 			renderer.drawDeadCellsOnGrid()   // TODO: explicitly pass engine.deadCells
 
