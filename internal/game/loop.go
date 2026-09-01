@@ -136,7 +136,7 @@ func Run() {
 					historyVal := engine.livingCellsHistory.Back()
 
 					engine.livingCellsHistory.Remove(historyVal)
-					engine.livingCells = historyVal.Value.(livingCellsSet)
+					// engine.livingCells = historyVal.Value.(livingCellsSet)
 
 					if engine.generation > 0 {
 						engine.generation--
@@ -148,7 +148,9 @@ func Run() {
 						engine.livingCells.Len(),
 					)
 
-					renderer.drawNewGrid() // TODO: should be optimized by just drawing dead cells instead a whole new grid
+					// renderer.drawNewGrid() // TODO: should be optimized by just drawing dead cells instead a whole new grid
+					renderer.killLivingCellsOnGrid(engine.livingCells)
+					engine.livingCells = historyVal.Value.(livingCellsSet)
 					renderer.drawLivingCellsOnGrid()
 					renderer.drawText(1, gameText)
 					renderer.screen.Show()
