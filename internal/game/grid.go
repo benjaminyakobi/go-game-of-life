@@ -171,6 +171,42 @@ func (r *renderer) calcBoxDimesions() (int, int, int, int) {
 	return maxW - minW + 5, maxH - minH + 5, minW, minH
 }
 
+func (r *renderer) removeBox() {
+	boxWidth, boxHeight, minWidth, minHeight = r.calcBoxDimesions()
+	x := (r.gridWidth - boxWidth) / 2
+	y := (r.gridHeight - boxHeight) / 2
+
+	for col := x; col < x+boxWidth; col++ {
+		r.screen.Put(col, y, ".", cs.lightSlateGrey)
+		r.screen.Put(col, y+boxHeight-1, ".", cs.lightSlateGrey)
+		// r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cs.def)
+	}
+
+	for row := y; row < y+boxHeight; row++ {
+		r.screen.Put(x, row, ".", cs.lightSlateGrey)
+		r.screen.Put(x+boxWidth-1, row, ".", cs.lightSlateGrey)
+		// r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cs.def)
+	}
+
+	// r.screen.SetContent(x, y, tcell.RuneULCorner, nil, cs.def)
+	// r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cs.def)
+	// r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
+	// r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
+
+	// centerLivingCells := func(lcs livingCellsSet) livingCellsSet { centeredLCS := make(livingCellsSet)
+	// 	for cell := range lcs {
+	// 		PosX := x + cell.PosX - minWidth + 2
+	// 		PosY := y + cell.PosY - minHeight + 2
+	// 		centeredLCS.Add(livingCell{PosX: PosX, PosY: PosY})
+	// 	}
+	// 	return centeredLCS
+	// }
+	//
+	// r.engine.livingCells = centerLivingCells(r.engine.livingCells)
+	// r.drawLivingCellsOnGrid()
+	// r.drawText(1, title)
+}
+
 func (r *renderer) drawBox(title string) {
 	boxWidth, boxHeight, minWidth, minHeight = r.calcBoxDimesions()
 	x := (r.gridWidth - boxWidth) / 2
