@@ -150,9 +150,9 @@ func (r *renderer) drawLivingCellsOnGrid(lcs livingCellsSet) {
 	}
 }
 
-func (r *renderer) drawDeadCellsOnGrid() {
-	for lc := range r.engine.deadCells {
-		r.updateCellStyle(lc.PosX, lc.PosY)
+func (r *renderer) drawDeadCellsOnGrid(dcs livingCellsSet) {
+	for dc := range dcs {
+		r.updateCellStyle(dc.PosX, dc.PosY)
 	}
 }
 
