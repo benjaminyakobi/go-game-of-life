@@ -188,8 +188,9 @@ func Run() {
 					engine.generation = 0
 
 					renderer.screen.DisableMouse()
-					renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
-
+					// renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
+					renderer.removeBox()
+					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
 
 					renderer.drawBox("Choose predefined pattern")
