@@ -142,8 +142,8 @@ func (r *renderer) killLivingCellsOnGrid(lcs livingCellsSet) {
 	}
 }
 
-func (r *renderer) drawLivingCellsOnGrid() {
-	for lc := range r.engine.livingCells {
+func (r *renderer) drawLivingCellsOnGrid(lcs livingCellsSet) {
+	for lc := range lcs {
 		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
 			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
 		}
@@ -227,6 +227,7 @@ func (r *renderer) drawBox(title string) {
 	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
 	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
 
+	// TODO: make it separate func to be reused also when resizing the grid!
 	centerLivingCells := func(lcs livingCellsSet) livingCellsSet {
 		centeredLCS := make(livingCellsSet)
 		for cell := range lcs {
@@ -238,6 +239,6 @@ func (r *renderer) drawBox(title string) {
 	}
 
 	r.engine.livingCells = centerLivingCells(r.engine.livingCells)
-	r.drawLivingCellsOnGrid()
+	r.drawLivingCellsOnGrid(r.engine.livingCells)
 	r.drawText(1, title)
 }
