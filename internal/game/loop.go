@@ -148,7 +148,6 @@ func Run() {
 						engine.livingCells.Len(),
 					)
 
-					// renderer.drawNewGrid() // TODO: should be optimized by just drawing dead cells instead a whole new grid
 					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.livingCells = historyVal.Value.(livingCellsSet)
 					renderer.drawLivingCellsOnGrid()
@@ -161,7 +160,6 @@ func Run() {
 					!running &&
 					!boxOpen {
 
-					// renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
 					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.calcNextGeneration()
 					renderer.drawLivingCellsOnGrid()
@@ -188,7 +186,6 @@ func Run() {
 					engine.generation = 0
 
 					renderer.screen.DisableMouse()
-					// renderer.drawNewGrid() // TODO: should be optimized by "killing"all living cells instead of drawing a whole new grid
 					renderer.removeBox()
 					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.livingCells = predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
@@ -206,7 +203,6 @@ func Run() {
 					if boxOpen {
 						renderer.screen.EnableMouse()
 
-						// renderer.drawNewGrid() // TODO: should be optimized by removing the box border instead of drawing a whole new grid
 						renderer.removeBox()
 						renderer.drawLivingCellsOnGrid()
 						renderer.drawText(
