@@ -60,11 +60,12 @@ func loadConfig() {
 		}
 	}
 
+	// TODO: maybe should be moved to somewhere else? (not part of config.go)
 	for _, points := range conf.Patterns {
-		var lcs = make(cellsSet)
+		var cs = make(cellsSet)
 		for i := range points {
-			lcs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
+			cs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
 		}
-		predefinedLivingCells = append(predefinedLivingCells, lcs)
+		predefinedLivingCells = append(predefinedLivingCells, cs)
 	}
 }
