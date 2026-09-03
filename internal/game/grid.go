@@ -230,10 +230,10 @@ func (r *renderer) drawBox(title string) {
 	// TODO: make it separate func to be reused also when resizing the grid!
 	centerLivingCells := func(lcs livingCellsSet) livingCellsSet {
 		centeredLCS := make(livingCellsSet)
-		for cell := range lcs {
-			PosX := x + cell.PosX - minWidth + 2
-			PosY := y + cell.PosY - minHeight + 2
-			centeredLCS.Add(livingCell{PosX: PosX, PosY: PosY})
+		for c := range lcs {
+			PosX := x + c.PosX - minWidth + 2
+			PosY := y + c.PosY - minHeight + 2
+			centeredLCS.Add(cell{PosX: PosX, PosY: PosY})
 		}
 		return centeredLCS
 	}
