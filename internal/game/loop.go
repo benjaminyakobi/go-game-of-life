@@ -32,7 +32,7 @@ func Run() {
 	loadConfig()
 
 	renderer.drawNewGrid()
-	renderer.drawLivingCellsOnGrid() // TODO: explicitly pass engine.livingCells
+	renderer.drawLivingCellsOnGrid(engine.livingCells) // TODO: explicitly pass engine.livingCells
 	renderer.screen.Show()
 
 	var (
@@ -61,8 +61,8 @@ func Run() {
 			// renderer.drawNewGrid()
 			renderer.killLivingCellsOnGrid(engine.livingCells)
 			engine.calcNextGeneration()
-			renderer.drawLivingCellsOnGrid() // TODO: explicitly pass engine.livingCells
-			renderer.drawDeadCellsOnGrid()   // TODO: explicitly pass engine.deadCells
+			renderer.drawLivingCellsOnGrid(engine.livingCells) // TODO: explicitly pass engine.livingCells
+			renderer.drawDeadCellsOnGrid()                     // TODO: explicitly pass engine.deadCells
 
 			// Stopping when there is no more living cells
 			if engine.livingCells.Len() == 0 {
@@ -93,7 +93,7 @@ func Run() {
 				if boxOpen {
 					renderer.drawBox("Choose predefined pattern")
 				} else {
-					renderer.drawLivingCellsOnGrid()
+					renderer.drawLivingCellsOnGrid(engine.livingCells)
 				}
 				renderer.screen.Show()
 
@@ -150,7 +150,7 @@ func Run() {
 
 					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.livingCells = historyVal.Value.(livingCellsSet)
-					renderer.drawLivingCellsOnGrid()
+					renderer.drawLivingCellsOnGrid(engine.livingCells)
 					renderer.drawText(1, gameText)
 					renderer.screen.Show()
 				}
@@ -162,7 +162,7 @@ func Run() {
 
 					renderer.killLivingCellsOnGrid(engine.livingCells)
 					engine.calcNextGeneration()
-					renderer.drawLivingCellsOnGrid()
+					renderer.drawLivingCellsOnGrid(engine.livingCells)
 					renderer.drawDeadCellsOnGrid()
 
 					gameText = fmt.Sprintf(
@@ -204,7 +204,7 @@ func Run() {
 						renderer.screen.EnableMouse()
 
 						renderer.removeBox()
-						renderer.drawLivingCellsOnGrid()
+						renderer.drawLivingCellsOnGrid(engine.livingCells)
 						renderer.drawText(
 							1,
 							"Chosen predefined pattern",
