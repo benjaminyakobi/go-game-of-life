@@ -32,7 +32,7 @@ func Run() {
 	loadConfig()
 
 	renderer.drawNewGrid()
-	renderer.drawLivingCellsOnGrid(engine.livingCells) // TODO: explicitly pass engine.livingCells
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
 	renderer.screen.Show()
 
 	var (
@@ -61,8 +61,8 @@ func Run() {
 			// renderer.drawNewGrid()
 			renderer.killLivingCellsOnGrid(engine.livingCells)
 			engine.calcNextGeneration()
-			renderer.drawLivingCellsOnGrid(engine.livingCells) // TODO: explicitly pass engine.livingCells
-			renderer.drawDeadCellsOnGrid(engine.deadCells)     // TODO: explicitly pass engine.deadCells
+			renderer.drawLivingCellsOnGrid(engine.livingCells)
+			renderer.drawDeadCellsOnGrid(engine.deadCells)
 
 			// Stopping when there is no more living cells
 			if engine.livingCells.Len() == 0 {
