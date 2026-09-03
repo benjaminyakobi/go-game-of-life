@@ -206,7 +206,8 @@ func Run() {
 					if boxOpen {
 						renderer.screen.EnableMouse()
 
-						renderer.drawNewGrid() // TODO: should be optimized by removing the box border instead of drawing a whole new grid
+						// renderer.drawNewGrid() // TODO: should be optimized by removing the box border instead of drawing a whole new grid
+						renderer.removeBox()
 						renderer.drawLivingCellsOnGrid()
 						renderer.drawText(
 							1,
