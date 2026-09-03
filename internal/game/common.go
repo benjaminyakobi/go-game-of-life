@@ -20,7 +20,7 @@ type config struct {
 }
 
 // TODO: move to engine.go / grid.go
-var predefinedLivingCells []livingCellsSet
+var predefinedLivingCells []cellsSet
 
 // TODO: should be moved to grid.go
 var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
@@ -61,7 +61,7 @@ func loadConfig() {
 	}
 
 	for _, points := range conf.Patterns {
-		var lcs = make(livingCellsSet)
+		var lcs = make(cellsSet)
 		for i := range points {
 			lcs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
 		}

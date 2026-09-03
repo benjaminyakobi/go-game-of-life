@@ -24,7 +24,7 @@ type renderer struct {
 	engine     *engine
 }
 
-var cs = cellStyles{
+var css = cellStyles{
 	def:            tcell.StyleDefault.Background(color.Reset).Foreground(color.Default),
 	lightSlateGrey: tcell.StyleDefault.Background(color.Reset).Foreground(color.LightSlateGrey),
 	greenYellow:    tcell.StyleDefault.Background(color.Reset).Foreground(color.GreenYellow),
@@ -40,7 +40,7 @@ func initRenderer(e *engine) (*renderer, error) {
 		return nil, err
 	}
 
-	screen.SetStyle(cs.def)
+	screen.SetStyle(css.def)
 	screen.EnableMouse()
 	screen.Clear()
 
@@ -69,32 +69,32 @@ func (r *renderer) drawText(y int, text string) {
 
 	for row := range calcX {
 		if row == 0 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneULCorner), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneULCorner), css.def)
 		} else if row > 0 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
 		} else if row == 0 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneLLCorner), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneLLCorner), css.def)
 		} else if row > 0 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
 		}
 	}
 
 	col := calcX
 	for _, row := range text {
 		rw := runewidth.RuneWidth(row)
-		r.screen.SetContent(col, y, row, nil, cs.def)
+		r.screen.SetContent(col, y, row, nil, css.def)
 		col += rw
 	}
 
 	for row := col; row < r.gridWidth; row++ {
 		if row == r.gridWidth-1 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneURCorner), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneURCorner), css.def)
 		} else if row < r.gridWidth-1 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
 		} else if row == r.gridWidth-1 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneLRCorner), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneLRCorner), css.def)
 		} else if row < r.gridWidth-1 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneHLine), cs.def)
+			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
 		}
 
 	}
@@ -103,21 +103,21 @@ func (r *renderer) drawText(y int, text string) {
 // TODO: should be reviewed, currently it's working fine
 func (r *renderer) updateCellStyle(x, y int) {
 	if y == screenOffset || y == r.gridHeight-1 {
-		r.screen.Put(x, y, string(tcell.RuneHLine), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
 	} else if x == 0 || x == r.gridWidth-1 {
-		r.screen.Put(x, y, string(tcell.RuneVLine), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneVLine), css.def)
 	} else {
-		r.screen.Put(x, y, ".", cs.lightSlateGrey)
+		r.screen.Put(x, y, ".", css.lightSlateGrey)
 	}
 
 	if x == 0 && y == screenOffset {
-		r.screen.Put(x, y, string(tcell.RuneULCorner), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneULCorner), css.def)
 	} else if x == r.gridWidth-1 && y == screenOffset {
-		r.screen.Put(x, y, string(tcell.RuneURCorner), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneURCorner), css.def)
 	} else if x == 0 && y == r.gridHeight-1 {
-		r.screen.Put(x, y, string(tcell.RuneLLCorner), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneLLCorner), css.def)
 	} else if x == r.gridWidth-1 && y == r.gridHeight-1 {
-		r.screen.Put(x, y, string(tcell.RuneLRCorner), cs.def)
+		r.screen.Put(x, y, string(tcell.RuneLRCorner), css.def)
 	}
 }
 
@@ -134,25 +134,25 @@ func (r *renderer) drawNewGrid() {
 }
 
 // TODO: should be reviewed, currently it's working fine
-func (r *renderer) killLivingCellsOnGrid(lcs livingCellsSet) {
-	for lc := range lcs {
-		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
-			r.screen.Put(lc.PosX, lc.PosY, ".", cs.lightSlateGrey)
+func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
+	for c := range cs {
+		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
+			r.screen.Put(c.PosX, c.PosY, ".", css.lightSlateGrey)
 		}
 	}
 }
 
-func (r *renderer) drawLivingCellsOnGrid(lcs livingCellsSet) {
-	for lc := range lcs {
-		if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
-			r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
+func (r *renderer) drawLivingCellsOnGrid(cs cellsSet) {
+	for c := range cs {
+		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
+			r.screen.Put(c.PosX, c.PosY, "@", css.greenYellow)
 		}
 	}
 }
 
-func (r *renderer) drawDeadCellsOnGrid(dcs livingCellsSet) {
-	for dc := range dcs {
-		r.updateCellStyle(dc.PosX, dc.PosY)
+func (r *renderer) drawDeadCellsOnGrid(cs cellsSet) {
+	for c := range cs {
+		r.updateCellStyle(c.PosX, c.PosY)
 	}
 }
 
@@ -177,14 +177,14 @@ func (r *renderer) removeBox() {
 	y := (r.gridHeight - boxHeight) / 2
 
 	for col := x; col < x+boxWidth; col++ {
-		r.screen.Put(col, y, ".", cs.lightSlateGrey)
-		r.screen.Put(col, y+boxHeight-1, ".", cs.lightSlateGrey)
+		r.screen.Put(col, y, ".", css.lightSlateGrey)
+		r.screen.Put(col, y+boxHeight-1, ".", css.lightSlateGrey)
 		// r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cs.def)
 	}
 
 	for row := y; row < y+boxHeight; row++ {
-		r.screen.Put(x, row, ".", cs.lightSlateGrey)
-		r.screen.Put(x+boxWidth-1, row, ".", cs.lightSlateGrey)
+		r.screen.Put(x, row, ".", css.lightSlateGrey)
+		r.screen.Put(x+boxWidth-1, row, ".", css.lightSlateGrey)
 		// r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cs.def)
 	}
 
@@ -213,29 +213,29 @@ func (r *renderer) drawBox(title string) {
 	y := (r.gridHeight - boxHeight) / 2
 
 	for col := x; col < x+boxWidth; col++ {
-		r.screen.SetContent(col, y, tcell.RuneHLine, nil, cs.def)
-		r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cs.def)
+		r.screen.SetContent(col, y, tcell.RuneHLine, nil, css.def)
+		r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, css.def)
 	}
 
 	for row := y; row < y+boxHeight; row++ {
-		r.screen.SetContent(x, row, tcell.RuneVLine, nil, cs.def)
-		r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cs.def)
+		r.screen.SetContent(x, row, tcell.RuneVLine, nil, css.def)
+		r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, css.def)
 	}
 
-	r.screen.SetContent(x, y, tcell.RuneULCorner, nil, cs.def)
-	r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cs.def)
-	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
-	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
+	r.screen.SetContent(x, y, tcell.RuneULCorner, nil, css.def)
+	r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, css.def)
+	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, css.def)
+	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, css.def)
 
 	// TODO: make it separate func to be reused also when resizing the grid!
-	centerLivingCells := func(lcs livingCellsSet) livingCellsSet {
-		centeredLCS := make(livingCellsSet)
-		for c := range lcs {
+	centerLivingCells := func(cs cellsSet) cellsSet {
+		centeredCS := make(cellsSet)
+		for c := range cs {
 			PosX := x + c.PosX - minWidth + 2
 			PosY := y + c.PosY - minHeight + 2
-			centeredLCS.Add(cell{PosX: PosX, PosY: PosY})
+			centeredCS.Add(cell{PosX: PosX, PosY: PosY})
 		}
-		return centeredLCS
+		return centeredCS
 	}
 
 	r.engine.livingCells = centerLivingCells(r.engine.livingCells)

@@ -14,48 +14,48 @@ type cell struct {
 	PosY int `json:"y"`
 }
 
-type livingCellsSet map[cell]struct{}
+type cellsSet map[cell]struct{}
 
 type engine struct {
 	generation         int
-	deadCells          livingCellsSet
-	livingCells        livingCellsSet
+	deadCells          cellsSet
+	livingCells        cellsSet
 	livingCellsHistory *list.List // TODO: convert to slice
 }
 
-func (lcs livingCellsSet) Add(lc cell) {
-	lcs[lc] = struct{}{}
+func (cs cellsSet) Add(c cell) {
+	cs[c] = struct{}{}
 }
 
-func (lcs livingCellsSet) Remove(lc cell) {
-	delete(lcs, lc)
+func (cs cellsSet) Remove(c cell) {
+	delete(cs, c)
 }
 
-func (lcs livingCellsSet) Contains(lc cell) bool {
-	_, ok := lcs[lc]
+func (cs cellsSet) Contains(c cell) bool {
+	_, ok := cs[c]
 	return ok
 }
 
-func (lcs livingCellsSet) Len() int {
-	return len(lcs)
+func (cs cellsSet) Len() int {
+	return len(cs)
 }
 
-func (lcs livingCellsSet) Copy() livingCellsSet {
-	if lcs == nil {
+func (cs cellsSet) Copy() cellsSet {
+	if cs == nil {
 		return nil
 	}
-	lcsCopy := make(livingCellsSet, lcs.Len())
-	for cell := range lcs {
-		lcsCopy[cell] = struct{}{}
+	csCopy := make(cellsSet, cs.Len())
+	for c := range cs {
+		csCopy[c] = struct{}{}
 	}
-	return lcsCopy
+	return csCopy
 }
 
 func initEngine() *engine {
 	return &engine{
 		generation:         0,
-		deadCells:          make(livingCellsSet, 0),
-		livingCells:        make(livingCellsSet, 0),
+		deadCells:          make(cellsSet, 0),
+		livingCells:        make(cellsSet, 0),
 		livingCellsHistory: list.New(),
 	}
 }
@@ -123,8 +123,8 @@ func (e *engine) calcNextGeneration() {
 		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
 	}
 	e.livingCellsHistory.PushBack(e.livingCells)
-	livingCellsNextGen := make(livingCellsSet)
-	deadCellsNextGen := make(livingCellsSet)
+	livingCellsNextGen := make(cellsSet)
+	deadCellsNextGen := make(cellsSet)
 	for lc := range e.livingCells {
 		count := 0
 		for _, d := range directions {

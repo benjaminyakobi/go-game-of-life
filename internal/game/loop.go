@@ -149,7 +149,7 @@ func Run() {
 					)
 
 					renderer.killLivingCellsOnGrid(engine.livingCells)
-					engine.livingCells = historyVal.Value.(livingCellsSet)
+					engine.livingCells = historyVal.Value.(cellsSet)
 					renderer.drawLivingCellsOnGrid(engine.livingCells)
 					renderer.drawText(1, gameText)
 					renderer.screen.Show()
@@ -342,7 +342,7 @@ func Run() {
 						x,
 						y,
 						"@",
-						cs.greenYellow,
+						css.greenYellow,
 					) // TODO: this should happend only inside the renderer
 				}
 
