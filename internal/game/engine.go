@@ -9,29 +9,29 @@ import (
 	// "time"
 )
 
-type livingCell struct {
+type cell struct {
 	PosX int `json:"x"`
 	PosY int `json:"y"`
 }
 
-type livingCellsSet map[livingCell]struct{}
+type livingCellsSet map[cell]struct{}
 
 type engine struct {
 	generation         int
 	deadCells          livingCellsSet
 	livingCells        livingCellsSet
-	livingCellsHistory *list.List
+	livingCellsHistory *list.List // TODO: convert to slice
 }
 
-func (lcs livingCellsSet) Add(lc livingCell) {
+func (lcs livingCellsSet) Add(lc cell) {
 	lcs[lc] = struct{}{}
 }
 
-func (lcs livingCellsSet) Remove(lc livingCell) {
+func (lcs livingCellsSet) Remove(lc cell) {
 	delete(lcs, lc)
 }
 
-func (lcs livingCellsSet) Contains(lc livingCell) bool {
+func (lcs livingCellsSet) Contains(lc cell) bool {
 	_, ok := lcs[lc]
 	return ok
 }
@@ -95,11 +95,11 @@ func initEngine() *engine {
 // 	}
 // }
 
-func (e *engine) calcNextGenDeadCells(lc livingCell) bool {
+func (e *engine) calcNextGenDeadCells(lc cell) bool {
 	count := 0
 	for _, d := range directions {
 		dx, dy := d[0], d[1]
-		if e.livingCells.Contains(livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
+		if e.livingCells.Contains(cell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
 			count++
 		}
 		if count > 3 {
@@ -129,7 +129,7 @@ func (e *engine) calcNextGeneration() {
 		count := 0
 		for _, d := range directions {
 			dx, dy := d[0], d[1]
-			neighborCell := livingCell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
+			neighborCell := cell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
 			if e.livingCells.Contains(neighborCell) {
 				count++
 			} else {
@@ -149,7 +149,7 @@ func (e *engine) calcNextGeneration() {
 		if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
 		} else {
-			deadCellsNextGen.Add(livingCell{PosX: lc.PosX, PosY: lc.PosY})
+			deadCellsNextGen.Add(cell{PosX: lc.PosX, PosY: lc.PosY})
 			// r.updateCellStyle(lc.PosX, lc.PosY)
 		}
 

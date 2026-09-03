@@ -306,7 +306,7 @@ func Run() {
 					y == lastY {
 
 					engine.livingCells.Remove(
-						livingCell{
+						cell{
 							PosX: x,
 							PosY: y,
 						},
@@ -324,7 +324,7 @@ func Run() {
 				} else {
 					// Single click -> add cell
 					engine.livingCells.Add(
-						livingCell{
+						cell{
 							PosX: x,
 							PosY: y,
 						},

@@ -16,7 +16,7 @@ const screenOffset = 1
 const historySize = 50
 
 type config struct {
-	Patterns map[string][]livingCell `json:"patterns"`
+	Patterns map[string][]cell `json:"patterns"`
 }
 
 // TODO: move to engine.go / grid.go
@@ -63,7 +63,7 @@ func loadConfig() {
 	for _, points := range conf.Patterns {
 		var lcs = make(livingCellsSet)
 		for i := range points {
-			lcs.Add(livingCell{PosX: points[i].PosX, PosY: points[i].PosY})
+			lcs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
 		}
 		predefinedLivingCells = append(predefinedLivingCells, lcs)
 	}
