@@ -27,6 +27,16 @@ type loopState struct {
 	ticker   *time.Ticker
 }
 
+func newLoopState() *loopState {
+	interval := 500 * time.Millisecond
+
+	return &loopState{
+		dblClickDelay: 500 * time.Millisecond,
+		interval:      interval,
+		ticker:        time.NewTicker(interval),
+	}
+}
+
 // TODO: loop only should orchestrate (not knowing about tcell!)
 func Run() {
 	engine := initEngine()
