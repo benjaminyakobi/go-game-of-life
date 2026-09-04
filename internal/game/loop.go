@@ -64,6 +64,10 @@ func Run() {
 
 	loadConfig()
 	initializeGame(renderer, engine)
+
+	state := initLoopState()
+	defer state.ticker.Stop()
+
 }
 
 // TODO: loop only should orchestrate (not knowing about tcell!)
