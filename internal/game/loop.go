@@ -5,7 +5,7 @@ package game
 import (
 	// "container/list"
 	// "context"
-	// "fmt"
+	"fmt"
 	"log"
 	"time"
 	// "github.com/gdamore/tcell/v3"
@@ -55,13 +55,45 @@ func initializeGame(renderer *renderer, engine *engine) {
 func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
 	for {
 		select {
-		// case <-state.ticker.C:
-		// 	handleTick(renderer, engine, state)
-		//
-		// case ev := <-renderer.screen.EventQ():
-		// 	handleEvent(renderer, engine, state, ev)
+		case <-state.ticker.C:
+			handleTick(renderer, engine, state)
+
+			// case ev := <-renderer.screen.EventQ():
+			// 	handleEvent(renderer, engine, state, ev)
 		}
 	}
+}
+
+func handleTick(renderer *renderer, engine *engine, state *loopState) {
+	if !state.running {
+		return
+	}
+
+	renderer.killLivingCellsOnGrid(engine.livingCells)
+
+	engine.calcNextGeneration()
+
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(engine.deadCells)
+
+	if engine.livingCells.Len() == 0 {
+		state.running = false
+		renderer.screen.EnableMouse()
+
+		gameText = fmt.Sprintf(
+			"stopped after %v generations",
+			engine.generation,
+		)
+	} else {
+		gameText = fmt.Sprintf(
+			"generation: %v, living cells: %v",
+			engine.generation,
+			engine.livingCells.Len(),
+		)
+	}
+
+	renderer.drawText(1, gameText)
+	renderer.screen.Show()
 }
 
 func Run() {
