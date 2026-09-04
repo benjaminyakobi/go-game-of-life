@@ -3,6 +3,7 @@ package game
 // Contains game input events code
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -60,8 +61,7 @@ func handleKey(
 		return true
 	}
 
-	// Pause
-	// handlePause(renderer, engine, state, ev)
+	handlePause(renderer, engine, state, ev)
 
 	// Previous generation
 	// handlePreviousGeneration(renderer, engine, state, ev)
@@ -87,4 +87,32 @@ func handleKey(
 	state.lastKeyTime = keyNow
 
 	return false
+}
+
+func handlePause(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyRune ||
+		ev.Str() != "p" ||
+		state.boxOpen ||
+		engine.livingCellsHistory.Len() == 0 {
+		return
+	}
+
+	if state.running {
+		state.running = false
+
+		renderer.screen.EnableMouse()
+
+		gameText = fmt.Sprintf(
+			"paused after %v generations",
+			engine.generation,
+		)
+
+		renderer.drawText(1, gameText)
+		renderer.screen.Show()
+	}
 }
