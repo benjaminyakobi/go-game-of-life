@@ -52,6 +52,18 @@ func initializeGame(renderer *renderer, engine *engine) {
 	renderer.screen.Show()
 }
 
+func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
+	for {
+		select {
+		// case <-state.ticker.C:
+		// 	handleTick(renderer, engine, state)
+		//
+		// case ev := <-renderer.screen.EventQ():
+		// 	handleEvent(renderer, engine, state, ev)
+		}
+	}
+}
+
 func Run() {
 	engine := initEngine()
 
@@ -68,6 +80,7 @@ func Run() {
 	state := initLoopState()
 	defer state.ticker.Stop()
 
+	runGameLoop(renderer, engine, state)
 }
 
 // TODO: loop only should orchestrate (not knowing about tcell!)
