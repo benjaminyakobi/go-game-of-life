@@ -24,3 +24,19 @@ func handleEvent(
 	// 	handleMouse(renderer, engine, state, ev)
 	// }
 }
+
+func handleResize(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+) {
+	renderer.drawNewGrid()
+
+	if state.boxOpen {
+		renderer.drawBox("Choose predefined pattern")
+	} else {
+		renderer.drawLivingCellsOnGrid(engine.livingCells)
+	}
+
+	renderer.screen.Show()
+}
