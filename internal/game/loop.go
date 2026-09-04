@@ -12,6 +12,21 @@ import (
 	"github.com/gdamore/tcell/v3"
 )
 
+type loopState struct {
+	lastClickTime time.Time
+	lastKeyTime   time.Time
+	lastX         int
+	lastY         int
+
+	dblClickDelay time.Duration
+
+	running bool
+	boxOpen bool
+
+	interval time.Duration
+	ticker   *time.Ticker
+}
+
 // TODO: loop only should orchestrate (not knowing about tcell!)
 func Run() {
 	engine := initEngine()
