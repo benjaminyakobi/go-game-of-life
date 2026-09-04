@@ -46,6 +46,12 @@ func cleanup(renderer *renderer) {
 	}
 }
 
+func initializeGame(renderer *renderer, engine *engine) {
+	renderer.drawNewGrid()
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.screen.Show()
+}
+
 func Run() {
 	engine := initEngine()
 
@@ -57,7 +63,7 @@ func Run() {
 	defer cleanup(renderer)
 
 	loadConfig()
-
+	initializeGame(renderer, engine)
 }
 
 // TODO: loop only should orchestrate (not knowing about tcell!)
