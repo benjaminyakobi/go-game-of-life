@@ -96,7 +96,7 @@ func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
 	}
 }
 
-func Run() {
+func Start() {
 	engine := initEngine()
 
 	renderer, err := initRenderer(engine)
