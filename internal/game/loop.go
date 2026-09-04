@@ -27,7 +27,7 @@ type loopState struct {
 	ticker   *time.Ticker
 }
 
-func newLoopState() *loopState {
+func initLoopState() *loopState {
 	interval := 500 * time.Millisecond
 
 	return &loopState{
