@@ -46,24 +46,6 @@ func cleanup(renderer *renderer) {
 	}
 }
 
-func initializeGame(renderer *renderer, engine *engine) {
-	renderer.drawNewGrid()
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
-	renderer.screen.Show()
-}
-
-func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
-	for {
-		select {
-		case <-state.ticker.C:
-			handleTick(renderer, engine, state)
-
-		case ev := <-renderer.screen.EventQ():
-			handleEvent(renderer, engine, state, ev)
-		}
-	}
-}
-
 func handleTick(renderer *renderer, engine *engine, state *loopState) {
 	if !state.running {
 		return
@@ -94,6 +76,24 @@ func handleTick(renderer *renderer, engine *engine, state *loopState) {
 
 	renderer.drawText(1, gameText)
 	renderer.screen.Show()
+}
+
+func initializeGame(renderer *renderer, engine *engine) {
+	renderer.drawNewGrid()
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.screen.Show()
+}
+
+func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
+	for {
+		select {
+		case <-state.ticker.C:
+			handleTick(renderer, engine, state)
+
+		case ev := <-renderer.screen.EventQ():
+			handleEvent(renderer, engine, state, ev)
+		}
+	}
 }
 
 func Run() {
