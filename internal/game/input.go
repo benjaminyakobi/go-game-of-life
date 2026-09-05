@@ -55,9 +55,7 @@ func handleKey(
 ) bool {
 	keyNow := time.Now()
 
-	// Escape
 	if ev.Key() == tcell.KeyEscape {
-		// We need to preserve the original return behavior.
 		return true
 	}
 
@@ -65,8 +63,7 @@ func handleKey(
 
 	handlePreviousGeneration(renderer, engine, state, ev)
 
-	// Next generation
-	// handleNextGeneration(renderer, engine, state, ev)
+	handleNextGeneration(renderer, engine, state, ev)
 
 	// Choose predefined pattern
 	// handlePredefinedPattern(renderer, engine, state, ev)
@@ -148,6 +145,35 @@ func handlePreviousGeneration(
 	engine.livingCells = historyVal.Value.(cellsSet)
 
 	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawText(1, gameText)
+	renderer.screen.Show()
+}
+
+func handleNextGeneration(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyRight ||
+		state.running ||
+		state.boxOpen {
+		return
+	}
+
+	renderer.killLivingCellsOnGrid(engine.livingCells)
+
+	engine.calcNextGeneration()
+
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(engine.deadCells)
+
+	gameText = fmt.Sprintf(
+		"generation: %v, living cells: %v",
+		engine.generation,
+		engine.livingCells.Len(),
+	)
+
 	renderer.drawText(1, gameText)
 	renderer.screen.Show()
 }
