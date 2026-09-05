@@ -73,8 +73,7 @@ func handleKey(
 
 	handleIncreaseSpeed(state, ev, keyNow)
 
-	// Decrease speed
-	// handleDecreaseSpeed(renderer, state, ev, keyNow)
+	handleDecreaseSpeed(state, ev, keyNow)
 
 	// Stop
 	// handleStop(renderer, engine, state, ev)
@@ -268,6 +267,28 @@ func handleIncreaseSpeed(
 
 	if state.interval > 100 {
 		state.interval -= 100
+
+		state.ticker.Stop()
+		state.ticker = time.NewTicker(
+			state.interval * time.Millisecond,
+		)
+	}
+}
+
+func handleDecreaseSpeed(
+	state *loopState,
+	ev *tcell.EventKey,
+	keyNow time.Time,
+) {
+	if keyNow.Sub(state.lastKeyTime) > state.dblClickDelay ||
+		ev.Key() != tcell.KeyRune ||
+		ev.Str() != "-" ||
+		!state.running {
+		return
+	}
+
+	if state.interval < 1000 {
+		state.interval += 100
 
 		state.ticker.Stop()
 		state.ticker = time.NewTicker(
