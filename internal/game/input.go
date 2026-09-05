@@ -3,6 +3,7 @@ package game
 // Contains game input events code
 
 import (
+	"container/list"
 	"fmt"
 	"time"
 
@@ -65,8 +66,7 @@ func handleKey(
 
 	handleNextGeneration(renderer, engine, state, ev)
 
-	// Choose predefined pattern
-	// handlePredefinedPattern(renderer, engine, state, ev)
+	handlePredefinedPattern(renderer, engine, state, ev)
 
 	// Run / resume / accept predefined pattern
 	// handleRun(renderer, engine, state, ev)
@@ -176,4 +176,35 @@ func handleNextGeneration(
 
 	renderer.drawText(1, gameText)
 	renderer.screen.Show()
+}
+
+func handlePredefinedPattern(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyRune ||
+		ev.Str() != "b" ||
+		state.running ||
+		len(predefinedLivingCells) == 0 {
+		return
+	}
+
+	state.boxOpen = true
+
+	engine.livingCellsHistory = list.New()
+	engine.generation = 0
+
+	renderer.screen.DisableMouse()
+	renderer.removeBox()
+	renderer.killLivingCellsOnGrid(engine.livingCells)
+
+	engine.livingCells =
+		predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
+
+	renderer.drawBox("Choose predefined pattern")
+	renderer.screen.Show()
+
+	predefinedLCIndex++
 }
