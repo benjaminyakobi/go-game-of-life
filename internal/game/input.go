@@ -75,8 +75,7 @@ func handleKey(
 
 	handleDecreaseSpeed(state, ev, keyNow)
 
-	// Stop
-	// handleStop(renderer, engine, state, ev)
+	handleStop(renderer, engine, state, ev)
 
 	state.lastKeyTime = keyNow
 
@@ -295,4 +294,29 @@ func handleDecreaseSpeed(
 			state.interval * time.Millisecond,
 		)
 	}
+}
+
+func handleStop(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyRune ||
+		ev.Str() != "s" ||
+		!state.running {
+		return
+	}
+
+	state.running = false
+
+	renderer.screen.EnableMouse()
+
+	gameText = fmt.Sprintf(
+		"stopped after %v generations",
+		engine.generation,
+	)
+
+	renderer.drawText(1, gameText)
+	renderer.screen.Show()
 }
