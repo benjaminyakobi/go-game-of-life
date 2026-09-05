@@ -63,8 +63,7 @@ func handleKey(
 
 	handlePause(renderer, engine, state, ev)
 
-	// Previous generation
-	// handlePreviousGeneration(renderer, engine, state, ev)
+	handlePreviousGeneration(renderer, engine, state, ev)
 
 	// Next generation
 	// handleNextGeneration(renderer, engine, state, ev)
@@ -115,4 +114,40 @@ func handlePause(
 		renderer.drawText(1, gameText)
 		renderer.screen.Show()
 	}
+}
+
+func handlePreviousGeneration(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyLeft ||
+		state.running ||
+		state.boxOpen ||
+		engine.livingCellsHistory.Len() == 0 {
+		return
+	}
+
+	historyVal := engine.livingCellsHistory.Back()
+
+	engine.livingCellsHistory.Remove(historyVal)
+
+	if engine.generation > 0 {
+		engine.generation--
+	}
+
+	gameText = fmt.Sprintf(
+		"history | generation: %v, living cells: %v",
+		engine.generation,
+		engine.livingCells.Len(),
+	)
+
+	renderer.killLivingCellsOnGrid(engine.livingCells)
+
+	engine.livingCells = historyVal.Value.(cellsSet)
+
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawText(1, gameText)
+	renderer.screen.Show()
 }
