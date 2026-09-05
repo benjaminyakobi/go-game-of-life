@@ -69,7 +69,7 @@ func handleKey(
 	handlePredefinedPattern(renderer, engine, state, ev)
 
 	// Run / resume / accept predefined pattern
-	// handleRun(renderer, engine, state, ev)
+	handleRun(renderer, engine, state, ev)
 
 	// Increase speed
 	// handleIncreaseSpeed(renderer, state, ev, keyNow)
@@ -207,4 +207,50 @@ func handlePredefinedPattern(
 	renderer.screen.Show()
 
 	predefinedLCIndex++
+}
+
+func handleRun(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyRune || ev.Str() != "r" {
+		return
+	}
+
+	if state.boxOpen {
+		renderer.screen.EnableMouse()
+
+		renderer.removeBox()
+		renderer.drawLivingCellsOnGrid(engine.livingCells)
+		renderer.drawText(
+			1,
+			"Chosen predefined pattern",
+		)
+
+		predefinedLCIndex--
+		state.boxOpen = false
+
+		renderer.screen.Show()
+
+		return
+	}
+
+	if engine.livingCells.Len() == 0 {
+		gameText = fmt.Sprintf(
+			"not starting, select cells first %v",
+			engine.livingCells.Len(),
+		)
+
+		renderer.drawText(1, gameText)
+		renderer.screen.Show()
+
+		return
+	}
+
+	if !state.running {
+		state.running = true
+		renderer.screen.DisableMouse()
+	}
 }
