@@ -142,6 +142,10 @@ func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 	}
 }
 
+func (r *renderer) removeSingleLivingCellOnGrid(c cell) {
+	r.screen.Put(c.PosX, c.PosY, ".", css.lightSlateGrey)
+}
+
 func (r *renderer) drawSingleLivingCellOnGrid(c cell) {
 	r.screen.Put(c.PosX, c.PosY, "@", css.greenYellow)
 }
