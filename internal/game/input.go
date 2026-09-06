@@ -336,56 +336,35 @@ func handleMouse(
 		return
 	}
 
-	// Double click -> remove cell
-	if now.Sub(state.lastClickTime) <= state.dblClickDelay &&
-		x == state.lastX &&
-		y == state.lastY {
+	c := cell{PosX: x, PosY: y}
 
-		engine.livingCells.Remove(
-			cell{
-				PosX: x,
-				PosY: y,
-			},
-		)
+	if now.Sub(state.lastClickTime) <= state.dblClickDelay &&
+		c.PosX == state.lastX &&
+		c.PosY == state.lastY {
+		engine.livingCells.Remove(c)
+		renderer.removeSingleLivingCellOnGrid(c)
 
 		gameText = fmt.Sprintf(
 			"unselected [%v, %v] - living cells: %v",
-			x,
-			y,
+			c.PosX,
+			c.PosY,
 			engine.livingCells.Len(),
 		)
-
 		renderer.drawText(1, gameText)
-		renderer.updateCellStyle(x, y)
-
 	} else {
-		// Single click -> add cell
-		engine.livingCells.Add(
-			cell{
-				PosX: x,
-				PosY: y,
-			},
-		)
+		engine.livingCells.Add(c)
+		renderer.drawSingleLivingCellOnGrid(c)
 
 		gameText = fmt.Sprintf(
 			"selected [%v, %v] - living cells: %v",
-			x,
-			y,
+			c.PosX,
+			c.PosY,
 			engine.livingCells.Len(),
 		)
-
 		renderer.drawText(1, gameText)
-
-		renderer.screen.Put(
-			x,
-			y,
-			"@",
-			css.greenYellow,
-		)
 	}
 
 	renderer.screen.Show()
-
 	state.lastClickTime = now
 	state.lastX = x
 	state.lastY = y
