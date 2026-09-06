@@ -17,16 +17,16 @@ func handleEvent(
 	state *loopState,
 	ev tcell.Event,
 ) bool {
-	// switch ev := ev.(type) {
-	// case *tcell.EventResize:
-	// 	handleResize(renderer, engine, state)
-	//
-	// case *tcell.EventKey:
-	// 	return handleKey(renderer, engine, state, ev)
-	//
-	// case *tcell.EventMouse:
-	// 	handleMouse(renderer, engine, state, ev)
-	// }
+	switch ev := ev.(type) {
+	case *tcell.EventResize:
+		handleResize(renderer, engine, state)
+
+	case *tcell.EventKey:
+		return handleKey(renderer, engine, state, ev)
+
+	case *tcell.EventMouse:
+		// handleMouse(renderer, engine, state, ev)
+	}
 
 	return false
 }
