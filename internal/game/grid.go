@@ -137,7 +137,7 @@ func (r *renderer) drawNewGrid() {
 func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 	for c := range cs {
 		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
-			r.screen.Put(c.PosX, c.PosY, ".", css.lightSlateGrey)
+			r.removeSingleLivingCellOnGrid(c)
 		}
 	}
 }
@@ -160,7 +160,7 @@ func (r *renderer) drawLivingCellsOnGrid(cs cellsSet) {
 
 func (r *renderer) drawDeadCellsOnGrid(cs cellsSet) {
 	for c := range cs {
-		r.updateCellStyle(c.PosX, c.PosY)
+		r.removeSingleLivingCellOnGrid(c)
 	}
 }
 
