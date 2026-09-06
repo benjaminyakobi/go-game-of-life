@@ -264,13 +264,9 @@ func handleIncreaseSpeed(
 		return
 	}
 
-	if state.interval > 100 {
-		state.interval -= 100
-
-		state.ticker.Stop()
-		state.ticker = time.NewTicker(
-			state.interval * time.Millisecond,
-		)
+	if state.interval > 100*time.Millisecond {
+		state.interval -= 100 * time.Millisecond
+		state.ticker.Reset(state.interval)
 	}
 }
 
@@ -286,13 +282,9 @@ func handleDecreaseSpeed(
 		return
 	}
 
-	if state.interval < 1000 {
-		state.interval += 100
-
-		state.ticker.Stop()
-		state.ticker = time.NewTicker(
-			state.interval * time.Millisecond,
-		)
+	if state.interval < 1000*time.Millisecond {
+		state.interval += 100 * time.Millisecond
+		state.ticker.Reset(state.interval)
 	}
 }
 
