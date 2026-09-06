@@ -142,10 +142,14 @@ func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 	}
 }
 
+func (r *renderer) drawSingleLivingCellOnGrid(c cell) {
+	r.screen.Put(c.PosX, c.PosY, "@", css.greenYellow)
+}
+
 func (r *renderer) drawLivingCellsOnGrid(cs cellsSet) {
 	for c := range cs {
 		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
-			r.screen.Put(c.PosX, c.PosY, "@", css.greenYellow)
+			r.drawSingleLivingCellOnGrid(c)
 		}
 	}
 }
