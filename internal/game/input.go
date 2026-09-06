@@ -25,7 +25,7 @@ func handleEvent(
 		return handleKey(renderer, engine, state, ev)
 
 	case *tcell.EventMouse:
-		// handleMouse(renderer, engine, state, ev)
+		handleMouse(renderer, engine, state, ev)
 	}
 
 	return false
@@ -311,4 +311,82 @@ func handleStop(
 
 	renderer.drawText(1, gameText)
 	renderer.screen.Show()
+}
+
+func handleMouse(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventMouse,
+) {
+	x, y := ev.Position()
+
+	if ev.Buttons() != tcell.ButtonPrimary {
+		return
+	}
+
+	now := time.Now()
+
+	validCell := y > screenOffset &&
+		y < renderer.gridHeight-1 &&
+		x > 0 &&
+		x < renderer.gridWidth-1
+
+	if !validCell || state.running || state.boxOpen {
+		return
+	}
+
+	// Double click -> remove cell
+	if now.Sub(state.lastClickTime) <= state.dblClickDelay &&
+		x == state.lastX &&
+		y == state.lastY {
+
+		engine.livingCells.Remove(
+			cell{
+				PosX: x,
+				PosY: y,
+			},
+		)
+
+		gameText = fmt.Sprintf(
+			"unselected [%v, %v] - living cells: %v",
+			x,
+			y,
+			engine.livingCells.Len(),
+		)
+
+		renderer.drawText(1, gameText)
+		renderer.updateCellStyle(x, y)
+
+	} else {
+		// Single click -> add cell
+		engine.livingCells.Add(
+			cell{
+				PosX: x,
+				PosY: y,
+			},
+		)
+
+		gameText = fmt.Sprintf(
+			"selected [%v, %v] - living cells: %v",
+			x,
+			y,
+			engine.livingCells.Len(),
+		)
+
+		renderer.drawText(1, gameText)
+
+		renderer.screen.Put(
+			x,
+			y,
+			"@",
+			css.greenYellow,
+		)
+	}
+
+	renderer.screen.Show()
+
+	state.lastClickTime = now
+	state.lastX = x
+	state.lastY = y
 }
