@@ -342,7 +342,7 @@ func handleMouse(
 		c.PosX == state.lastX &&
 		c.PosY == state.lastY {
 		engine.livingCells.Remove(c)
-		renderer.removeSingleLivingCellOnGrid(c)
+		renderer.drawSingleDeadCellOnGrid(c)
 
 		gameText = fmt.Sprintf(
 			"unselected [%v, %v] - living cells: %v",

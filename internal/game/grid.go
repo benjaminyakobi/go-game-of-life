@@ -121,7 +121,7 @@ func (r *renderer) updateCellStyle(x, y int) {
 		r.screen.Put(x, y, string(tcell.RuneVLine), css.def)
 
 	default:
-		r.screen.Put(x, y, ".", css.lightSlateGrey)
+		r.drawSingleDeadCellOnGrid(cell{PosX: x, PosY: y})
 	}
 }
 
@@ -141,12 +141,12 @@ func (r *renderer) drawNewGrid() {
 func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 	for c := range cs {
 		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
-			r.removeSingleLivingCellOnGrid(c)
+			r.drawSingleDeadCellOnGrid(c)
 		}
 	}
 }
 
-func (r *renderer) removeSingleLivingCellOnGrid(c cell) {
+func (r *renderer) drawSingleDeadCellOnGrid(c cell) {
 	r.screen.Put(c.PosX, c.PosY, ".", css.lightSlateGrey)
 }
 
@@ -164,7 +164,7 @@ func (r *renderer) drawLivingCellsOnGrid(cs cellsSet) {
 
 func (r *renderer) drawDeadCellsOnGrid(cs cellsSet) {
 	for c := range cs {
-		r.removeSingleLivingCellOnGrid(c)
+		r.drawSingleDeadCellOnGrid(c)
 	}
 }
 
