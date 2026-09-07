@@ -100,24 +100,28 @@ func (r *renderer) drawText(y int, text string) {
 	}
 }
 
-// TODO: should be reviewed, currently it's working fine
 func (r *renderer) updateCellStyle(x, y int) {
-	if y == screenOffset || y == r.gridHeight-1 {
-		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
-	} else if x == 0 || x == r.gridWidth-1 {
-		r.screen.Put(x, y, string(tcell.RuneVLine), css.def)
-	} else {
-		r.screen.Put(x, y, ".", css.lightSlateGrey)
-	}
-
-	if x == 0 && y == screenOffset {
+	switch {
+	case x == 0 && y == screenOffset:
 		r.screen.Put(x, y, string(tcell.RuneULCorner), css.def)
-	} else if x == r.gridWidth-1 && y == screenOffset {
+
+	case x == r.gridWidth-1 && y == screenOffset:
 		r.screen.Put(x, y, string(tcell.RuneURCorner), css.def)
-	} else if x == 0 && y == r.gridHeight-1 {
+
+	case x == 0 && y == r.gridHeight-1:
 		r.screen.Put(x, y, string(tcell.RuneLLCorner), css.def)
-	} else if x == r.gridWidth-1 && y == r.gridHeight-1 {
+
+	case x == r.gridWidth-1 && y == r.gridHeight-1:
 		r.screen.Put(x, y, string(tcell.RuneLRCorner), css.def)
+
+	case y == screenOffset || y == r.gridHeight-1:
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
+
+	case x == 0 || x == r.gridWidth-1:
+		r.screen.Put(x, y, string(tcell.RuneVLine), css.def)
+
+	default:
+		r.screen.Put(x, y, ".", css.lightSlateGrey)
 	}
 }
 
