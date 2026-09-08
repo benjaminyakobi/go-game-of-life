@@ -4,9 +4,6 @@ package game
 
 import (
 	"container/list"
-	// "context"
-	// "fmt"
-	// "time"
 )
 
 type cell struct {
@@ -60,41 +57,6 @@ func initEngine() *engine {
 	}
 }
 
-// TODO: remove renderer after refactor, engine should now know about the renderer
-// func (e *engine) runGameOfLife(r *renderer, ctx context.Context, pauseChan <-chan bool, millisChan <-chan time.Duration) {
-// 	ticker := time.NewTicker(m * time.Millisecond)
-// 	r.screen.DisableMouse() // disabling mouse before running the game
-// 	defer ticker.Stop()
-// 	defer r.screen.EnableMouse() // enabling mouse before returning
-// 	for {
-// 		select {
-// 		case <-ticker.C:
-// 			e.calcNextGeneration()
-// 			r.drawLivingCellsOnGrid()
-// 			r.drawDeadCellsOnGrid()
-// 			// TODO: duplicate code 1
-// 			gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
-// 			r.drawText(1, gameText)
-// 			r.screen.Show()
-// 		case <-ctx.Done():
-// 			gameText = fmt.Sprintf("stopped after %v generations", e.generation)
-// 			r.drawText(1, gameText)
-// 			r.screen.Show()
-// 			gameIsRuning = false
-// 			return
-// 		case <-pauseChan:
-// 			gameText = fmt.Sprintf("paused after %v generations", e.generation)
-// 			r.drawText(1, gameText)
-// 			r.screen.Show()
-// 			gameIsRuning = false
-// 			return
-// 		case <-millisChan:
-// 			ticker.Stop()
-// 			ticker = time.NewTicker(m * time.Millisecond)
-// 		}
-// 	}
-// }
-
 func (e *engine) calcNextGenDeadCells(lc cell) bool {
 	count := 0
 	for _, d := range directions {
@@ -107,15 +69,6 @@ func (e *engine) calcNextGenDeadCells(lc cell) bool {
 		}
 	}
 	return count == 3
-	// if count == 3 {
-	// 	if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
-	// 		// TODO: add to renderer.livingCells (after next refactor)
-	// 		// e.livingCells.Add(livingCell{PosX: lc.PosX, PosY: lc.PosY})
-	// 		// r.screen.Put(lc.PosX, lc.PosY, "@", cs.greenYellow)
-	// 	}
-	// 	return true
-	// }
-	// return false
 }
 
 func (e *engine) calcNextGeneration() {
@@ -139,30 +92,14 @@ func (e *engine) calcNextGeneration() {
 				}
 			}
 		}
-		// if count < 2 || count > 3 {
-		// 	if lc.PosY > screenOffset && lc.PosY < r.gridHeight-1 && lc.PosX > 0 && lc.PosX < r.gridWidth-1 {
-		// 		r.updateCellStyle(lc.PosX, lc.PosY)
-		// 	}
-		// } else if count == 2 || count == 3 {
-		// 	livingCellsNextGen.Add(lc)
-		// }
 		if count == 2 || count == 3 {
 			livingCellsNextGen.Add(lc)
 		} else {
 			deadCellsNextGen.Add(cell{PosX: lc.PosX, PosY: lc.PosY})
-			// r.updateCellStyle(lc.PosX, lc.PosY)
 		}
 
 	}
 	e.livingCells = livingCellsNextGen
 	e.deadCells = deadCellsNextGen
 	e.generation++
-	// gameText = fmt.Sprintf("generation: %v, living cells: %v", e.generation, e.livingCells.Len())
-	// r.drawText(1, gameText)
-	// if e.livingCells.Len() == 0 {
-	// 	cancel()
-	//	} // else {
-	// r.drawLivingCellsOnGrid()
-	// r.drawDeadCellsOnGrid()
-	// }
 }
