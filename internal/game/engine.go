@@ -57,20 +57,6 @@ func initEngine() *engine {
 	}
 }
 
-func (e *engine) calcNextGenDeadCells(lc cell) bool {
-	count := 0
-	for _, d := range directions {
-		dx, dy := d[0], d[1]
-		if e.livingCells.Contains(cell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}) {
-			count++
-		}
-		if count > 3 {
-			return false
-		}
-	}
-	return count == 3
-}
-
 func (e *engine) calcNextGeneration() {
 	if e.livingCellsHistory.Len() > historySize {
 		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
@@ -86,8 +72,17 @@ func (e *engine) calcNextGeneration() {
 			if e.livingCells.Contains(neighborCell) {
 				count++
 			} else {
-				ok := e.calcNextGenDeadCells(neighborCell)
-				if ok {
+				deadCount := 0
+				for _, nd := range directions {
+					ndx, ndy := nd[0], nd[1]
+					if e.livingCells.Contains(cell{PosX: neighborCell.PosX + ndx, PosY: neighborCell.PosY + ndy}) {
+						deadCount++
+					}
+					if deadCount > 3 {
+						break
+					}
+				}
+				if deadCount == 3 {
 					livingCellsNextGen.Add(neighborCell)
 				}
 			}
@@ -99,6 +94,44 @@ func (e *engine) calcNextGeneration() {
 		}
 
 	}
+	e.livingCells = livingCellsNextGen
+	e.deadCells = deadCellsNextGen
+	e.generation++
+}
+
+func (e *engine) calcNextGeneration2() {
+	if e.livingCellsHistory.Len() > historySize {
+		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
+	}
+	e.livingCellsHistory.PushBack(e.livingCells)
+
+	livingCellsNextGen := make(cellsSet)
+	deadCellsNextGen := make(cellsSet)
+	neighborCounts := make(map[cell]int, len(e.livingCells)*8)
+
+	for lc := range e.livingCells {
+		for _, d := range directions {
+			dx, dy := d[0], d[1]
+			neighborCell := cell{
+				PosX: lc.PosX + dx,
+				PosY: lc.PosY + dy,
+			}
+			neighborCounts[neighborCell]++
+		}
+	}
+
+	for c, count := range neighborCounts {
+		if e.livingCells.Contains(c) {
+			if count == 2 || count == 3 {
+				livingCellsNextGen.Add(c)
+			} else {
+				deadCellsNextGen.Add(c)
+			}
+		} else if count == 3 {
+			livingCellsNextGen.Add(c)
+		}
+	}
+
 	e.livingCells = livingCellsNextGen
 	e.deadCells = deadCellsNextGen
 	e.generation++
