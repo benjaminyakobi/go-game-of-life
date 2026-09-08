@@ -31,7 +31,6 @@ var css = cellStyles{
 }
 
 func initRenderer(e *engine) (*renderer, error) {
-	// Screen must be initialized before we read its size.
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		return nil, err
@@ -44,9 +43,8 @@ func initRenderer(e *engine) (*renderer, error) {
 	screen.EnableMouse()
 	screen.Clear()
 
-	w, h := screen.Size() // usually int
+	w, h := screen.Size()
 
-	// tcell uses terminal cells.
 	return &renderer{
 		gridWidth:  w,
 		gridHeight: h,
@@ -137,7 +135,6 @@ func (r *renderer) drawNewGrid() {
 	r.drawText(r.gridHeight-1, "Conway's Game Of Life")
 }
 
-// TODO: should be reviewed, currently it's working fine
 func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 	for c := range cs {
 		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
@@ -191,32 +188,12 @@ func (r *renderer) removeBox() {
 	for col := x; col < x+boxWidth; col++ {
 		r.screen.Put(col, y, ".", css.lightSlateGrey)
 		r.screen.Put(col, y+boxHeight-1, ".", css.lightSlateGrey)
-		// r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, cs.def)
 	}
 
 	for row := y; row < y+boxHeight; row++ {
 		r.screen.Put(x, row, ".", css.lightSlateGrey)
 		r.screen.Put(x+boxWidth-1, row, ".", css.lightSlateGrey)
-		// r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, cs.def)
 	}
-
-	// r.screen.SetContent(x, y, tcell.RuneULCorner, nil, cs.def)
-	// r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, cs.def)
-	// r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, cs.def)
-	// r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, cs.def)
-
-	// centerLivingCells := func(lcs livingCellsSet) livingCellsSet { centeredLCS := make(livingCellsSet)
-	// 	for cell := range lcs {
-	// 		PosX := x + cell.PosX - minWidth + 2
-	// 		PosY := y + cell.PosY - minHeight + 2
-	// 		centeredLCS.Add(livingCell{PosX: PosX, PosY: PosY})
-	// 	}
-	// 	return centeredLCS
-	// }
-	//
-	// r.engine.livingCells = centerLivingCells(r.engine.livingCells)
-	// r.drawLivingCellsOnGrid()
-	// r.drawText(1, title)
 }
 
 func (r *renderer) drawBox(title string) {
