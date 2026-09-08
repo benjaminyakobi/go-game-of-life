@@ -62,48 +62,6 @@ func (e *engine) calcNextGeneration() {
 		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
 	}
 	e.livingCellsHistory.PushBack(e.livingCells)
-	livingCellsNextGen := make(cellsSet)
-	deadCellsNextGen := make(cellsSet)
-	for lc := range e.livingCells {
-		count := 0
-		for _, d := range directions {
-			dx, dy := d[0], d[1]
-			neighborCell := cell{PosX: lc.PosX + dx, PosY: lc.PosY + dy}
-			if e.livingCells.Contains(neighborCell) {
-				count++
-			} else {
-				deadCount := 0
-				for _, nd := range directions {
-					ndx, ndy := nd[0], nd[1]
-					if e.livingCells.Contains(cell{PosX: neighborCell.PosX + ndx, PosY: neighborCell.PosY + ndy}) {
-						deadCount++
-					}
-					if deadCount > 3 {
-						break
-					}
-				}
-				if deadCount == 3 {
-					livingCellsNextGen.Add(neighborCell)
-				}
-			}
-		}
-		if count == 2 || count == 3 {
-			livingCellsNextGen.Add(lc)
-		} else {
-			deadCellsNextGen.Add(cell{PosX: lc.PosX, PosY: lc.PosY})
-		}
-
-	}
-	e.livingCells = livingCellsNextGen
-	e.deadCells = deadCellsNextGen
-	e.generation++
-}
-
-func (e *engine) calcNextGeneration2() {
-	if e.livingCellsHistory.Len() > historySize {
-		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
-	}
-	e.livingCellsHistory.PushBack(e.livingCells)
 
 	livingCellsNextGen := make(cellsSet)
 	deadCellsNextGen := make(cellsSet)
