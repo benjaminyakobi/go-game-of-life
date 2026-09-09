@@ -59,42 +59,43 @@ func (r *renderer) clearLine(y int) {
 	}
 }
 
-// TODO: should be reviewed
 func (r *renderer) drawText(y int, text string) {
 	r.clearLine(y)
+
 	textWidth := runewidth.StringWidth(text)
+	startX := max(1, (r.gridWidth-textWidth)/2)
+	endX := startX
 
-	calcX := (r.gridWidth - textWidth) / 2
-
-	for row := range calcX {
-		if row == 0 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneULCorner), css.def)
-		} else if row > 0 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
-		} else if row == 0 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneLLCorner), css.def)
-		} else if row > 0 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
-		}
+	for _, ch := range text {
+		rw := runewidth.RuneWidth(ch)
+		r.screen.SetContent(endX, y, ch, nil, css.def)
+		endX += rw
 	}
 
-	col := calcX
-	for _, row := range text {
-		rw := runewidth.RuneWidth(row)
-		r.screen.SetContent(col, y, row, nil, css.def)
-		col += rw
+	// NOTE: return if not first line (top) and not last line (bottom)
+	if y != screenOffset && y != r.gridHeight-1 {
+		return
 	}
 
-	for row := col; row < r.gridWidth; row++ {
-		if row == r.gridWidth-1 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneURCorner), css.def)
-		} else if row < r.gridWidth-1 && y == screenOffset {
-			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
-		} else if row == r.gridWidth-1 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneLRCorner), css.def)
-		} else if row < r.gridWidth-1 && y == r.gridHeight-1 {
-			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
-		}
+	var leftCorner, rightCorner rune
+
+	if y == screenOffset { // top screen
+		leftCorner = tcell.RuneULCorner
+		rightCorner = tcell.RuneURCorner
+	} else { // bottom screen
+		leftCorner = tcell.RuneLLCorner
+		rightCorner = tcell.RuneLRCorner
+	}
+
+	r.screen.Put(0, y, string(leftCorner), css.def)
+	r.screen.Put(r.gridWidth-1, y, string(rightCorner), css.def)
+
+	for x := 1; x < startX; x++ {
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
+	}
+
+	for x := endX; x < r.gridWidth-1; x++ {
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
 	}
 }
 
