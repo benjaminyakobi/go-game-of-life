@@ -14,13 +14,22 @@ type config struct {
 	Patterns map[string][]cell `json:"patterns"`
 }
 
-// TODO: move to engine.go / grid.go
-var predefinedLivingCells []cellsSet
-
 // TODO: should be removed from here
 var predefinedLCIndex = 0
 
-func loadConfig() {
+func (c *config) loadPatterns() []cellsSet {
+	var patterns []cellsSet
+	for _, points := range c.Patterns {
+		var cs = make(cellsSet)
+		for i := range points {
+			cs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
+		}
+		patterns = append(patterns, cs)
+	}
+	return patterns
+}
+
+func loadConfig() config {
 	file, err := os.Open("./conf.json")
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
@@ -37,12 +46,5 @@ func loadConfig() {
 		}
 	}
 
-	// TODO: maybe should be moved to somewhere else? (not part of config.go)
-	for _, points := range conf.Patterns {
-		var cs = make(cellsSet)
-		for i := range points {
-			cs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
-		}
-		predefinedLivingCells = append(predefinedLivingCells, cs)
-	}
+	return conf
 }
