@@ -58,6 +58,17 @@ func initEngine() *engine {
 }
 
 func (e *engine) calcNextGeneration() {
+	directions := [][]int{
+		{-1, -1}, // top left
+		{0, -1},  // top mid
+		{1, -1},  // top right
+		{-1, 0},  // left
+		{1, 0},   // right
+		{-1, 1},  // bottom left
+		{0, 1},   // bottom mid
+		{1, 1},   // bottom right
+	}
+
 	if e.livingCellsHistory.Len() > historySize {
 		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
 	}

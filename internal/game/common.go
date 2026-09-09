@@ -31,18 +31,6 @@ var predefinedLCIndex = 0
 // TODO: should be removed from here
 var gameText = ""
 
-// TODO: move to engine.go / grid.go
-var directions = [][]int{
-	{-1, -1}, // top left
-	{0, -1},  // top mid
-	{1, -1},  // top right
-	{-1, 0},  // left
-	{1, 0},   // right
-	{-1, 1},  // bottom left
-	{0, 1},   // bottom mid
-	{1, 1},   // bottom right
-}
-
 func loadConfig() {
 	file, err := os.Open("./conf.json")
 	if err != nil {
