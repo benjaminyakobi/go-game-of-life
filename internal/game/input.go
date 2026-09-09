@@ -317,7 +317,7 @@ func handleMouse(
 
 	now := time.Now()
 
-	validCell := y > screenOffset &&
+	validCell := y > renderer.gridOffset &&
 		y < renderer.gridHeight-1 &&
 		x > 0 &&
 		x < renderer.gridWidth-1

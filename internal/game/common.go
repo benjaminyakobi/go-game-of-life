@@ -11,9 +11,6 @@ import (
 	"os"
 )
 
-// TODO: should be removed from here
-const screenOffset = 1
-
 type config struct {
 	Patterns map[string][]cell `json:"patterns"`
 }

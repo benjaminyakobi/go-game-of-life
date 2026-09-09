@@ -18,6 +18,7 @@ type cellStyles struct {
 }
 
 type renderer struct {
+	gridOffset int
 	gridWidth  int
 	gridHeight int
 	screen     tcell.Screen
@@ -46,6 +47,7 @@ func initRenderer(e *engine) (*renderer, error) {
 	w, h := screen.Size()
 
 	return &renderer{
+		gridOffset: 1,
 		gridWidth:  w,
 		gridHeight: h,
 		screen:     screen,
@@ -73,13 +75,13 @@ func (r *renderer) drawText(y int, text string) {
 	}
 
 	// NOTE: return if not first line (top) and not last line (bottom)
-	if y != screenOffset && y != r.gridHeight-1 {
+	if y != r.gridOffset && y != r.gridHeight-1 {
 		return
 	}
 
 	var leftCorner, rightCorner rune
 
-	if y == screenOffset { // top screen
+	if y == r.gridOffset { // top screen
 		leftCorner = tcell.RuneULCorner
 		rightCorner = tcell.RuneURCorner
 	} else { // bottom screen
@@ -101,10 +103,10 @@ func (r *renderer) drawText(y int, text string) {
 
 func (r *renderer) updateCellStyle(x, y int) {
 	switch {
-	case x == 0 && y == screenOffset:
+	case x == 0 && y == r.gridOffset:
 		r.screen.Put(x, y, string(tcell.RuneULCorner), css.def)
 
-	case x == r.gridWidth-1 && y == screenOffset:
+	case x == r.gridWidth-1 && y == r.gridOffset:
 		r.screen.Put(x, y, string(tcell.RuneURCorner), css.def)
 
 	case x == 0 && y == r.gridHeight-1:
@@ -113,7 +115,7 @@ func (r *renderer) updateCellStyle(x, y int) {
 	case x == r.gridWidth-1 && y == r.gridHeight-1:
 		r.screen.Put(x, y, string(tcell.RuneLRCorner), css.def)
 
-	case y == screenOffset || y == r.gridHeight-1:
+	case y == r.gridOffset || y == r.gridHeight-1:
 		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
 
 	case x == 0 || x == r.gridWidth-1:
@@ -128,7 +130,7 @@ func (r *renderer) drawNewGrid() {
 	r.drawText(0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
 	r.gridWidth, r.gridHeight = r.screen.Size()
 	for w := range r.gridWidth {
-		for h := screenOffset; h < r.gridHeight; h++ {
+		for h := r.gridOffset; h < r.gridHeight; h++ {
 			r.updateCellStyle(w, h)
 		}
 	}
@@ -138,7 +140,7 @@ func (r *renderer) drawNewGrid() {
 
 func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 	for c := range cs {
-		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
+		if c.PosY > r.gridOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
 			r.drawSingleDeadCellOnGrid(c)
 		}
 	}
@@ -154,7 +156,7 @@ func (r *renderer) drawSingleLivingCellOnGrid(c cell) {
 
 func (r *renderer) drawLivingCellsOnGrid(cs cellsSet) {
 	for c := range cs {
-		if c.PosY > screenOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
+		if c.PosY > r.gridOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
 			r.drawSingleLivingCellOnGrid(c)
 		}
 	}
