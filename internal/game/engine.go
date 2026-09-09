@@ -18,6 +18,7 @@ type engine struct {
 	deadCells          cellsSet
 	livingCells        cellsSet
 	livingCellsHistory *list.List // TODO: convert to slice
+	historySize        int
 }
 
 func (cs cellsSet) Add(c cell) {
@@ -54,6 +55,7 @@ func initEngine() *engine {
 		deadCells:          make(cellsSet, 0),
 		livingCells:        make(cellsSet, 0),
 		livingCellsHistory: list.New(),
+		historySize:        50,
 	}
 }
 
@@ -69,7 +71,7 @@ func (e *engine) calcNextGeneration() {
 		{1, 1},   // bottom right
 	}
 
-	if e.livingCellsHistory.Len() > historySize {
+	if e.livingCellsHistory.Len() > e.historySize {
 		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
 	}
 	e.livingCellsHistory.PushBack(e.livingCells)

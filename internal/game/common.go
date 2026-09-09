@@ -13,7 +13,6 @@ import (
 
 // TODO: should be removed from here
 const screenOffset = 1
-const historySize = 50
 
 type config struct {
 	Patterns map[string][]cell `json:"patterns"`
