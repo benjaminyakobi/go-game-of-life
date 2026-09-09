@@ -62,23 +62,26 @@ func (r *renderer) clearLine(y int) {
 }
 
 func (r *renderer) drawText(y int, text string) {
-	r.clearLine(y)
+	r.clearLine(y) // 1. clear line
 
+	// 2. calculate test position
 	textWidth := runewidth.StringWidth(text)
 	startX := max(1, (r.gridWidth-textWidth)/2)
 	endX := startX
 
+	// 3. draw text
 	for _, ch := range text {
 		rw := runewidth.RuneWidth(ch)
 		r.screen.SetContent(endX, y, ch, nil, css.def)
 		endX += rw
 	}
 
-	// NOTE: return if not first line (top) and not last line (bottom)
+	// 4. is this a border row (top/bottom)? return if no
 	if y != r.gridOffset && y != r.gridHeight-1 {
 		return
 	}
 
+	// 5. draw left/right corners
 	var leftCorner, rightCorner rune
 
 	if y == r.gridOffset { // top screen
@@ -92,6 +95,7 @@ func (r *renderer) drawText(y int, text string) {
 	r.screen.Put(0, y, string(leftCorner), css.def)
 	r.screen.Put(r.gridWidth-1, y, string(rightCorner), css.def)
 
+	// 6. fill horizontal lines
 	for x := 1; x < startX; x++ {
 		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
 	}
