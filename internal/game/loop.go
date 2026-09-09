@@ -98,7 +98,9 @@ func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
 }
 
 func Start() {
-	engine := initEngine()
+	cfg := loadConfig()
+
+	engine := initEngine(cfg)
 
 	renderer, err := initRenderer(engine)
 	if err != nil {
@@ -107,7 +109,6 @@ func Start() {
 
 	defer cleanup(renderer)
 
-	loadConfig()
 	initializeGame(renderer, engine)
 
 	state := initLoopState()
