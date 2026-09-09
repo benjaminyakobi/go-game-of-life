@@ -28,9 +28,6 @@ var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinIn
 // TODO: should be removed from here
 var predefinedLCIndex = 0
 
-// TODO: should be removed from here
-var gameText = ""
-
 func loadConfig() {
 	file, err := os.Open("./conf.json")
 	if err != nil {

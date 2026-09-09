@@ -59,6 +59,7 @@ func (r *renderer) clearLine(y int) {
 	}
 }
 
+// TODO: should be reviewed
 func (r *renderer) drawText(y int, text string) {
 	r.clearLine(y)
 	textWidth := runewidth.StringWidth(text)
@@ -94,7 +95,6 @@ func (r *renderer) drawText(y int, text string) {
 		} else if row < r.gridWidth-1 && y == r.gridHeight-1 {
 			r.screen.Put(row, y, string(tcell.RuneHLine), css.def)
 		}
-
 	}
 }
 
@@ -131,7 +131,7 @@ func (r *renderer) drawNewGrid() {
 			r.updateCellStyle(w, h)
 		}
 	}
-	r.drawText(1, gameText)
+	r.drawText(1, "")
 	r.drawText(r.gridHeight-1, "Conway's Game Of Life")
 }
 

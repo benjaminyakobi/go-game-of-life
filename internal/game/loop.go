@@ -55,23 +55,25 @@ func handleTick(renderer *renderer, engine *engine, state *loopState) {
 	renderer.drawLivingCellsOnGrid(engine.livingCells)
 	renderer.drawDeadCellsOnGrid(engine.deadCells)
 
+	var text string
+
 	if engine.livingCells.Len() == 0 {
 		state.running = false
 		renderer.screen.EnableMouse()
 
-		gameText = fmt.Sprintf(
+		text = fmt.Sprintf(
 			"stopped after %v generations",
 			engine.generation,
 		)
 	} else {
-		gameText = fmt.Sprintf(
+		text = fmt.Sprintf(
 			"generation: %v, living cells: %v",
 			engine.generation,
 			engine.livingCells.Len(),
 		)
 	}
 
-	renderer.drawText(1, gameText)
+	renderer.drawText(1, text)
 	renderer.screen.Show()
 }
 

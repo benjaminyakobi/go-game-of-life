@@ -100,12 +100,10 @@ func handlePause(
 
 		renderer.screen.EnableMouse()
 
-		gameText = fmt.Sprintf(
+		renderer.drawText(1, fmt.Sprintf(
 			"paused after %v generations",
 			engine.generation,
-		)
-
-		renderer.drawText(1, gameText)
+		))
 		renderer.screen.Show()
 	}
 }
@@ -131,18 +129,16 @@ func handlePreviousGeneration(
 		engine.generation--
 	}
 
-	gameText = fmt.Sprintf(
+	renderer.drawText(1, fmt.Sprintf(
 		"history | generation: %v, living cells: %v",
 		engine.generation,
 		engine.livingCells.Len(),
-	)
-
+	))
 	renderer.killLivingCellsOnGrid(engine.livingCells)
 
 	engine.livingCells = historyVal.Value.(cellsSet)
 
 	renderer.drawLivingCellsOnGrid(engine.livingCells)
-	renderer.drawText(1, gameText)
 	renderer.screen.Show()
 }
 
@@ -165,13 +161,11 @@ func handleNextGeneration(
 	renderer.drawLivingCellsOnGrid(engine.livingCells)
 	renderer.drawDeadCellsOnGrid(engine.deadCells)
 
-	gameText = fmt.Sprintf(
+	renderer.drawText(1, fmt.Sprintf(
 		"generation: %v, living cells: %v",
 		engine.generation,
 		engine.livingCells.Len(),
-	)
-
-	renderer.drawText(1, gameText)
+	))
 	renderer.screen.Show()
 }
 
@@ -235,12 +229,10 @@ func handleRun(
 	}
 
 	if engine.livingCells.Len() == 0 {
-		gameText = fmt.Sprintf(
+		renderer.drawText(1, fmt.Sprintf(
 			"not starting, select cells first %v",
 			engine.livingCells.Len(),
-		)
-
-		renderer.drawText(1, gameText)
+		))
 		renderer.screen.Show()
 
 		return
@@ -304,12 +296,10 @@ func handleStop(
 
 	renderer.screen.EnableMouse()
 
-	gameText = fmt.Sprintf(
+	renderer.drawText(1, fmt.Sprintf(
 		"stopped after %v generations",
 		engine.generation,
-	)
-
-	renderer.drawText(1, gameText)
+	))
 	renderer.screen.Show()
 }
 
@@ -344,24 +334,22 @@ func handleMouse(
 		engine.livingCells.Remove(c)
 		renderer.drawSingleDeadCellOnGrid(c)
 
-		gameText = fmt.Sprintf(
+		renderer.drawText(1, fmt.Sprintf(
 			"unselected [%v, %v] - living cells: %v",
 			c.PosX,
 			c.PosY,
 			engine.livingCells.Len(),
-		)
-		renderer.drawText(1, gameText)
+		))
 	} else {
 		engine.livingCells.Add(c)
 		renderer.drawSingleLivingCellOnGrid(c)
 
-		gameText = fmt.Sprintf(
+		renderer.drawText(1, fmt.Sprintf(
 			"selected [%v, %v] - living cells: %v",
 			c.PosX,
 			c.PosY,
 			engine.livingCells.Len(),
-		)
-		renderer.drawText(1, gameText)
+		))
 	}
 
 	renderer.screen.Show()
