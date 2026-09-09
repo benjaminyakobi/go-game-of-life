@@ -14,9 +14,6 @@ type config struct {
 	Patterns map[string][]cell `json:"patterns"`
 }
 
-// TODO: should be removed from here
-var predefinedLCIndex = 0
-
 func (c *config) loadPatterns() []cellsSet {
 	var patterns []cellsSet
 	for _, points := range c.Patterns {

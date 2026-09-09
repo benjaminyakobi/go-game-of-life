@@ -16,8 +16,9 @@ type loopState struct {
 
 	dblClickDelay time.Duration
 
-	running bool
-	boxOpen bool
+	running  bool
+	boxOpen  bool
+	boxIndex int
 
 	interval time.Duration
 	ticker   *time.Ticker
