@@ -192,12 +192,12 @@ func handlePredefinedPattern(
 	renderer.killLivingCellsOnGrid(engine.livingCells)
 
 	engine.livingCells =
-		engine.patterns[predefinedLCIndex%len(engine.patterns)].Copy()
+		engine.patterns[state.boxIndex%len(engine.patterns)].Copy()
 
 	renderer.drawBox("Choose predefined pattern")
 	renderer.screen.Show()
 
-	predefinedLCIndex++
+	state.boxIndex++
 }
 
 func handleRun(
@@ -220,7 +220,7 @@ func handleRun(
 			"Chosen predefined pattern",
 		)
 
-		predefinedLCIndex--
+		state.boxIndex--
 		state.boxOpen = false
 
 		renderer.screen.Show()
