@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"os"
 )
 
@@ -17,9 +16,6 @@ type config struct {
 
 // TODO: move to engine.go / grid.go
 var predefinedLivingCells []cellsSet
-
-// TODO: should be moved to grid.go
-var boxWidth, boxHeight, minWidth, minHeight = -1, -1, math.MaxInt32, math.MinInt32
 
 // TODO: should be removed from here
 var predefinedLCIndex = 0

@@ -188,7 +188,7 @@ func (r *renderer) calcBoxDimesions() (int, int, int, int) {
 }
 
 func (r *renderer) removeBox() {
-	boxWidth, boxHeight, minWidth, minHeight = r.calcBoxDimesions()
+	boxWidth, boxHeight, _, _ := r.calcBoxDimesions()
 	x := (r.gridWidth - boxWidth) / 2
 	y := (r.gridHeight - boxHeight) / 2
 
@@ -204,7 +204,7 @@ func (r *renderer) removeBox() {
 }
 
 func (r *renderer) drawBox(title string) {
-	boxWidth, boxHeight, minWidth, minHeight = r.calcBoxDimesions()
+	boxWidth, boxHeight, minWidth, minHeight := r.calcBoxDimesions()
 	x := (r.gridWidth - boxWidth) / 2
 	y := (r.gridHeight - boxHeight) / 2
 
