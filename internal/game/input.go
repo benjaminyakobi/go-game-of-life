@@ -178,7 +178,7 @@ func handlePredefinedPattern(
 	if ev.Key() != tcell.KeyRune ||
 		ev.Str() != "b" ||
 		state.running ||
-		len(predefinedLivingCells) == 0 {
+		len(engine.patterns) == 0 {
 		return
 	}
 
@@ -192,7 +192,7 @@ func handlePredefinedPattern(
 	renderer.killLivingCellsOnGrid(engine.livingCells)
 
 	engine.livingCells =
-		predefinedLivingCells[predefinedLCIndex%len(predefinedLivingCells)].Copy()
+		engine.patterns[predefinedLCIndex%len(engine.patterns)].Copy()
 
 	renderer.drawBox("Choose predefined pattern")
 	renderer.screen.Show()
