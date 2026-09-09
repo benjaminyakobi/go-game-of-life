@@ -19,6 +19,7 @@ type engine struct {
 	livingCells        cellsSet
 	livingCellsHistory *list.List // TODO: convert to slice
 	historySize        int
+	patterns           []cellsSet
 }
 
 func (cs cellsSet) Add(c cell) {
@@ -49,13 +50,14 @@ func (cs cellsSet) Copy() cellsSet {
 	return csCopy
 }
 
-func initEngine() *engine {
+func initEngine(cfg config) *engine {
 	return &engine{
 		generation:         0,
 		deadCells:          make(cellsSet, 0),
 		livingCells:        make(cellsSet, 0),
 		livingCellsHistory: list.New(),
 		historySize:        50,
+		patterns:           cfg.loadPatterns(),
 	}
 }
 
