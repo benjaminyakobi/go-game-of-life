@@ -203,6 +203,16 @@ func (r *renderer) removeBox() {
 	}
 }
 
+func (r *renderer) centerSliceOfCells(css []cellsSet) []cellsSet {
+	centered := make([]cellsSet, 0)
+	for _, cs := range css {
+		cc := r.centerCells(cs,
+			0, 0, r.gridWidth, r.gridHeight)
+		centered = append(centered, cc)
+	}
+	return centered
+}
+
 func (r *renderer) centerCells(
 	cs cellsSet,
 	x, y, width, height int,
