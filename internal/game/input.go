@@ -41,6 +41,9 @@ func handleResize(
 	if state.boxOpen {
 		renderer.drawBox("Choose predefined pattern")
 	} else {
+		renderer.engine.livingCells = renderer.centerCells(
+			renderer.engine.livingCells,
+			0, 0, renderer.gridWidth, renderer.gridHeight)
 		renderer.drawLivingCellsOnGrid(engine.livingCells)
 	}
 
