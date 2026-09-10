@@ -44,13 +44,9 @@ func handleResize(
 			renderer.engine.livingCells,
 			0, 0, renderer.gridWidth, renderer.gridHeight)
 		renderer.drawLivingCellsOnGrid(engine.livingCells)
-		// TODO: improve this part, currently seems to work
-		centeredHistory := make([]cellsSet, 0)
-		for _, cs := range engine.livingCellsHistory {
-			centeredCS := renderer.centerCells(cs, 0, 0, renderer.gridWidth, renderer.gridHeight)
-			centeredHistory = append(centeredHistory, centeredCS)
-		}
-		renderer.engine.livingCellsHistory = centeredHistory
+
+		renderer.engine.livingCellsHistory = renderer.centerSliceOfCells(
+			renderer.engine.livingCellsHistory)
 	}
 
 	renderer.screen.Show()
