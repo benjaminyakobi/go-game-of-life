@@ -2,10 +2,6 @@ package game
 
 // Contains game engine code
 
-import (
-	"container/list"
-)
-
 type cell struct {
 	PosX int `json:"x"`
 	PosY int `json:"y"`
@@ -17,7 +13,7 @@ type engine struct {
 	generation         int
 	deadCells          cellsSet
 	livingCells        cellsSet
-	livingCellsHistory *list.List // TODO: convert to slice
+	livingCellsHistory []cellsSet
 	historySize        int
 	patterns           []cellsSet
 }
@@ -55,7 +51,7 @@ func initEngine(cfg config) *engine {
 		generation:         0,
 		deadCells:          make(cellsSet, 0),
 		livingCells:        make(cellsSet, 0),
-		livingCellsHistory: list.New(),
+		livingCellsHistory: make([]cellsSet, 0),
 		historySize:        50,
 		patterns:           cfg.loadPatterns(),
 	}
@@ -73,10 +69,10 @@ func (e *engine) calcNextGeneration() {
 		{1, 1},   // bottom right
 	}
 
-	if e.livingCellsHistory.Len() > e.historySize {
-		e.livingCellsHistory.Remove(e.livingCellsHistory.Front())
+	if len(e.livingCellsHistory) >= e.historySize {
+		e.livingCellsHistory = e.livingCellsHistory[1:]
 	}
-	e.livingCellsHistory.PushBack(e.livingCells)
+	e.livingCellsHistory = append(e.livingCellsHistory, e.livingCells)
 
 	livingCellsNextGen := make(cellsSet)
 	deadCellsNextGen := make(cellsSet)

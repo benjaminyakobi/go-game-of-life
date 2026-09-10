@@ -3,7 +3,6 @@ package game
 // Contains game input events code
 
 import (
-	"container/list"
 	"fmt"
 	"time"
 
@@ -94,7 +93,7 @@ func handlePause(
 	if ev.Key() != tcell.KeyRune ||
 		ev.Str() != "p" ||
 		state.boxOpen ||
-		engine.livingCellsHistory.Len() == 0 {
+		len(engine.livingCellsHistory) == 0 {
 		return
 	}
 
@@ -120,13 +119,13 @@ func handlePreviousGeneration(
 	if ev.Key() != tcell.KeyLeft ||
 		state.running ||
 		state.boxOpen ||
-		engine.livingCellsHistory.Len() == 0 {
+		len(engine.livingCellsHistory) == 0 {
 		return
 	}
 
-	historyVal := engine.livingCellsHistory.Back()
-
-	engine.livingCellsHistory.Remove(historyVal)
+	lastHistoryIndex := len(engine.livingCellsHistory) - 1
+	historyVal := engine.livingCellsHistory[lastHistoryIndex]
+	engine.livingCellsHistory = engine.livingCellsHistory[:lastHistoryIndex]
 
 	if engine.generation > 0 {
 		engine.generation--
@@ -139,7 +138,7 @@ func handlePreviousGeneration(
 	))
 	renderer.killLivingCellsOnGrid(engine.livingCells)
 
-	engine.livingCells = historyVal.Value.(cellsSet)
+	engine.livingCells = historyVal
 
 	renderer.drawLivingCellsOnGrid(engine.livingCells)
 	renderer.screen.Show()
@@ -187,7 +186,7 @@ func handlePredefinedPattern(
 
 	state.boxOpen = true
 
-	engine.livingCellsHistory = list.New()
+	engine.livingCellsHistory = make([]cellsSet, 0)
 	engine.generation = 0
 
 	renderer.screen.DisableMouse()
