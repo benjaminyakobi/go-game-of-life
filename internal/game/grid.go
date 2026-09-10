@@ -203,38 +203,166 @@ func (r *renderer) removeBox() {
 	}
 }
 
+// func (r *renderer) drawBox(title string) {
+// 	boxWidth, boxHeight, minWidth, minHeight := r.calcBoxDimesions()
+// 	x := (r.gridWidth - boxWidth) / 2
+// 	y := (r.gridHeight - boxHeight) / 2
+//
+// 	for col := x; col < x+boxWidth; col++ {
+// 		r.screen.SetContent(col, y, tcell.RuneHLine, nil, css.def)
+// 		r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, css.def)
+// 	}
+//
+// 	for row := y; row < y+boxHeight; row++ {
+// 		r.screen.SetContent(x, row, tcell.RuneVLine, nil, css.def)
+// 		r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, css.def)
+// 	}
+//
+// 	r.screen.SetContent(x, y, tcell.RuneULCorner, nil, css.def)
+// 	r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, css.def)
+// 	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, css.def)
+// 	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, css.def)
+//
+// 	// TODO: make it separate func to be reused also when resizing the grid!
+// 	centerLivingCells := func(cs cellsSet) cellsSet {
+// 		centeredCS := make(cellsSet)
+// 		for c := range cs {
+// 			PosX := x + c.PosX - minWidth + 2
+// 			PosY := y + c.PosY - minHeight + 2
+// 			centeredCS.Add(cell{PosX: PosX, PosY: PosY})
+// 		}
+// 		return centeredCS
+// 	}
+//
+// 	r.engine.livingCells = centerLivingCells(r.engine.livingCells)
+// 	r.drawLivingCellsOnGrid(r.engine.livingCells)
+// 	r.drawText(1, title)
+// }
+
+func (r *renderer) centerCells(
+	cs cellsSet,
+	x, y, width, height int,
+) cellsSet {
+	if len(cs) == 0 {
+		return make(cellsSet)
+	}
+
+	minX := math.MaxInt
+	minY := math.MaxInt
+	maxX := math.MinInt
+	maxY := math.MinInt
+
+	for c := range cs {
+		minX = min(minX, c.PosX)
+		minY = min(minY, c.PosY)
+		maxX = max(maxX, c.PosX)
+		maxY = max(maxY, c.PosY)
+	}
+
+	patternWidth := maxX - minX + 1
+	patternHeight := maxY - minY + 1
+
+	offsetX := x + (width-patternWidth)/2
+	offsetY := y + (height-patternHeight)/2
+
+	centeredCS := make(cellsSet)
+
+	for c := range cs {
+		centeredCS.Add(cell{
+			PosX: offsetX + (c.PosX - minX),
+			PosY: offsetY + (c.PosY - minY),
+		})
+	}
+
+	return centeredCS
+}
+
 func (r *renderer) drawBox(title string) {
-	boxWidth, boxHeight, minWidth, minHeight := r.calcBoxDimesions()
+	boxWidth, boxHeight, _, _ := r.calcBoxDimesions()
+
 	x := (r.gridWidth - boxWidth) / 2
 	y := (r.gridHeight - boxHeight) / 2
 
+	// Top and bottom borders.
 	for col := x; col < x+boxWidth; col++ {
-		r.screen.SetContent(col, y, tcell.RuneHLine, nil, css.def)
-		r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, css.def)
+		r.screen.SetContent(
+			col,
+			y,
+			tcell.RuneHLine,
+			nil,
+			css.def,
+		)
+
+		r.screen.SetContent(
+			col,
+			y+boxHeight-1,
+			tcell.RuneHLine,
+			nil,
+			css.def,
+		)
 	}
 
+	// Left and right borders.
 	for row := y; row < y+boxHeight; row++ {
-		r.screen.SetContent(x, row, tcell.RuneVLine, nil, css.def)
-		r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, css.def)
+		r.screen.SetContent(
+			x,
+			row,
+			tcell.RuneVLine,
+			nil,
+			css.def,
+		)
+
+		r.screen.SetContent(
+			x+boxWidth-1,
+			row,
+			tcell.RuneVLine,
+			nil,
+			css.def,
+		)
 	}
 
-	r.screen.SetContent(x, y, tcell.RuneULCorner, nil, css.def)
-	r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, css.def)
-	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, css.def)
-	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, css.def)
+	// Corners.
+	r.screen.SetContent(
+		x,
+		y,
+		tcell.RuneULCorner,
+		nil,
+		css.def,
+	)
 
-	// TODO: make it separate func to be reused also when resizing the grid!
-	centerLivingCells := func(cs cellsSet) cellsSet {
-		centeredCS := make(cellsSet)
-		for c := range cs {
-			PosX := x + c.PosX - minWidth + 2
-			PosY := y + c.PosY - minHeight + 2
-			centeredCS.Add(cell{PosX: PosX, PosY: PosY})
-		}
-		return centeredCS
-	}
+	r.screen.SetContent(
+		x+boxWidth-1,
+		y,
+		tcell.RuneURCorner,
+		nil,
+		css.def,
+	)
 
-	r.engine.livingCells = centerLivingCells(r.engine.livingCells)
+	r.screen.SetContent(
+		x,
+		y+boxHeight-1,
+		tcell.RuneLLCorner,
+		nil,
+		css.def,
+	)
+
+	r.screen.SetContent(
+		x+boxWidth-1,
+		y+boxHeight-1,
+		tcell.RuneLRCorner,
+		nil,
+		css.def,
+	)
+
+	// Center the current pattern inside the box.
+	r.engine.livingCells = r.centerCells(
+		r.engine.livingCells,
+		x+1,
+		y+1,
+		boxWidth-2,
+		boxHeight-2,
+	)
+
 	r.drawLivingCellsOnGrid(r.engine.livingCells)
 	r.drawText(1, title)
 }
