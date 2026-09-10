@@ -149,13 +149,19 @@ func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
 }
 
 func (r *renderer) drawSingleDeadCellOnGrid(c cell) {
-	if c.PosY > r.gridOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
+	if c.PosY > r.gridOffset &&
+		c.PosY < r.gridHeight-1 &&
+		c.PosX > 0 &&
+		c.PosX < r.gridWidth-1 {
 		r.screen.Put(c.PosX, c.PosY, ".", css.lightSlateGrey)
 	}
 }
 
 func (r *renderer) drawSingleLivingCellOnGrid(c cell) {
-	if c.PosY > r.gridOffset && c.PosY < r.gridHeight-1 && c.PosX > 0 && c.PosX < r.gridWidth-1 {
+	if c.PosY > r.gridOffset &&
+		c.PosY < r.gridHeight-1 &&
+		c.PosX > 0 &&
+		c.PosX < r.gridWidth-1 {
 		r.screen.Put(c.PosX, c.PosY, "@", css.greenYellow)
 	}
 }
