@@ -203,42 +203,6 @@ func (r *renderer) removeBox() {
 	}
 }
 
-// func (r *renderer) drawBox(title string) {
-// 	boxWidth, boxHeight, minWidth, minHeight := r.calcBoxDimesions()
-// 	x := (r.gridWidth - boxWidth) / 2
-// 	y := (r.gridHeight - boxHeight) / 2
-//
-// 	for col := x; col < x+boxWidth; col++ {
-// 		r.screen.SetContent(col, y, tcell.RuneHLine, nil, css.def)
-// 		r.screen.SetContent(col, y+boxHeight-1, tcell.RuneHLine, nil, css.def)
-// 	}
-//
-// 	for row := y; row < y+boxHeight; row++ {
-// 		r.screen.SetContent(x, row, tcell.RuneVLine, nil, css.def)
-// 		r.screen.SetContent(x+boxWidth-1, row, tcell.RuneVLine, nil, css.def)
-// 	}
-//
-// 	r.screen.SetContent(x, y, tcell.RuneULCorner, nil, css.def)
-// 	r.screen.SetContent(x+boxWidth-1, y, tcell.RuneURCorner, nil, css.def)
-// 	r.screen.SetContent(x, y+boxHeight-1, tcell.RuneLLCorner, nil, css.def)
-// 	r.screen.SetContent(x+boxWidth-1, y+boxHeight-1, tcell.RuneLRCorner, nil, css.def)
-//
-// 	// TODO: make it separate func to be reused also when resizing the grid!
-// 	centerLivingCells := func(cs cellsSet) cellsSet {
-// 		centeredCS := make(cellsSet)
-// 		for c := range cs {
-// 			PosX := x + c.PosX - minWidth + 2
-// 			PosY := y + c.PosY - minHeight + 2
-// 			centeredCS.Add(cell{PosX: PosX, PosY: PosY})
-// 		}
-// 		return centeredCS
-// 	}
-//
-// 	r.engine.livingCells = centerLivingCells(r.engine.livingCells)
-// 	r.drawLivingCellsOnGrid(r.engine.livingCells)
-// 	r.drawText(1, title)
-// }
-
 func (r *renderer) centerCells(
 	cs cellsSet,
 	x, y, width, height int,
