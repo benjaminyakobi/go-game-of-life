@@ -21,6 +21,8 @@ type renderer struct {
 	gridOffset int
 	gridWidth  int
 	gridHeight int
+	boxWidth   int
+	boxHeight  int
 	screen     tcell.Screen
 	engine     *engine
 }
@@ -194,19 +196,24 @@ func (r *renderer) calcBoxDimesions() (int, int, int, int) {
 }
 
 func (r *renderer) removeBox() {
-	boxWidth, boxHeight, _, _ := r.calcBoxDimesions()
-	x := (r.gridWidth - boxWidth) / 2
-	y := (r.gridHeight - boxHeight) / 2
+	if r.boxWidth == -1 && r.boxHeight == -1 {
+		return
+	}
 
-	for col := x; col < x+boxWidth; col++ {
+	x := (r.gridWidth - r.boxWidth) / 2
+	y := (r.gridHeight - r.boxHeight) / 2
+
+	for col := x; col < x+r.boxWidth; col++ {
 		r.screen.Put(col, y, ".", css.lightSlateGrey)
-		r.screen.Put(col, y+boxHeight-1, ".", css.lightSlateGrey)
+		r.screen.Put(col, y+r.boxHeight-1, ".", css.lightSlateGrey)
 	}
 
-	for row := y; row < y+boxHeight; row++ {
+	for row := y; row < y+r.boxHeight; row++ {
 		r.screen.Put(x, row, ".", css.lightSlateGrey)
-		r.screen.Put(x+boxWidth-1, row, ".", css.lightSlateGrey)
+		r.screen.Put(x+r.boxWidth-1, row, ".", css.lightSlateGrey)
 	}
+
+	r.boxWidth, r.boxHeight = -1, -1
 }
 
 func (r *renderer) centerSliceOfCells(css []cellsSet) []cellsSet {
@@ -258,13 +265,13 @@ func (r *renderer) centerCells(
 }
 
 func (r *renderer) drawBox(title string) {
-	boxWidth, boxHeight, _, _ := r.calcBoxDimesions()
+	r.boxWidth, r.boxHeight, _, _ = r.calcBoxDimesions()
 
-	x := (r.gridWidth - boxWidth) / 2
-	y := (r.gridHeight - boxHeight) / 2
+	x := (r.gridWidth - r.boxWidth) / 2
+	y := (r.gridHeight - r.boxHeight) / 2
 
 	// Top and bottom borders.
-	for col := x; col < x+boxWidth; col++ {
+	for col := x; col < x+r.boxWidth; col++ {
 		r.screen.SetContent(
 			col,
 			y,
@@ -275,7 +282,7 @@ func (r *renderer) drawBox(title string) {
 
 		r.screen.SetContent(
 			col,
-			y+boxHeight-1,
+			y+r.boxHeight-1,
 			tcell.RuneHLine,
 			nil,
 			css.def,
@@ -283,7 +290,7 @@ func (r *renderer) drawBox(title string) {
 	}
 
 	// Left and right borders.
-	for row := y; row < y+boxHeight; row++ {
+	for row := y; row < y+r.boxHeight; row++ {
 		r.screen.SetContent(
 			x,
 			row,
@@ -293,7 +300,7 @@ func (r *renderer) drawBox(title string) {
 		)
 
 		r.screen.SetContent(
-			x+boxWidth-1,
+			x+r.boxWidth-1,
 			row,
 			tcell.RuneVLine,
 			nil,
@@ -311,7 +318,7 @@ func (r *renderer) drawBox(title string) {
 	)
 
 	r.screen.SetContent(
-		x+boxWidth-1,
+		x+r.boxWidth-1,
 		y,
 		tcell.RuneURCorner,
 		nil,
@@ -320,15 +327,15 @@ func (r *renderer) drawBox(title string) {
 
 	r.screen.SetContent(
 		x,
-		y+boxHeight-1,
+		y+r.boxHeight-1,
 		tcell.RuneLLCorner,
 		nil,
 		css.def,
 	)
 
 	r.screen.SetContent(
-		x+boxWidth-1,
-		y+boxHeight-1,
+		x+r.boxWidth-1,
+		y+r.boxHeight-1,
 		tcell.RuneLRCorner,
 		nil,
 		css.def,
@@ -339,8 +346,8 @@ func (r *renderer) drawBox(title string) {
 		r.engine.livingCells,
 		x+1,
 		y+1,
-		boxWidth-2,
-		boxHeight-2,
+		r.boxWidth-2,
+		r.boxHeight-2,
 	)
 
 	r.drawLivingCellsOnGrid(r.engine.livingCells)
