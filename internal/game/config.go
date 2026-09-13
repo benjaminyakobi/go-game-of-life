@@ -27,7 +27,7 @@ func (c *config) loadPatterns() []cellsSet {
 }
 
 func loadConfig() config {
-	file, err := os.Open("./conf.json")
+	file, err := os.Open("./config.json")
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
 	}
