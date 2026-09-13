@@ -95,7 +95,7 @@ var directions = [][]int{
 }
 
 func loadConfig() {
-	file, err := os.Open("./conf.json")
+	file, err := os.Open("./config.json")
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
 	}
