@@ -1,6 +1,6 @@
 package game
 
-// Contains game common code
+// Contains game config code
 
 import (
 	"encoding/json"
