@@ -3,6 +3,7 @@ package game
 // Contains game grid code
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/gdamore/tcell/v3"
@@ -180,19 +181,41 @@ func (r *renderer) drawDeadCellsOnGrid(cs cellsSet) {
 	}
 }
 
-func (r *renderer) calcBoxDimesions() (int, int, int, int) {
-	minW, maxW := r.gridWidth, math.MinInt32
-	minH, maxH := r.gridHeight, math.MinInt32
-	for cell := range r.engine.livingCells {
-		minW = min(minW, cell.PosX)
-		maxW = max(maxW, cell.PosX)
-		minH = min(minH, cell.PosY)
-		maxH = max(maxH, cell.PosY)
+func (r *renderer) calcBoxDimesions() (int, int) {
+
+	minX := math.MaxInt
+	minY := math.MaxInt
+	maxX := math.MinInt
+	maxY := math.MinInt
+
+	for c := range r.engine.livingCells {
+		minX = min(minX, c.PosX)
+		minY = min(minY, c.PosY)
+		maxX = max(maxX, c.PosX)
+		maxY = max(maxY, c.PosY)
 	}
+
+	patternWidth := maxX - minX + 1
+	patternHeight := maxY - minY + 1
+
 	if r.engine.livingCells.Len() == 1 {
-		return 5, 5, minW, minH
+		return 5, 5
 	}
-	return maxW - minW + 5, maxH - minH + 5, minW, minH
+	return patternWidth + 4, patternHeight + 4
+
+	// minW, maxW := r.gridWidth, math.MinInt32
+	// minH, maxH := r.gridHeight, math.MinInt32
+	// for cell := range r.engine.livingCells {
+	// 	minW = min(minW, cell.PosX)
+	// 	maxW = max(maxW, cell.PosX)
+	// 	minH = min(minH, cell.PosY)
+	// 	maxH = max(maxH, cell.PosY)
+	// }
+	// if r.engine.livingCells.Len() == 1 {
+	// 	return 5, 5, minW, minH
+	// }
+
+	// return maxW - minW + 5, maxH - minH + 5, minW, minH
 }
 
 func (r *renderer) removeBox() {
@@ -265,10 +288,12 @@ func (r *renderer) centerCells(
 }
 
 func (r *renderer) drawBox(title string) {
-	r.boxWidth, r.boxHeight, _, _ = r.calcBoxDimesions()
+	r.boxWidth, r.boxHeight = r.calcBoxDimesions()
 
 	x := (r.gridWidth - r.boxWidth) / 2
 	y := (r.gridHeight - r.boxHeight) / 2
+	r.drawText(1, fmt.Sprintf("gw: %d, gh: %d, bw: %d, bh: %d",
+		r.gridWidth, r.gridHeight, r.boxWidth, r.boxHeight))
 
 	// Top and bottom borders.
 	for col := x; col < x+r.boxWidth; col++ {
@@ -351,5 +376,5 @@ func (r *renderer) drawBox(title string) {
 	)
 
 	r.drawLivingCellsOnGrid(r.engine.livingCells)
-	r.drawText(1, title)
+	// r.drawText(1, title)
 }
