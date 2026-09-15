@@ -181,14 +181,14 @@ func (r *renderer) drawDeadCellsOnGrid(cs cellsSet) {
 	}
 }
 
-func (r *renderer) calcBoxDimesions() (int, int) {
-
+// TODO: should be modified and being renamed to getPatternDimensions
+func (r *renderer) calcPatternDimesions(cs cellsSet) (int, int) {
 	minX := math.MaxInt
 	minY := math.MaxInt
 	maxX := math.MinInt
 	maxY := math.MinInt
 
-	for c := range r.engine.livingCells {
+	for c := range cs {
 		minX = min(minX, c.PosX)
 		minY = min(minY, c.PosY)
 		maxX = max(maxX, c.PosX)
@@ -199,23 +199,9 @@ func (r *renderer) calcBoxDimesions() (int, int) {
 	patternHeight := maxY - minY + 1
 
 	if r.engine.livingCells.Len() == 1 {
-		return 5, 5
+		return 1, 1
 	}
-	return patternWidth + 4, patternHeight + 4
-
-	// minW, maxW := r.gridWidth, math.MinInt32
-	// minH, maxH := r.gridHeight, math.MinInt32
-	// for cell := range r.engine.livingCells {
-	// 	minW = min(minW, cell.PosX)
-	// 	maxW = max(maxW, cell.PosX)
-	// 	minH = min(minH, cell.PosY)
-	// 	maxH = max(maxH, cell.PosY)
-	// }
-	// if r.engine.livingCells.Len() == 1 {
-	// 	return 5, 5, minW, minH
-	// }
-
-	// return maxW - minW + 5, maxH - minH + 5, minW, minH
+	return patternWidth, patternHeight
 }
 
 func (r *renderer) removeBox() {
@@ -257,20 +243,14 @@ func (r *renderer) centerCells(
 		return make(cellsSet)
 	}
 
+	// TODO: should use the new getPatternDimensions
 	minX := math.MaxInt
 	minY := math.MaxInt
-	maxX := math.MinInt
-	maxY := math.MinInt
-
 	for c := range cs {
 		minX = min(minX, c.PosX)
 		minY = min(minY, c.PosY)
-		maxX = max(maxX, c.PosX)
-		maxY = max(maxY, c.PosY)
 	}
-
-	patternWidth := maxX - minX + 1
-	patternHeight := maxY - minY + 1
+	patternWidth, patternHeight := r.calcPatternDimesions(cs)
 
 	offsetX := x + (width-patternWidth)/2
 	offsetY := y + (height-patternHeight)/2
@@ -288,10 +268,13 @@ func (r *renderer) centerCells(
 }
 
 func (r *renderer) drawBox(title string) {
-	r.boxWidth, r.boxHeight = r.calcBoxDimesions()
+	r.boxWidth, r.boxHeight = r.calcPatternDimesions(r.engine.livingCells)
+	r.boxWidth += 4
+	r.boxHeight += 4
 
 	x := (r.gridWidth - r.boxWidth) / 2
 	y := (r.gridHeight - r.boxHeight) / 2
+	// TODO: remove
 	r.drawText(1, fmt.Sprintf("gw: %d, gh: %d, bw: %d, bh: %d",
 		r.gridWidth, r.gridHeight, r.boxWidth, r.boxHeight))
 
@@ -376,5 +359,6 @@ func (r *renderer) drawBox(title string) {
 	)
 
 	r.drawLivingCellsOnGrid(r.engine.livingCells)
+	// TODO: uncomment
 	// r.drawText(1, title)
 }
