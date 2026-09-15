@@ -3,7 +3,6 @@ package game
 // Contains game grid code
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/gdamore/tcell/v3"
@@ -274,9 +273,6 @@ func (r *renderer) drawBox(title string) {
 
 	x := (r.gridWidth - r.boxWidth) / 2
 	y := (r.gridHeight - r.boxHeight) / 2
-	// TODO: remove
-	r.drawText(1, fmt.Sprintf("gw: %d, gh: %d, bw: %d, bh: %d",
-		r.gridWidth, r.gridHeight, r.boxWidth, r.boxHeight))
 
 	// Top and bottom borders.
 	for col := x; col < x+r.boxWidth; col++ {
@@ -359,6 +355,5 @@ func (r *renderer) drawBox(title string) {
 	)
 
 	r.drawLivingCellsOnGrid(r.engine.livingCells)
-	// TODO: uncomment
-	// r.drawText(1, title)
+	r.drawText(1, title)
 }
