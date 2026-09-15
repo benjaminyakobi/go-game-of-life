@@ -180,8 +180,8 @@ func (r *renderer) drawDeadCellsOnGrid(cs cellsSet) {
 	}
 }
 
-// TODO: should be modified and being renamed to getPatternDimensions
-func (r *renderer) calcPatternDimesions(cs cellsSet) (int, int) {
+func (r *renderer) calcPatternDimesions(cs cellsSet) (
+	int, int, int, int, int, int) {
 	minX := math.MaxInt
 	minY := math.MaxInt
 	maxX := math.MinInt
@@ -197,10 +197,7 @@ func (r *renderer) calcPatternDimesions(cs cellsSet) (int, int) {
 	patternWidth := maxX - minX + 1
 	patternHeight := maxY - minY + 1
 
-	if r.engine.livingCells.Len() == 1 {
-		return 1, 1
-	}
-	return patternWidth, patternHeight
+	return patternWidth, patternHeight, minX, minY, maxX, maxY
 }
 
 func (r *renderer) removeBox() {
@@ -242,14 +239,7 @@ func (r *renderer) centerCells(
 		return make(cellsSet)
 	}
 
-	// TODO: should use the new getPatternDimensions
-	minX := math.MaxInt
-	minY := math.MaxInt
-	for c := range cs {
-		minX = min(minX, c.PosX)
-		minY = min(minY, c.PosY)
-	}
-	patternWidth, patternHeight := r.calcPatternDimesions(cs)
+	patternWidth, patternHeight, minX, minY, _, _ := r.calcPatternDimesions(cs)
 
 	offsetX := x + (width-patternWidth)/2
 	offsetY := y + (height-patternHeight)/2
@@ -267,7 +257,7 @@ func (r *renderer) centerCells(
 }
 
 func (r *renderer) drawBox(title string) {
-	r.boxWidth, r.boxHeight = r.calcPatternDimesions(r.engine.livingCells)
+	r.boxWidth, r.boxHeight, _, _, _, _ = r.calcPatternDimesions(r.engine.livingCells)
 	r.boxWidth += 4
 	r.boxHeight += 4
 
