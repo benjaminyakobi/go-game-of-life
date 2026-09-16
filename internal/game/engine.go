@@ -13,9 +13,14 @@ type engine struct {
 	generation         int
 	deadCells          cellsSet
 	livingCells        cellsSet
-	livingCellsHistory []cellsSet
-	historySize        int
+	livingCellsHistory cellsHistory
 	patterns           []cellsSet
+}
+
+type cellsHistory struct {
+	cells []cellsSet
+	head  int
+	count int
 }
 
 func (cs cellsSet) Add(c cell) {
@@ -46,13 +51,20 @@ func (cs cellsSet) Copy() cellsSet {
 	return csCopy
 }
 
+func initCellsHistory(size int) cellsHistory {
+	return cellsHistory{
+		cells: make([]cellsSet, size),
+		head:  0,
+		count: 0,
+	}
+}
+
 func initEngine(cfg config) *engine {
 	return &engine{
 		generation:         0,
 		deadCells:          make(cellsSet, 0),
 		livingCells:        make(cellsSet, 0),
-		livingCellsHistory: make([]cellsSet, 0),
-		historySize:        50,
+		livingCellsHistory: initCellsHistory(50),
 		patterns:           cfg.loadPatterns(),
 	}
 }
@@ -69,10 +81,7 @@ func (e *engine) calcNextGeneration() {
 		{1, 1},   // bottom right
 	}
 
-	if len(e.livingCellsHistory) >= e.historySize {
-		e.livingCellsHistory = e.livingCellsHistory[1:]
-	}
-	e.livingCellsHistory = append(e.livingCellsHistory, e.livingCells)
+	e.livingCellsHistory.Push(e.livingCells)
 
 	livingCellsNextGen := make(cellsSet)
 	deadCellsNextGen := make(cellsSet)
