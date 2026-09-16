@@ -59,6 +59,23 @@ func initCellsHistory(size int) cellsHistory {
 	}
 }
 
+// func (h *cellsHistory) Len() int {
+// }
+
+// func (h *cellsHistory) Push(cs cellsSet) {
+// }
+
+// func (h *cellsHistory) Pop() (cellsSet, bool) {
+// }
+
+// NOTE: wipe out the history
+// func (h *cellsHistory) Clear() {
+// }
+
+// NOTE: updating for resize events that requires history updates also
+// func (h *cellsHistory) Update(update func(cellsSet) cellsSet) {
+// }
+
 func initEngine(cfg config) *engine {
 	return &engine{
 		generation:         0,
