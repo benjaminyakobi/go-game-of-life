@@ -93,8 +93,12 @@ func (h *cellsHistory) Clear() {
 }
 
 // NOTE: updating for resize events that requires history updates also
-// func (h *cellsHistory) Update(update func(cellsSet) cellsSet) {
-// }
+func (h *cellsHistory) Update(update func(cellsSet) cellsSet) {
+	for idx := range h.count {
+		cs := update(h.cells[idx])
+		h.cells[idx] = cs
+	}
+}
 
 func initEngine(cfg config) *engine {
 	return &engine{
