@@ -71,8 +71,19 @@ func (h *cellsHistory) Push(cs cellsSet) {
 	}
 }
 
-// func (h *cellsHistory) Pop() cellsSet {
-// }
+func (h *cellsHistory) Pop() cellsSet {
+	if h.count == 0 {
+		return nil
+	}
+
+	h.head = (h.head - 1 + len(h.cells)) % len(h.cells)
+
+	cs := h.cells[h.head]
+	h.cells[h.head] = nil
+	h.count--
+
+	return cs
+}
 
 // NOTE: wipe out the history
 func (h *cellsHistory) Clear() {
