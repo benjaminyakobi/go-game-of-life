@@ -70,8 +70,11 @@ func (h *cellsHistory) Len() int {
 // }
 
 // NOTE: wipe out the history
-// func (h *cellsHistory) Clear() {
-// }
+func (h *cellsHistory) Clear() {
+	clear(h.cells)
+	h.head = 0
+	h.count = 0
+}
 
 // NOTE: updating for resize events that requires history updates also
 // func (h *cellsHistory) Update(update func(cellsSet) cellsSet) {
