@@ -59,13 +59,14 @@ func initCellsHistory(size int) cellsHistory {
 	}
 }
 
-// func (h *cellsHistory) Len() int {
-// }
+func (h *cellsHistory) Len() int {
+	return h.count
+}
 
 // func (h *cellsHistory) Push(cs cellsSet) {
 // }
 
-// func (h *cellsHistory) Pop() (cellsSet, bool) {
+// func (h *cellsHistory) Pop() cellsSet {
 // }
 
 // NOTE: wipe out the history
