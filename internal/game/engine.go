@@ -63,8 +63,13 @@ func (h *cellsHistory) Len() int {
 	return h.count
 }
 
-// func (h *cellsHistory) Push(cs cellsSet) {
-// }
+func (h *cellsHistory) Push(cs cellsSet) {
+	h.cells[h.head] = cs
+	h.head = (h.head + 1) % len(h.cells) // updating head position
+	if h.count <= len(h.cells) {
+		h.count++
+	}
+}
 
 // func (h *cellsHistory) Pop() cellsSet {
 // }
