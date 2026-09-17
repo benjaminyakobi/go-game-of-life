@@ -95,8 +95,11 @@ func (h *cellsHistory) Clear() {
 // NOTE: updating for resize events that requires history updates also
 func (h *cellsHistory) Update(update func(cellsSet) cellsSet) {
 	for idx := range len(h.cells) {
-		cs := update(h.cells[idx])
-		h.cells[idx] = cs
+		el := h.cells[idx]
+		if el != nil {
+			cs := update(el)
+			h.cells[idx] = cs
+		}
 	}
 }
 
