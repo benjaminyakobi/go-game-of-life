@@ -45,8 +45,7 @@ func handleResize(
 			0, 0, renderer.gridWidth, renderer.gridHeight)
 		renderer.drawLivingCellsOnGrid(engine.livingCells)
 
-		renderer.engine.livingCellsHistory = renderer.centerSliceOfCells(
-			renderer.engine.livingCellsHistory)
+		renderer.centerCellsHistory(&renderer.engine.livingCellsHistory)
 	}
 
 	renderer.screen.Show()
@@ -96,7 +95,7 @@ func handlePause(
 	if ev.Key() != tcell.KeyRune ||
 		ev.Str() != "p" ||
 		state.boxOpen ||
-		len(engine.livingCellsHistory) == 0 {
+		engine.livingCellsHistory.Len() == 0 { // TODO: necessary condition?
 		return
 	}
 
@@ -122,13 +121,14 @@ func handlePreviousGeneration(
 	if ev.Key() != tcell.KeyLeft ||
 		state.running ||
 		state.boxOpen ||
-		len(engine.livingCellsHistory) == 0 {
+		engine.livingCellsHistory.Len() == 0 {
 		return
 	}
 
-	lastHistoryIndex := len(engine.livingCellsHistory) - 1
-	historyVal := engine.livingCellsHistory[lastHistoryIndex]
-	engine.livingCellsHistory = engine.livingCellsHistory[:lastHistoryIndex]
+	historyVal := engine.livingCellsHistory.Pop()
+	if historyVal == nil {
+		return
+	}
 
 	if engine.generation > 0 {
 		engine.generation--
@@ -189,7 +189,7 @@ func handlePredefinedPattern(
 
 	state.boxOpen = true
 
-	engine.livingCellsHistory = make([]cellsSet, 0)
+	engine.livingCellsHistory.Clear()
 	engine.generation = 0
 
 	renderer.screen.DisableMouse()
