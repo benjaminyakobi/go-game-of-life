@@ -221,14 +221,10 @@ func (r *renderer) removeBox() {
 	r.boxWidth, r.boxHeight = -1, -1
 }
 
-func (r *renderer) centerSliceOfCells(css []cellsSet) []cellsSet {
-	centered := make([]cellsSet, 0)
-	for _, cs := range css {
-		cc := r.centerCells(cs,
-			0, 0, r.gridWidth, r.gridHeight)
-		centered = append(centered, cc)
-	}
-	return centered
+func (r *renderer) centerCellsHistory(history *cellsHistory) {
+	history.Update(func(cs cellsSet) cellsSet {
+		return r.centerCells(cs, 0, 0, r.gridWidth, r.gridHeight)
+	})
 }
 
 func (r *renderer) centerCells(
