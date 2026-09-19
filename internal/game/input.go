@@ -94,8 +94,7 @@ func handlePause(
 ) {
 	if ev.Key() != tcell.KeyRune ||
 		ev.Str() != "p" ||
-		state.boxOpen ||
-		engine.livingCellsHistory.Len() == 0 { // TODO: necessary condition?
+		state.boxOpen {
 		return
 	}
 
@@ -120,8 +119,7 @@ func handlePreviousGeneration(
 ) {
 	if ev.Key() != tcell.KeyLeft ||
 		state.running ||
-		state.boxOpen ||
-		engine.livingCellsHistory.Len() == 0 {
+		state.boxOpen {
 		return
 	}
 
