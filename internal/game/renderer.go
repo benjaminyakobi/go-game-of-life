@@ -11,11 +11,18 @@ import (
 )
 
 type cellStyles struct {
-	def            tcell.Style
-	grey           tcell.Style
-	lightSlateGrey tcell.Style
-	greenYellow    tcell.Style
+	def    tcell.Style
+	border tcell.Style
+	hud    tcell.Style
+	dead   tcell.Style
+	live   tcell.Style
+	box    tcell.Style
 }
+
+const (
+	deadCellGlyph   = "·"
+	livingCellGlyph = "◆"
+)
 
 type renderer struct {
 	gridOffset int
@@ -28,9 +35,12 @@ type renderer struct {
 }
 
 var css = cellStyles{
-	def:            tcell.StyleDefault.Background(color.Reset).Foreground(color.Default),
-	lightSlateGrey: tcell.StyleDefault.Background(color.Reset).Foreground(color.LightSlateGrey),
-	greenYellow:    tcell.StyleDefault.Background(color.Reset).Foreground(color.GreenYellow),
+	def:    tcell.StyleDefault.Background(color.Black).Foreground(color.LightCyan),
+	border: tcell.StyleDefault.Background(color.Black).Foreground(color.MediumOrchid).Bold(true),
+	hud:    tcell.StyleDefault.Background(color.Black).Foreground(color.HotPink).Bold(true),
+	dead:   tcell.StyleDefault.Background(color.Black).Foreground(color.DarkSlateBlue),
+	live:   tcell.StyleDefault.Background(color.Black).Foreground(color.Aqua).Bold(true),
+	box:    tcell.StyleDefault.Background(color.Black).Foreground(color.DeepSkyBlue).Bold(true),
 }
 
 func initRenderer(e *engine) (*renderer, error) {
@@ -59,7 +69,7 @@ func initRenderer(e *engine) (*renderer, error) {
 
 func (r *renderer) clearLine(y int) {
 	for x := range r.gridWidth {
-		r.screen.SetContent(x, y, ' ', nil, tcell.StyleDefault)
+		r.screen.SetContent(x, y, ' ', nil, css.def)
 	}
 }
 
@@ -74,7 +84,7 @@ func (r *renderer) drawText(y int, text string) {
 	// 3. draw text
 	for _, ch := range text {
 		rw := runewidth.RuneWidth(ch)
-		r.screen.SetContent(endX, y, ch, nil, css.def)
+		r.screen.SetContent(endX, y, ch, nil, css.hud)
 		endX += rw
 	}
 
@@ -94,38 +104,38 @@ func (r *renderer) drawText(y int, text string) {
 		rightCorner = tcell.RuneLRCorner
 	}
 
-	r.screen.Put(0, y, string(leftCorner), css.def)
-	r.screen.Put(r.gridWidth-1, y, string(rightCorner), css.def)
+	r.screen.Put(0, y, string(leftCorner), css.border)
+	r.screen.Put(r.gridWidth-1, y, string(rightCorner), css.border)
 
 	// 6. fill horizontal lines
 	for x := 1; x < startX; x++ {
-		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.border)
 	}
 
 	for x := endX; x < r.gridWidth-1; x++ {
-		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.border)
 	}
 }
 
 func (r *renderer) updateCellStyle(x, y int) {
 	switch {
 	case x == 0 && y == r.gridOffset:
-		r.screen.Put(x, y, string(tcell.RuneULCorner), css.def)
+		r.screen.Put(x, y, string(tcell.RuneULCorner), css.border)
 
 	case x == r.gridWidth-1 && y == r.gridOffset:
-		r.screen.Put(x, y, string(tcell.RuneURCorner), css.def)
+		r.screen.Put(x, y, string(tcell.RuneURCorner), css.border)
 
 	case x == 0 && y == r.gridHeight-1:
-		r.screen.Put(x, y, string(tcell.RuneLLCorner), css.def)
+		r.screen.Put(x, y, string(tcell.RuneLLCorner), css.border)
 
 	case x == r.gridWidth-1 && y == r.gridHeight-1:
-		r.screen.Put(x, y, string(tcell.RuneLRCorner), css.def)
+		r.screen.Put(x, y, string(tcell.RuneLRCorner), css.border)
 
 	case y == r.gridOffset || y == r.gridHeight-1:
-		r.screen.Put(x, y, string(tcell.RuneHLine), css.def)
+		r.screen.Put(x, y, string(tcell.RuneHLine), css.border)
 
 	case x == 0 || x == r.gridWidth-1:
-		r.screen.Put(x, y, string(tcell.RuneVLine), css.def)
+		r.screen.Put(x, y, string(tcell.RuneVLine), css.border)
 
 	default:
 		r.drawSingleDeadCellOnGrid(cell{PosX: x, PosY: y})
@@ -133,7 +143,7 @@ func (r *renderer) updateCellStyle(x, y int) {
 }
 
 func (r *renderer) drawNewGrid() {
-	r.drawText(0, "Click: Select | Double Click: Unselect | r: Run | p: Pause | s: Stop & Reset Generations | b: Clear & Choose Pattern | Left Arrow: Previous Generation | Right Arrow: Next Generation | =/-: Increase/Decrease Speed | Escapse: Exit")
+	r.drawText(0, "click select | dbl-click clear | r run | p pause | s stop | b pattern | ←/→ history | +/- speed | esc exit")
 	r.gridWidth, r.gridHeight = r.screen.Size()
 	for w := range r.gridWidth {
 		for h := r.gridOffset; h < r.gridHeight; h++ {
@@ -141,7 +151,7 @@ func (r *renderer) drawNewGrid() {
 		}
 	}
 	r.drawText(1, "")
-	r.drawText(r.gridHeight-1, "Conway's Game Of Life")
+	r.drawText(r.gridHeight-1, "NEON LIFE")
 }
 
 func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
@@ -155,7 +165,7 @@ func (r *renderer) drawSingleDeadCellOnGrid(c cell) {
 		c.PosY < r.gridHeight-1 &&
 		c.PosX > 0 &&
 		c.PosX < r.gridWidth-1 {
-		r.screen.Put(c.PosX, c.PosY, ".", css.lightSlateGrey)
+		r.screen.Put(c.PosX, c.PosY, deadCellGlyph, css.dead)
 	}
 }
 
@@ -164,7 +174,7 @@ func (r *renderer) drawSingleLivingCellOnGrid(c cell) {
 		c.PosY < r.gridHeight-1 &&
 		c.PosX > 0 &&
 		c.PosX < r.gridWidth-1 {
-		r.screen.Put(c.PosX, c.PosY, "@", css.greenYellow)
+		r.screen.Put(c.PosX, c.PosY, livingCellGlyph, css.live)
 	}
 }
 
@@ -209,13 +219,13 @@ func (r *renderer) removeBox() {
 	y := (r.gridHeight - r.boxHeight) / 2
 
 	for col := x; col < x+r.boxWidth; col++ {
-		r.screen.Put(col, y, ".", css.lightSlateGrey)
-		r.screen.Put(col, y+r.boxHeight-1, ".", css.lightSlateGrey)
+		r.screen.Put(col, y, deadCellGlyph, css.dead)
+		r.screen.Put(col, y+r.boxHeight-1, deadCellGlyph, css.dead)
 	}
 
 	for row := y; row < y+r.boxHeight; row++ {
-		r.screen.Put(x, row, ".", css.lightSlateGrey)
-		r.screen.Put(x+r.boxWidth-1, row, ".", css.lightSlateGrey)
+		r.screen.Put(x, row, deadCellGlyph, css.dead)
+		r.screen.Put(x+r.boxWidth-1, row, deadCellGlyph, css.dead)
 	}
 
 	r.boxWidth, r.boxHeight = -1, -1
@@ -267,7 +277,7 @@ func (r *renderer) drawBox(title string) {
 			y,
 			tcell.RuneHLine,
 			nil,
-			css.def,
+			css.box,
 		)
 
 		r.screen.SetContent(
@@ -275,7 +285,7 @@ func (r *renderer) drawBox(title string) {
 			y+r.boxHeight-1,
 			tcell.RuneHLine,
 			nil,
-			css.def,
+			css.box,
 		)
 	}
 
@@ -286,7 +296,7 @@ func (r *renderer) drawBox(title string) {
 			row,
 			tcell.RuneVLine,
 			nil,
-			css.def,
+			css.box,
 		)
 
 		r.screen.SetContent(
@@ -294,7 +304,7 @@ func (r *renderer) drawBox(title string) {
 			row,
 			tcell.RuneVLine,
 			nil,
-			css.def,
+			css.box,
 		)
 	}
 
@@ -304,7 +314,7 @@ func (r *renderer) drawBox(title string) {
 		y,
 		tcell.RuneULCorner,
 		nil,
-		css.def,
+		css.box,
 	)
 
 	r.screen.SetContent(
@@ -312,7 +322,7 @@ func (r *renderer) drawBox(title string) {
 		y,
 		tcell.RuneURCorner,
 		nil,
-		css.def,
+		css.box,
 	)
 
 	r.screen.SetContent(
@@ -320,7 +330,7 @@ func (r *renderer) drawBox(title string) {
 		y+r.boxHeight-1,
 		tcell.RuneLLCorner,
 		nil,
-		css.def,
+		css.box,
 	)
 
 	r.screen.SetContent(
@@ -328,7 +338,7 @@ func (r *renderer) drawBox(title string) {
 		y+r.boxHeight-1,
 		tcell.RuneLRCorner,
 		nil,
-		css.def,
+		css.box,
 	)
 
 	// Center the current pattern inside the box.
