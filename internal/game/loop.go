@@ -25,7 +25,7 @@ type loopState struct {
 }
 
 func initLoopState() *loopState {
-	interval := 500 * time.Millisecond
+	interval := 300 * time.Millisecond
 
 	return &loopState{
 		dblClickDelay: 500 * time.Millisecond,
