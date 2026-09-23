@@ -77,8 +77,11 @@ func (r *renderer) drawText(y int, text string) {
 	r.clearLine(y) // 1. clear line
 
 	// 2. calculate test position
-	textWidth := runewidth.StringWidth(text)
-	startX := max(1, (r.gridWidth-textWidth)/2)
+	startX := 1
+	if y > 0 {
+		textWidth := runewidth.StringWidth(text)
+		startX = max(1, (r.gridWidth-textWidth)/2)
+	}
 	endX := startX
 
 	// 3. draw text
