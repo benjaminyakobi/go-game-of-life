@@ -30,6 +30,7 @@ type renderer struct {
 	gridHeight int
 	boxWidth   int
 	boxHeight  int
+	title      string
 	screen     tcell.Screen
 	engine     *engine
 }
@@ -74,6 +75,9 @@ func (r *renderer) clearLine(y int) {
 }
 
 func (r *renderer) drawText(y int, text string) {
+	if y == 1 {
+		r.title = text
+	}
 	r.clearLine(y) // 1. clear line
 
 	// 2. calculate test position
@@ -153,7 +157,9 @@ func (r *renderer) drawNewGrid() {
 			r.updateCellStyle(w, h)
 		}
 	}
-	r.drawText(1, "")
+	if r.title != "" {
+		r.drawText(1, r.title)
+	}
 	r.drawText(r.gridHeight-1, "NEON LIFE")
 }
 
