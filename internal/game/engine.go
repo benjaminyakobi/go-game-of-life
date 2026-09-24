@@ -14,7 +14,7 @@ type engine struct {
 	deadCells          cellsSet
 	livingCells        cellsSet
 	livingCellsHistory cellsHistory
-	patterns           []cellsSet
+	patterns           *indexedPatterns
 }
 
 type cellsHistory struct {
