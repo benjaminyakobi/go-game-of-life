@@ -218,10 +218,6 @@ func handleRun(
 
 		renderer.removeBox()
 		renderer.drawLivingCellsOnGrid(engine.livingCells)
-		renderer.drawText(
-			1,
-			"Chosen predefined pattern",
-		)
 
 		state.boxIndex--
 		state.boxOpen = false
