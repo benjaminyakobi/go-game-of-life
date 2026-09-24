@@ -194,9 +194,7 @@ func handlePredefinedPattern(
 	renderer.removeBox()
 	renderer.killLivingCellsOnGrid(engine.livingCells)
 
-	patternName, pattern := engine.patterns.Get(state.boxIndex)
-	engine.patternName = patternName
-	engine.livingCells = pattern
+	engine.patternName, engine.livingCells = engine.patterns.Get(state.boxIndex)
 
 	renderer.drawBox(engine.patternName)
 	renderer.screen.Show()
