@@ -14,16 +14,38 @@ type config struct {
 	Patterns map[string][]cell `json:"patterns"`
 }
 
-func (c *config) loadPatterns() []cellsSet {
-	var patterns []cellsSet
-	for _, points := range c.Patterns {
-		var cs = make(cellsSet)
-		for i := range points {
-			cs.Add(cell{PosX: points[i].PosX, PosY: points[i].PosY})
+type indexedPatterns struct {
+	order []string
+	sets  map[string]cellsSet
+}
+
+func (ip *indexedPatterns) Len() int {
+	return len(ip.order)
+}
+
+func (ip *indexedPatterns) Get(i int) (string, cellsSet) {
+	cyclicIndex := i % len(ip.order)
+	patternName := ip.order[cyclicIndex]
+	return patternName, ip.sets[patternName]
+}
+
+func (c *config) loadPatterns() *indexedPatterns {
+	out := make(map[string]cellsSet, len(c.Patterns))
+	for name, cells := range c.Patterns {
+		set := make(cellsSet, len(cells))
+		for _, c := range cells {
+			set[c] = struct{}{}
 		}
-		patterns = append(patterns, cs)
+		out[name] = set
 	}
-	return patterns
+
+	keys := make([]string, 0, len(out))
+	for k := range out {
+		keys = append(keys, k)
+	}
+	fmt.Println(len(keys), keys)
+
+	return &indexedPatterns{order: keys, sets: out}
 }
 
 func loadConfig() config {
