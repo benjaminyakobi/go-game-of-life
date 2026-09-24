@@ -38,7 +38,7 @@ func handleResize(
 	renderer.drawNewGrid()
 
 	if state.boxOpen {
-		renderer.drawBox("Choose predefined pattern")
+		renderer.drawBox(renderer.engine.patternName)
 	} else {
 		renderer.engine.livingCells = renderer.centerCells(
 			renderer.engine.livingCells,
@@ -195,9 +195,10 @@ func handlePredefinedPattern(
 	renderer.killLivingCellsOnGrid(engine.livingCells)
 
 	patternName, pattern := engine.patterns.Get(state.boxIndex)
+	engine.patternName = patternName
 	engine.livingCells = pattern
 
-	renderer.drawBox(patternName)
+	renderer.drawBox(engine.patternName)
 	renderer.screen.Show()
 
 	state.boxIndex++
