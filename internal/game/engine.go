@@ -11,10 +11,11 @@ type cellsSet map[cell]struct{}
 
 type engine struct {
 	generation         int
-	deadCells          cellsSet
+	deadCells          cellsSet // TODO: remove and use engine.killLivingCells..
 	livingCells        cellsSet
 	livingCellsHistory cellsHistory
 	patterns           *indexedPatterns
+	patternName        string
 }
 
 type cellsHistory struct {
