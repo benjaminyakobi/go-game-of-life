@@ -43,7 +43,6 @@ func (c *config) loadPatterns() *indexedPatterns {
 	for k := range out {
 		keys = append(keys, k)
 	}
-	fmt.Println(len(keys), keys)
 
 	return &indexedPatterns{order: keys, sets: out}
 }
