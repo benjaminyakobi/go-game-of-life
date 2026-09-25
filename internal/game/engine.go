@@ -144,6 +144,11 @@ func (e *engine) calcNextGeneration() {
 	}
 
 	for c, count := range neighborCounts {
+		// if count == 3 || (e.livingCells.Contains(c) && count == 2) {
+		// 	livingCellsNextGen.Add(c)
+		// } else {
+		// 	deadCellsNextGen.Add(c)
+		// }
 		if e.livingCells.Contains(c) {
 			if count == 2 || count == 3 {
 				livingCellsNextGen.Add(c)
