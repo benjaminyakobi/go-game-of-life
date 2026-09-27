@@ -70,7 +70,7 @@ func handleKey(
 
 	handleNextGeneration(renderer, engine, state, ev)
 
-	handlePredefinedPattern(renderer, engine, state, ev)
+	handleNextPredefinedPattern(renderer, engine, state, ev)
 
 	handlePreviousPredefinedPattern(renderer, engine, state, ev)
 
@@ -173,7 +173,7 @@ func handleNextGeneration(
 	renderer.screen.Show()
 }
 
-func handlePredefinedPattern(
+func handleNextPredefinedPattern(
 	renderer *renderer,
 	engine *engine,
 	state *loopState,
@@ -196,12 +196,49 @@ func handlePredefinedPattern(
 
 	renderer.drawDeadCellsOnGrid(engine.livingCells)
 
+	state.boxIndex++
+	if state.boxIndex >= engine.patterns.Len() {
+		state.boxIndex = 0
+	}
 	engine.patternName, engine.livingCells = engine.patterns.Get(state.boxIndex)
 
 	renderer.drawBox(engine.patternName)
 	renderer.screen.Show()
 
-	state.boxIndex++
+}
+
+func handlePreviousPredefinedPattern(
+	renderer *renderer,
+	engine *engine,
+	state *loopState,
+	ev *tcell.EventKey,
+) {
+	if ev.Key() != tcell.KeyRune ||
+		ev.Str() != "B" ||
+		state.running ||
+		engine.patterns.Len() == 0 {
+		return
+	}
+
+	state.boxOpen = true
+
+	engine.livingCellsHistory.Clear()
+	engine.generation = 0
+
+	renderer.screen.DisableMouse()
+	renderer.removeBox()
+
+	renderer.drawDeadCellsOnGrid(engine.livingCells)
+
+	state.boxIndex--
+	if state.boxIndex < 0 {
+		state.boxIndex = engine.patterns.Len() - 1
+	}
+	engine.patternName, engine.livingCells = engine.patterns.Get(state.boxIndex)
+
+	renderer.drawBox(engine.patternName)
+	renderer.screen.Show()
+
 }
 
 func handleRun(
@@ -220,7 +257,7 @@ func handleRun(
 		renderer.removeBox()
 		renderer.drawLivingCellsOnGrid(engine.livingCells)
 
-		state.boxIndex--
+		state.boxIndex-- // TODO: remove this later!
 		state.boxOpen = false
 
 		renderer.screen.Show()
