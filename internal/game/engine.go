@@ -141,6 +141,10 @@ func (e *engine) calcNextGeneration() {
 			}
 			neighborCounts[neighborCell]++
 		}
+		// 0 living neighbors
+		if _, exist := neighborCounts[lc]; !exist {
+			deadCellsNextGen.Add(lc)
+		}
 	}
 
 	for c, count := range neighborCounts {
