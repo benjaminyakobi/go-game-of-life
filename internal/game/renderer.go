@@ -163,12 +163,6 @@ func (r *renderer) drawNewGrid() {
 	r.drawText(r.gridHeight-1, "NEON LIFE")
 }
 
-func (r *renderer) killLivingCellsOnGrid(cs cellsSet) {
-	for c := range cs {
-		r.drawSingleDeadCellOnGrid(c)
-	}
-}
-
 func (r *renderer) drawSingleDeadCellOnGrid(c cell) {
 	if c.PosY > r.gridOffset &&
 		c.PosY < r.gridHeight-1 &&
