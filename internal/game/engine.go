@@ -11,7 +11,7 @@ type cellsSet map[cell]struct{}
 
 type engine struct {
 	generation         int
-	deadCells          cellsSet // TODO: remove and use engine.killLivingCells..
+	deadCells          cellsSet
 	livingCells        cellsSet
 	livingCellsHistory cellsHistory
 	patterns           *indexedPatterns
