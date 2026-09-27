@@ -31,6 +31,7 @@ func initLoopState() *loopState {
 		dblClickDelay: 500 * time.Millisecond,
 		interval:      interval,
 		ticker:        time.NewTicker(interval),
+		boxIndex:      -1,
 	}
 }
 
