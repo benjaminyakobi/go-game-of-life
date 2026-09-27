@@ -72,6 +72,8 @@ func handleKey(
 
 	handlePredefinedPattern(renderer, engine, state, ev)
 
+	handlePreviousPredefinedPattern(renderer, engine, state, ev)
+
 	// Run / resume / accept predefined pattern
 	handleRun(renderer, engine, state, ev)
 
@@ -137,7 +139,8 @@ func handlePreviousGeneration(
 		engine.generation,
 		engine.livingCells.Len(),
 	))
-	renderer.killLivingCellsOnGrid(engine.livingCells)
+
+	renderer.drawDeadCellsOnGrid(engine.livingCells)
 
 	engine.livingCells = historyVal
 
@@ -157,12 +160,10 @@ func handleNextGeneration(
 		return
 	}
 
-	renderer.killLivingCellsOnGrid(engine.livingCells)
-
 	engine.calcNextGeneration()
 
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
 	renderer.drawDeadCellsOnGrid(engine.deadCells)
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
 
 	renderer.drawText(1, fmt.Sprintf(
 		"generation: %v, living cells: %v",
@@ -192,7 +193,8 @@ func handlePredefinedPattern(
 
 	renderer.screen.DisableMouse()
 	renderer.removeBox()
-	renderer.killLivingCellsOnGrid(engine.livingCells)
+
+	renderer.drawDeadCellsOnGrid(engine.livingCells)
 
 	engine.patternName, engine.livingCells = engine.patterns.Get(state.boxIndex)
 
