@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 )
 
 type config struct {
@@ -43,6 +44,7 @@ func (c *config) loadPatterns() *indexedPatterns {
 	for k := range out {
 		keys = append(keys, k)
 	}
+	sort.Strings(keys)
 
 	return &indexedPatterns{order: keys, sets: out}
 }
