@@ -49,12 +49,10 @@ func handleTick(renderer *renderer, engine *engine, state *loopState) {
 		return
 	}
 
-	renderer.killLivingCellsOnGrid(engine.livingCells)
-
 	engine.calcNextGeneration()
 
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
 	renderer.drawDeadCellsOnGrid(engine.deadCells)
+	renderer.drawLivingCellsOnGrid(engine.livingCells)
 
 	var text string
 
