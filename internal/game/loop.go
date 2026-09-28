@@ -65,6 +65,7 @@ func handleTick(renderer *renderer, engine *engine, state *loopState) {
 			"stopped after %v generations",
 			engine.generation,
 		)
+		engine.generation = 0
 	} else {
 		text = fmt.Sprintf(
 			"generation: %v, living cells: %v",
