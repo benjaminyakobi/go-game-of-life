@@ -257,7 +257,6 @@ func handleRun(
 		renderer.removeBox()
 		renderer.drawLivingCellsOnGrid(engine.livingCells)
 
-		state.boxIndex-- // TODO: remove this later!
 		state.boxOpen = false
 
 		renderer.screen.Show()
