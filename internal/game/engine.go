@@ -18,6 +18,21 @@ type engine struct {
 	patternName        string
 }
 
+type Engine interface {
+	GetGeneration() int
+	ResetGeneration()
+	GetLivingCells() cellsSet
+	SetLivingCells(cs cellsSet)
+	PatternName() string
+	SetPatternName(n string)
+	Patterns() *indexedPatterns
+	LivingCellsHistory() cellsHistory
+	PreviousGeneration() cellsSet
+	DeadCells() cellsSet
+	DecrementGeneration()
+	NextGeneration()
+}
+
 type cellsHistory struct {
 	cells []cellsSet
 	head  int
@@ -104,7 +119,7 @@ func (h *cellsHistory) Update(update func(cellsSet) cellsSet) {
 	}
 }
 
-func initEngine(cfg config) *engine {
+func newEngine(cfg config) Engine {
 	return &engine{
 		generation:         0,
 		deadCells:          make(cellsSet, 0),
@@ -114,7 +129,52 @@ func initEngine(cfg config) *engine {
 	}
 }
 
-func (e *engine) calcNextGeneration() {
+func (e *engine) GetGeneration() int {
+	return e.generation
+}
+
+func (e *engine) ResetGeneration() {
+	e.generation = 0
+}
+
+func (e *engine) GetLivingCells() cellsSet {
+	return e.livingCells
+}
+
+func (e *engine) SetLivingCells(cs cellsSet) {
+	e.livingCells = cs
+}
+
+func (e *engine) PatternName() string {
+	return e.patternName
+}
+
+func (e *engine) SetPatternName(n string) {
+	e.patternName = n
+}
+
+func (e *engine) Patterns() *indexedPatterns {
+	return e.patterns
+}
+
+func (e *engine) LivingCellsHistory() cellsHistory {
+	return e.livingCellsHistory
+}
+
+func (e *engine) DeadCells() cellsSet {
+	return e.deadCells
+}
+
+func (e *engine) DecrementGeneration() {
+	e.generation--
+}
+
+func (e *engine) PreviousGeneration() cellsSet {
+	lch := e.livingCellsHistory.Pop()
+	return lch
+}
+
+func (e *engine) NextGeneration() {
 	directions := [][]int{
 		{-1, -1}, // top left
 		{0, -1},  // top mid
