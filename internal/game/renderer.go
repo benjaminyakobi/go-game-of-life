@@ -32,7 +32,7 @@ type renderer struct {
 	boxHeight  int
 	title      string
 	screen     tcell.Screen
-	engine     *engine
+	engine     Engine
 }
 
 var css = cellStyles{
@@ -44,7 +44,7 @@ var css = cellStyles{
 	box:    tcell.StyleDefault.Background(color.Black).Foreground(color.DeepSkyBlue).Bold(true),
 }
 
-func initRenderer(e *engine) (*renderer, error) {
+func initRenderer(e Engine) (*renderer, error) {
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		return nil, err
@@ -234,7 +234,7 @@ func (r *renderer) removeBox() {
 	r.boxWidth, r.boxHeight = -1, -1
 }
 
-func (r *renderer) centerCellsHistory(history *cellsHistory) {
+func (r *renderer) centerCellsHistory(history cellsHistory) {
 	history.Update(func(cs cellsSet) cellsSet {
 		return r.centerCells(cs, 0, 0, r.gridWidth, r.gridHeight)
 	})
@@ -266,7 +266,7 @@ func (r *renderer) centerCells(
 }
 
 func (r *renderer) drawBox(title string) {
-	r.boxWidth, r.boxHeight, _, _, _, _ = r.calcPatternDimesions(r.engine.livingCells)
+	r.boxWidth, r.boxHeight, _, _, _, _ = r.calcPatternDimesions(r.engine.GetLivingCells())
 	r.boxWidth += 4
 	r.boxHeight += 4
 
@@ -345,14 +345,15 @@ func (r *renderer) drawBox(title string) {
 	)
 
 	// Center the current pattern inside the box.
-	r.engine.livingCells = r.centerCells(
-		r.engine.livingCells,
+	cs := r.centerCells(
+		r.engine.GetLivingCells(),
 		x+1,
 		y+1,
 		r.boxWidth-2,
 		r.boxHeight-2,
 	)
+	r.engine.SetLivingCells(cs)
 
-	r.drawLivingCellsOnGrid(r.engine.livingCells)
+	r.drawLivingCellsOnGrid(cs)
 	r.drawText(1, title)
 }
