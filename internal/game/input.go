@@ -9,10 +9,12 @@ import (
 	"github.com/gdamore/tcell/v3"
 )
 
+// TODO: why do i need engine when I have renderer.engine?
+
 // NOTE: event dispatcher
 func handleEvent(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev tcell.Event,
 ) bool {
@@ -32,20 +34,21 @@ func handleEvent(
 
 func handleResize(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 ) {
 	renderer.drawNewGrid()
 
 	if state.boxOpen {
-		renderer.drawBox(renderer.engine.patternName)
+		renderer.drawBox(renderer.engine.PatternName())
 	} else {
-		renderer.engine.livingCells = renderer.centerCells(
-			renderer.engine.livingCells,
+		cs := renderer.centerCells(
+			renderer.engine.GetLivingCells(),
 			0, 0, renderer.gridWidth, renderer.gridHeight)
-		renderer.drawLivingCellsOnGrid(engine.livingCells)
+		renderer.engine.SetLivingCells(cs)
+		renderer.drawLivingCellsOnGrid(cs)
 
-		renderer.centerCellsHistory(&renderer.engine.livingCellsHistory)
+		renderer.centerCellsHistory(renderer.engine.LivingCellsHistory())
 	}
 
 	renderer.screen.Show()
@@ -54,7 +57,7 @@ func handleResize(
 // NOTE: event dispatcher for keyboard events
 func handleKey(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) bool {
@@ -90,7 +93,7 @@ func handleKey(
 
 func handlePause(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -107,7 +110,7 @@ func handlePause(
 
 		renderer.drawText(1, fmt.Sprintf(
 			"paused after %v generations",
-			engine.generation,
+			renderer.engine.GetGeneration(),
 		))
 		renderer.screen.Show()
 	}
@@ -115,7 +118,7 @@ func handlePause(
 
 func handlePreviousGeneration(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -125,32 +128,32 @@ func handlePreviousGeneration(
 		return
 	}
 
-	historyVal := engine.livingCellsHistory.Pop()
+	historyVal := renderer.engine.PreviousGeneration()
 	if historyVal == nil {
 		return
 	}
 
-	if engine.generation > 0 {
-		engine.generation--
+	if renderer.engine.GetGeneration() > 0 {
+		renderer.engine.DecrementGeneration()
 	}
 
 	renderer.drawText(1, fmt.Sprintf(
 		"history | generation: %v, living cells: %v",
-		engine.generation,
-		engine.livingCells.Len(),
+		renderer.engine.GetGeneration(),
+		renderer.engine.GetLivingCells().Len(),
 	))
 
-	renderer.drawDeadCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(renderer.engine.GetLivingCells())
 
-	engine.livingCells = historyVal
+	renderer.engine.SetLivingCells(historyVal)
 
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawLivingCellsOnGrid(renderer.engine.GetLivingCells())
 	renderer.screen.Show()
 }
 
 func handleNextGeneration(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -160,90 +163,98 @@ func handleNextGeneration(
 		return
 	}
 
-	engine.calcNextGeneration()
+	renderer.engine.NextGeneration()
 
-	renderer.drawDeadCellsOnGrid(engine.deadCells)
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(renderer.engine.DeadCells())
+	renderer.drawLivingCellsOnGrid(renderer.engine.GetLivingCells())
 
 	renderer.drawText(1, fmt.Sprintf(
 		"generation: %v, living cells: %v",
-		engine.generation,
-		engine.livingCells.Len(),
+		renderer.engine.GetGeneration(),
+		renderer.engine.GetLivingCells().Len(),
 	))
 	renderer.screen.Show()
 }
 
 func handleNextPredefinedPattern(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
 	if ev.Key() != tcell.KeyRune ||
 		ev.Str() != "b" ||
 		state.running ||
-		engine.patterns.Len() == 0 {
+		renderer.engine.Patterns().Len() == 0 {
 		return
 	}
 
 	state.boxOpen = true
 
-	engine.livingCellsHistory.Clear()
-	engine.generation = 0
+	lch := renderer.engine.LivingCellsHistory()
+	lch.Clear()
+	// renderer.engine.LivingCellsHistory().Clear()
+	renderer.engine.ResetGeneration()
 
 	renderer.screen.DisableMouse()
 	renderer.removeBox()
 
-	renderer.drawDeadCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(renderer.engine.GetLivingCells())
 
 	state.boxIndex++
-	if state.boxIndex >= engine.patterns.Len() {
+	if state.boxIndex >= renderer.engine.Patterns().Len() {
 		state.boxIndex = 0
 	}
-	engine.patternName, engine.livingCells = engine.patterns.Get(state.boxIndex)
+	patternName, livingCells := renderer.engine.Patterns().Get(state.boxIndex)
+	renderer.engine.SetLivingCells(livingCells)
+	renderer.engine.SetPatternName(patternName)
 
-	renderer.drawBox(engine.patternName)
+	renderer.drawBox(renderer.engine.PatternName())
 	renderer.screen.Show()
 
 }
 
 func handlePreviousPredefinedPattern(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
 	if ev.Key() != tcell.KeyRune ||
 		ev.Str() != "B" ||
 		state.running ||
-		engine.patterns.Len() == 0 {
+		renderer.engine.Patterns().Len() == 0 {
 		return
 	}
 
 	state.boxOpen = true
 
-	engine.livingCellsHistory.Clear()
-	engine.generation = 0
+	lch := renderer.engine.LivingCellsHistory()
+	lch.Clear()
+	// renderer.engine.LivingCellsHistory().Clear()
+	renderer.engine.ResetGeneration()
 
 	renderer.screen.DisableMouse()
 	renderer.removeBox()
 
-	renderer.drawDeadCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(renderer.engine.GetLivingCells())
 
 	state.boxIndex--
 	if state.boxIndex < 0 {
-		state.boxIndex = engine.patterns.Len() - 1
+		state.boxIndex = renderer.engine.Patterns().Len() - 1
 	}
-	engine.patternName, engine.livingCells = engine.patterns.Get(state.boxIndex)
+	patternName, livingCells := renderer.engine.Patterns().Get(state.boxIndex)
+	renderer.engine.SetLivingCells(livingCells)
+	renderer.engine.SetPatternName(patternName)
 
-	renderer.drawBox(engine.patternName)
+	renderer.drawBox(renderer.engine.PatternName())
 	renderer.screen.Show()
 
 }
 
 func handleRun(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -255,7 +266,7 @@ func handleRun(
 		renderer.screen.EnableMouse()
 
 		renderer.removeBox()
-		renderer.drawLivingCellsOnGrid(engine.livingCells)
+		renderer.drawLivingCellsOnGrid(renderer.engine.GetLivingCells())
 
 		state.boxOpen = false
 
@@ -264,10 +275,10 @@ func handleRun(
 		return
 	}
 
-	if engine.livingCells.Len() == 0 {
+	if renderer.engine.GetLivingCells().Len() == 0 {
 		renderer.drawText(1, fmt.Sprintf(
 			"not starting, select cells first %v",
-			engine.livingCells.Len(),
+			renderer.engine.GetLivingCells().Len(),
 		))
 		renderer.screen.Show()
 
@@ -318,7 +329,7 @@ func handleDecreaseSpeed(
 
 func handleStop(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -334,14 +345,14 @@ func handleStop(
 
 	renderer.drawText(1, fmt.Sprintf(
 		"stopped after %v generations",
-		engine.generation,
+		renderer.engine.GetGeneration(),
 	))
 	renderer.screen.Show()
 }
 
 func handleMouse(
 	renderer *renderer,
-	engine *engine,
+	engine Engine,
 	state *loopState,
 	ev *tcell.EventMouse,
 ) {
@@ -367,24 +378,24 @@ func handleMouse(
 	if now.Sub(state.lastClickTime) <= state.dblClickDelay &&
 		c.PosX == state.lastX &&
 		c.PosY == state.lastY {
-		engine.livingCells.Remove(c)
+		renderer.engine.GetLivingCells().Remove(c)
 		renderer.drawSingleDeadCellOnGrid(c)
 
 		renderer.drawText(1, fmt.Sprintf(
 			"unselected [%v, %v] - living cells: %v",
 			c.PosX,
 			c.PosY,
-			engine.livingCells.Len(),
+			renderer.engine.GetLivingCells().Len(),
 		))
 	} else {
-		engine.livingCells.Add(c)
+		renderer.engine.GetLivingCells().Add(c)
 		renderer.drawSingleLivingCellOnGrid(c)
 
 		renderer.drawText(1, fmt.Sprintf(
 			"selected [%v, %v] - living cells: %v",
 			c.PosX,
 			c.PosY,
-			engine.livingCells.Len(),
+			renderer.engine.GetLivingCells().Len(),
 		))
 	}
 
