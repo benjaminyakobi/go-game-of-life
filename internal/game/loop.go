@@ -45,32 +45,33 @@ func cleanup(renderer *renderer) {
 	}
 }
 
-func handleTick(renderer *renderer, engine *engine, state *loopState) {
+func handleTick(renderer *renderer, engine Engine, state *loopState) {
 	if !state.running {
 		return
 	}
 
-	engine.calcNextGeneration()
+	engine.NextGeneration()
 
-	renderer.drawDeadCellsOnGrid(engine.deadCells)
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawDeadCellsOnGrid(renderer.engine.DeadCells())
+	renderer.drawLivingCellsOnGrid(renderer.engine.GetLivingCells())
 
 	var text string
 
-	if engine.livingCells.Len() == 0 {
+	if renderer.engine.GetLivingCells().Len() == 0 {
 		state.running = false
 		renderer.screen.EnableMouse()
 
 		text = fmt.Sprintf(
 			"stopped after %v generations",
-			engine.generation,
+			renderer.engine.GetGeneration(),
 		)
-		engine.generation = 0
+		// engine.generation = 0
+		renderer.engine.ResetGeneration()
 	} else {
 		text = fmt.Sprintf(
 			"generation: %v, living cells: %v",
-			engine.generation,
-			engine.livingCells.Len(),
+			renderer.engine.GetGeneration(),
+			renderer.engine.GetLivingCells().Len(),
 		)
 	}
 
@@ -78,13 +79,13 @@ func handleTick(renderer *renderer, engine *engine, state *loopState) {
 	renderer.screen.Show()
 }
 
-func initializeGame(renderer *renderer, engine *engine) {
+func initializeGame(renderer *renderer, engine Engine) {
 	renderer.drawNewGrid()
-	renderer.drawLivingCellsOnGrid(engine.livingCells)
+	renderer.drawLivingCellsOnGrid(engine.GetLivingCells())
 	renderer.screen.Show()
 }
 
-func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
+func runGameLoop(renderer *renderer, engine Engine, state *loopState) {
 	for {
 		select {
 		case <-state.ticker.C:
@@ -101,7 +102,7 @@ func runGameLoop(renderer *renderer, engine *engine, state *loopState) {
 func Start() {
 	cfg := loadConfig()
 
-	engine := initEngine(cfg)
+	engine := newEngine(cfg)
 
 	renderer, err := initRenderer(engine)
 	if err != nil {
