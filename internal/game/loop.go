@@ -92,7 +92,7 @@ func runGameLoop(renderer *renderer, engine Engine, state *loopState) {
 			handleTick(renderer, engine, state)
 
 		case ev := <-renderer.screen.EventQ():
-			if handleEvent(renderer, engine, state, ev) {
+			if handleEvent(renderer, state, ev) {
 				return
 			}
 		}

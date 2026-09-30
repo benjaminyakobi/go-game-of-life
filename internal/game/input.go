@@ -9,24 +9,21 @@ import (
 	"github.com/gdamore/tcell/v3"
 )
 
-// TODO: why do i need engine when I have renderer.engine?
-
 // NOTE: event dispatcher
 func handleEvent(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev tcell.Event,
 ) bool {
 	switch ev := ev.(type) {
 	case *tcell.EventResize:
-		handleResize(renderer, engine, state)
+		handleResize(renderer, state)
 
 	case *tcell.EventKey:
-		return handleKey(renderer, engine, state, ev)
+		return handleKey(renderer, state, ev)
 
 	case *tcell.EventMouse:
-		handleMouse(renderer, engine, state, ev)
+		handleMouse(renderer, state, ev)
 	}
 
 	return false
@@ -34,7 +31,6 @@ func handleEvent(
 
 func handleResize(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 ) {
 	renderer.drawNewGrid()
@@ -57,7 +53,6 @@ func handleResize(
 // NOTE: event dispatcher for keyboard events
 func handleKey(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) bool {
@@ -67,24 +62,24 @@ func handleKey(
 		return true
 	}
 
-	handlePause(renderer, engine, state, ev)
+	handlePause(renderer, state, ev)
 
-	handlePreviousGeneration(renderer, engine, state, ev)
+	handlePreviousGeneration(renderer, state, ev)
 
-	handleNextGeneration(renderer, engine, state, ev)
+	handleNextGeneration(renderer, state, ev)
 
-	handleNextPredefinedPattern(renderer, engine, state, ev)
+	handleNextPredefinedPattern(renderer, state, ev)
 
-	handlePreviousPredefinedPattern(renderer, engine, state, ev)
+	handlePreviousPredefinedPattern(renderer, state, ev)
 
 	// Run / resume / accept predefined pattern
-	handleRun(renderer, engine, state, ev)
+	handleRun(renderer, state, ev)
 
 	handleIncreaseSpeed(state, ev, keyNow)
 
 	handleDecreaseSpeed(state, ev, keyNow)
 
-	handleStop(renderer, engine, state, ev)
+	handleStop(renderer, state, ev)
 
 	state.lastKeyTime = keyNow
 
@@ -93,7 +88,6 @@ func handleKey(
 
 func handlePause(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -118,7 +112,6 @@ func handlePause(
 
 func handlePreviousGeneration(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -153,7 +146,6 @@ func handlePreviousGeneration(
 
 func handleNextGeneration(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -178,7 +170,6 @@ func handleNextGeneration(
 
 func handleNextPredefinedPattern(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -216,7 +207,6 @@ func handleNextPredefinedPattern(
 
 func handlePreviousPredefinedPattern(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -254,7 +244,6 @@ func handlePreviousPredefinedPattern(
 
 func handleRun(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -329,7 +318,6 @@ func handleDecreaseSpeed(
 
 func handleStop(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventKey,
 ) {
@@ -352,7 +340,6 @@ func handleStop(
 
 func handleMouse(
 	renderer *renderer,
-	engine Engine,
 	state *loopState,
 	ev *tcell.EventMouse,
 ) {
