@@ -45,12 +45,12 @@ func cleanup(renderer *renderer) {
 	}
 }
 
-func handleTick(renderer *renderer, engine Engine, state *loopState) {
+func handleTick(renderer *renderer, state *loopState) {
 	if !state.running {
 		return
 	}
 
-	engine.NextGeneration()
+	renderer.engine.NextGeneration()
 
 	renderer.drawDeadCellsOnGrid(renderer.engine.DeadCells())
 	renderer.drawLivingCellsOnGrid(renderer.engine.GetLivingCells())
@@ -85,11 +85,11 @@ func initializeGame(renderer *renderer, engine Engine) {
 	renderer.screen.Show()
 }
 
-func runGameLoop(renderer *renderer, engine Engine, state *loopState) {
+func runGameLoop(renderer *renderer, state *loopState) {
 	for {
 		select {
 		case <-state.ticker.C:
-			handleTick(renderer, engine, state)
+			handleTick(renderer, state)
 
 		case ev := <-renderer.screen.EventQ():
 			if handleEvent(renderer, state, ev) {
@@ -116,5 +116,5 @@ func Start() {
 	state := initLoopState()
 	defer state.ticker.Stop()
 
-	runGameLoop(renderer, engine, state)
+	runGameLoop(renderer, state)
 }
