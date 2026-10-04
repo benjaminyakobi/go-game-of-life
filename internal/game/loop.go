@@ -65,7 +65,6 @@ func handleTick(renderer *renderer, state *loopState) {
 			"stopped after %v generations",
 			renderer.engine.GetGeneration(),
 		)
-		// engine.generation = 0
 		renderer.engine.ResetGeneration()
 	} else {
 		text = fmt.Sprintf(
@@ -79,9 +78,9 @@ func handleTick(renderer *renderer, state *loopState) {
 	renderer.screen.Show()
 }
 
-func initializeGame(renderer *renderer, engine Engine) {
+func initializeGame(renderer *renderer) {
 	renderer.drawNewGrid()
-	renderer.drawLivingCellsOnGrid(engine.GetLivingCells())
+	renderer.drawLivingCellsOnGrid(renderer.engine.GetLivingCells())
 	renderer.screen.Show()
 }
 
@@ -111,7 +110,7 @@ func Start() {
 
 	defer cleanup(renderer)
 
-	initializeGame(renderer, engine)
+	initializeGame(renderer)
 
 	state := initLoopState()
 	defer state.ticker.Stop()
