@@ -75,7 +75,7 @@ func initRenderer(e Engine) (*renderer, error) {
 	}, nil
 }
 
-func cleanup(r *renderer) {
+func (r *renderer) cleanup() {
 	maybePanic := recover()
 
 	r.screen.Fini()
@@ -85,7 +85,7 @@ func cleanup(r *renderer) {
 	}
 }
 
-func handleTick(r *renderer, state *loopState) {
+func (r *renderer) handleTick(state *loopState) {
 	if !state.running {
 		return
 	}
@@ -118,17 +118,17 @@ func handleTick(r *renderer, state *loopState) {
 	r.screen.Show()
 }
 
-func initializeGame(r *renderer) {
+func (r *renderer) initializeGame() {
 	r.drawNewGrid()
 	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
 	r.screen.Show()
 }
 
-func runGameLoop(r *renderer, state *loopState) {
+func (r *renderer) runGameLoop(state *loopState) {
 	for {
 		select {
 		case <-state.ticker.C:
-			handleTick(r, state)
+			r.handleTick(state)
 
 		case ev := <-r.screen.EventQ():
 			if handleEvent(r, state, ev) {
