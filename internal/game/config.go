@@ -16,17 +16,17 @@ type config struct {
 }
 
 type indexedPatterns struct {
-	order []string
-	sets  map[string]cellsSet
+	keys []string
+	sets map[string]cellsSet
 }
 
 func (ip *indexedPatterns) Len() int {
-	return len(ip.order)
+	return len(ip.keys)
 }
 
 func (ip *indexedPatterns) Get(i int) (string, cellsSet) {
-	cyclicIndex := i % len(ip.order)
-	patternName := ip.order[cyclicIndex]
+	cyclicIndex := i % len(ip.keys)
+	patternName := ip.keys[cyclicIndex]
 	return patternName, ip.sets[patternName]
 }
 
@@ -46,7 +46,7 @@ func (c *config) loadPatterns() *indexedPatterns {
 	}
 	sort.Strings(keys)
 
-	return &indexedPatterns{order: keys, sets: sets}
+	return &indexedPatterns{keys: keys, sets: sets}
 }
 
 func loadConfig() config {
