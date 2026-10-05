@@ -36,12 +36,18 @@ type renderer struct {
 }
 
 var css = cellStyles{
-	def:    tcell.StyleDefault.Background(color.Black).Foreground(color.LightCyan),
-	border: tcell.StyleDefault.Background(color.Black).Foreground(color.MediumOrchid).Bold(true),
-	hud:    tcell.StyleDefault.Background(color.Black).Foreground(color.HotPink).Bold(true),
-	dead:   tcell.StyleDefault.Background(color.Black).Foreground(color.DarkSlateBlue),
-	live:   tcell.StyleDefault.Background(color.Black).Foreground(color.Aqua).Bold(true),
-	box:    tcell.StyleDefault.Background(color.Black).Foreground(color.DeepSkyBlue).Bold(true),
+	def: tcell.StyleDefault.Background(color.Black).
+		Foreground(color.LightCyan),
+	border: tcell.StyleDefault.Background(color.Black).
+		Foreground(color.MediumOrchid).Bold(true),
+	hud: tcell.StyleDefault.Background(color.Black).
+		Foreground(color.HotPink).Bold(true),
+	dead: tcell.StyleDefault.Background(color.Black).
+		Foreground(color.DarkSlateBlue),
+	live: tcell.StyleDefault.Background(color.Black).
+		Foreground(color.Aqua).Bold(true),
+	box: tcell.StyleDefault.Background(color.Black).
+		Foreground(color.DeepSkyBlue).Bold(true),
 }
 
 func initRenderer(e Engine) (*renderer, error) {
@@ -150,7 +156,8 @@ func (r *renderer) updateCellStyle(x, y int) {
 }
 
 func (r *renderer) drawNewGrid() {
-	r.drawText(0, "click select | dbl-click clear | r run | p pause | s stop | b pattern | ←/→ history | +/- speed | esc exit")
+	r.drawText(0, "click select | dbl-click clear | r run | p pause | "+
+		"s stop | b pattern | ←/→ history | +/- speed | esc exit")
 	r.gridWidth, r.gridHeight = r.screen.Size()
 	for w := range r.gridWidth {
 		for h := r.gridOffset; h < r.gridHeight; h++ {
