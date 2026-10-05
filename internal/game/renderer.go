@@ -3,6 +3,7 @@ package game
 // Contains game grid code
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/gdamore/tcell/v3"
@@ -72,6 +73,69 @@ func initRenderer(e Engine) (*renderer, error) {
 		screen:     screen,
 		engine:     e,
 	}, nil
+}
+
+func cleanup(r *renderer) {
+	maybePanic := recover()
+
+	r.screen.Fini()
+
+	if maybePanic != nil {
+		panic(maybePanic)
+	}
+}
+
+func handleTick(r *renderer, state *loopState) {
+	if !state.running {
+		return
+	}
+
+	r.engine.NextGeneration()
+
+	r.drawDeadCellsOnGrid(r.engine.DeadCells())
+	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
+
+	var text string
+
+	if r.engine.GetLivingCells().Len() == 0 {
+		state.running = false
+		r.screen.EnableMouse()
+
+		text = fmt.Sprintf(
+			"stopped after %v generations",
+			r.engine.GetGeneration(),
+		)
+		r.engine.ResetGeneration()
+	} else {
+		text = fmt.Sprintf(
+			"generation: %v, living cells: %v",
+			r.engine.GetGeneration(),
+			r.engine.GetLivingCells().Len(),
+		)
+	}
+
+	r.drawText(1, text)
+	r.screen.Show()
+}
+
+func initializeGame(r *renderer) {
+	r.drawNewGrid()
+	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
+	r.screen.Show()
+}
+
+func runGameLoop(r *renderer, state *loopState) {
+	for {
+		select {
+		case <-state.ticker.C:
+			handleTick(r, state)
+
+		case ev := <-r.screen.EventQ():
+			if handleEvent(r, state, ev) {
+				return
+			}
+		}
+	}
 }
 
 func (r *renderer) clearLine(y int) {
