@@ -108,12 +108,12 @@ func Start() {
 		log.Fatalf("%+v", err)
 	}
 
-	defer cleanup(renderer)
+	defer renderer.cleanup()
 
-	initializeGame(renderer)
+	renderer.initializeGame()
 
 	state := initLoopState()
 	defer state.ticker.Stop()
 
-	runGameLoop(renderer, state)
+	renderer.runGameLoop(state)
 }
