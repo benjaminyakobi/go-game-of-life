@@ -31,22 +31,22 @@ func (ip *indexedPatterns) Get(i int) (string, cellsSet) {
 }
 
 func (c *config) loadPatterns() *indexedPatterns {
-	out := make(map[string]cellsSet, len(c.Patterns))
+	sets := make(map[string]cellsSet, len(c.Patterns))
 	for name, cells := range c.Patterns {
 		set := make(cellsSet, len(cells))
 		for _, c := range cells {
 			set[c] = struct{}{}
 		}
-		out[name] = set
+		sets[name] = set
 	}
 
-	keys := make([]string, 0, len(out))
-	for k := range out {
+	keys := make([]string, 0, len(sets))
+	for k := range sets {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
-	return &indexedPatterns{order: keys, sets: out}
+	return &indexedPatterns{order: keys, sets: sets}
 }
 
 func loadConfig() config {
