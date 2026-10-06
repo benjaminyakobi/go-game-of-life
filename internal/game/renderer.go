@@ -75,6 +75,12 @@ func initRenderer(e Engine) (*renderer, error) {
 	}, nil
 }
 
+func (r *renderer) initializeGame() {
+	r.drawNewGrid()
+	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
+	r.screen.Show()
+}
+
 func (r *renderer) cleanup() {
 	maybePanic := recover()
 
@@ -118,27 +124,20 @@ func (r *renderer) handleTick(state *loopState) {
 	r.screen.Show()
 }
 
-func (r *renderer) initializeGame() {
-	r.drawNewGrid()
-	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
-	r.screen.Show()
-}
-
 // NOTE: event dispatcher
-func handleEvent(
-	renderer *renderer,
+func (r *renderer) handleEvent(
 	state *loopState,
 	ev tcell.Event,
 ) bool {
 	switch ev := ev.(type) {
 	case *tcell.EventResize:
-		handleResize(renderer, state)
+		handleResize(r, state)
 
 	case *tcell.EventKey:
-		return handleKey(renderer, state, ev)
+		return handleKey(r, state, ev)
 
 	case *tcell.EventMouse:
-		handleMouse(renderer, state, ev)
+		handleMouse(r, state, ev)
 	}
 
 	return false
@@ -151,7 +150,7 @@ func (r *renderer) runGameLoop(state *loopState) {
 			r.handleTick(state)
 
 		case ev := <-r.screen.EventQ():
-			if handleEvent(r, state, ev) {
+			if r.handleEvent(state, ev) {
 				return
 			}
 		}
