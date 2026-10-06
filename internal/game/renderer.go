@@ -124,6 +124,26 @@ func (r *renderer) initializeGame() {
 	r.screen.Show()
 }
 
+// NOTE: event dispatcher
+func handleEvent(
+	renderer *renderer,
+	state *loopState,
+	ev tcell.Event,
+) bool {
+	switch ev := ev.(type) {
+	case *tcell.EventResize:
+		handleResize(renderer, state)
+
+	case *tcell.EventKey:
+		return handleKey(renderer, state, ev)
+
+	case *tcell.EventMouse:
+		handleMouse(renderer, state, ev)
+	}
+
+	return false
+}
+
 func (r *renderer) runGameLoop(state *loopState) {
 	for {
 		select {

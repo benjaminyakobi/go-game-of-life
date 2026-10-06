@@ -6,28 +6,28 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3" // TODO: remove dependency
 )
 
-// NOTE: event dispatcher
-func handleEvent(
-	renderer *renderer,
-	state *loopState,
-	ev tcell.Event,
-) bool {
-	switch ev := ev.(type) {
-	case *tcell.EventResize:
-		handleResize(renderer, state)
-
-	case *tcell.EventKey:
-		return handleKey(renderer, state, ev)
-
-	case *tcell.EventMouse:
-		handleMouse(renderer, state, ev)
-	}
-
-	return false
-}
+// // NOTE: event dispatcher
+// func handleEvent(
+// 	renderer *renderer,
+// 	state *loopState,
+// 	ev tcell.Event,
+// ) bool { // TODO: move to renderer.go as a method not a function
+// 	switch ev := ev.(type) {
+// 	case *tcell.EventResize:
+// 		handleResize(renderer, state)
+//
+// 	case *tcell.EventKey:
+// 		return handleKey(renderer, state, ev)
+//
+// 	case *tcell.EventMouse:
+// 		handleMouse(renderer, state, ev)
+// 	}
+//
+// 	return false
+// }
 
 func handleResize(
 	renderer *renderer,
