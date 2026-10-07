@@ -5,6 +5,7 @@ package game
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -134,10 +135,48 @@ func (r *renderer) handleEvent(
 		handleResize(r, state)
 
 	case *tcell.EventKey:
-		return handleKey(r, state, ev)
+		// return handleKey(r, state, ev)
+		if ev.Key() == tcell.KeyEscape {
+			return true
+		}
 
+		keyNow := time.Now()
+
+		if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "p" {
+			handlePause(r, state)
+		} else if ev.Key() == tcell.KeyLeft {
+			handlePreviousGeneration(r, state)
+		} else if ev.Key() == tcell.KeyRight {
+			handleNextGeneration(r, state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "b" {
+			handleNextPredefinedPattern(r, state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "B" {
+			handlePreviousPredefinedPattern(r, state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "r" {
+			handleRun(r, state)
+		} else if keyNow.Sub(state.lastKeyTime) < state.dblClickDelay &&
+			ev.Key() == tcell.KeyRune &&
+			ev.Str() == "=" {
+			handleIncreaseSpeed(state)
+		} else if keyNow.Sub(state.lastKeyTime) < state.dblClickDelay &&
+			ev.Key() == tcell.KeyRune &&
+			ev.Str() == "-" {
+			handleDecreaseSpeed(state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "s" {
+			handleStop(r, state)
+		} else {
+		}
+		state.lastKeyTime = keyNow
 	case *tcell.EventMouse:
-		handleMouse(r, state, ev)
+		if ev.Buttons() == tcell.ButtonPrimary {
+			x, y := ev.Position()
+			handleMouse(r, state, x, y)
+		}
 	}
 
 	return false
