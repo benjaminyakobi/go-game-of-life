@@ -126,7 +126,7 @@ func (r *renderer) handleTick(state *loopState) {
 }
 
 // NOTE: event dispatcher
-func (r *renderer) handleEvent(
+func (r *renderer) eventDispatcher(
 	state *loopState,
 	ev tcell.Event,
 ) bool {
@@ -189,7 +189,7 @@ func (r *renderer) runGameLoop(state *loopState) {
 			r.handleTick(state)
 
 		case ev := <-r.screen.EventQ():
-			if r.handleEvent(state, ev) {
+			if r.eventDispatcher(state, ev) {
 				return
 			}
 		}
