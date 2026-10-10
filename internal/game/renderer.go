@@ -135,7 +135,6 @@ func (r *renderer) eventDispatcher(
 		handleResize(r, state)
 
 	case *tcell.EventKey:
-		// return handleKey(r, state, ev)
 		if ev.Key() == tcell.KeyEscape {
 			return true
 		}
