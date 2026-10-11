@@ -362,12 +362,6 @@ func (r *renderer) removeBox() {
 	r.boxWidth, r.boxHeight = -1, -1
 }
 
-// func (r *renderer) centerCellsHistory(history cellsHistory) {
-// 	history.Update(func(cs cellsSet) cellsSet {
-// 		return r.centerCells(cs, 0, 0, r.gridWidth, r.gridHeight)
-// 	})
-// }
-
 func (r *renderer) centerCells(
 	cs cellsSet,
 	x, y, width, height int,

@@ -21,8 +21,6 @@ func handleResize(
 			0, 0, renderer.gridWidth, renderer.gridHeight)
 		renderer.engine.SetLivingCells(cs)
 		renderer.drawLivingCellsOnGrid(cs)
-
-		// renderer.centerCellsHistory(renderer.engine.LivingCellsHistory())
 	}
 
 	renderer.screen.Show()
