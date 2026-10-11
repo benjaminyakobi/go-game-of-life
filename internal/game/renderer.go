@@ -3,7 +3,9 @@ package game
 // Contains game grid code
 
 import (
+	"fmt"
 	"math"
+	"time"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -72,6 +74,125 @@ func initRenderer(e Engine) (*renderer, error) {
 		screen:     screen,
 		engine:     e,
 	}, nil
+}
+
+func (r *renderer) initializeGame() {
+	r.drawNewGrid()
+	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
+	r.screen.Show()
+}
+
+func (r *renderer) cleanup() {
+	maybePanic := recover()
+
+	r.screen.Fini()
+
+	if maybePanic != nil {
+		panic(maybePanic)
+	}
+}
+
+func (r *renderer) handleTick(state *loopState) {
+	if !state.running {
+		return
+	}
+
+	r.engine.NextGeneration()
+
+	r.drawDeadCellsOnGrid(r.engine.DeadCells())
+	r.drawLivingCellsOnGrid(r.engine.GetLivingCells())
+
+	var text string
+
+	if r.engine.GetLivingCells().Len() == 0 {
+		state.running = false
+		r.screen.EnableMouse()
+
+		text = fmt.Sprintf(
+			"stopped after %v generations",
+			r.engine.GetGeneration(),
+		)
+		r.engine.ResetGeneration()
+	} else {
+		text = fmt.Sprintf(
+			"generation: %v, living cells: %v",
+			r.engine.GetGeneration(),
+			r.engine.GetLivingCells().Len(),
+		)
+	}
+
+	r.drawText(1, text)
+	r.screen.Show()
+}
+
+// NOTE: event dispatcher
+func (r *renderer) eventDispatcher(
+	state *loopState,
+	ev tcell.Event,
+) bool {
+	switch ev := ev.(type) {
+	case *tcell.EventResize:
+		handleResize(r, state)
+
+	case *tcell.EventKey:
+		if ev.Key() == tcell.KeyEscape {
+			return true
+		}
+
+		keyNow := time.Now()
+
+		if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "p" {
+			handlePause(r, state)
+		} else if ev.Key() == tcell.KeyLeft {
+			handlePreviousGeneration(r, state)
+		} else if ev.Key() == tcell.KeyRight {
+			handleNextGeneration(r, state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "b" {
+			handleNextPredefinedPattern(r, state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "B" {
+			handlePreviousPredefinedPattern(r, state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "r" {
+			handleRun(r, state)
+		} else if keyNow.Sub(state.lastKeyTime) < state.dblClickDelay &&
+			ev.Key() == tcell.KeyRune &&
+			ev.Str() == "=" {
+			handleIncreaseSpeed(state)
+		} else if keyNow.Sub(state.lastKeyTime) < state.dblClickDelay &&
+			ev.Key() == tcell.KeyRune &&
+			ev.Str() == "-" {
+			handleDecreaseSpeed(state)
+		} else if ev.Key() == tcell.KeyRune &&
+			ev.Str() == "s" {
+			handleStop(r, state)
+		} else {
+		}
+		state.lastKeyTime = keyNow
+	case *tcell.EventMouse:
+		if ev.Buttons() == tcell.ButtonPrimary {
+			x, y := ev.Position()
+			handleMouse(r, state, x, y)
+		}
+	}
+
+	return false
+}
+
+func (r *renderer) runGameLoop(state *loopState) {
+	for {
+		select {
+		case <-state.ticker.C:
+			r.handleTick(state)
+
+		case ev := <-r.screen.EventQ():
+			if r.eventDispatcher(state, ev) {
+				return
+			}
+		}
+	}
 }
 
 func (r *renderer) clearLine(y int) {

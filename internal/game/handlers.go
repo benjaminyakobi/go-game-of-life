@@ -5,29 +5,7 @@ package game
 import (
 	"fmt"
 	"time"
-
-	"github.com/gdamore/tcell/v3"
 )
-
-// NOTE: event dispatcher
-func handleEvent(
-	renderer *renderer,
-	state *loopState,
-	ev tcell.Event,
-) bool {
-	switch ev := ev.(type) {
-	case *tcell.EventResize:
-		handleResize(renderer, state)
-
-	case *tcell.EventKey:
-		return handleKey(renderer, state, ev)
-
-	case *tcell.EventMouse:
-		handleMouse(renderer, state, ev)
-	}
-
-	return false
-}
 
 func handleResize(
 	renderer *renderer,
@@ -50,74 +28,30 @@ func handleResize(
 	renderer.screen.Show()
 }
 
-// NOTE: event dispatcher for keyboard events
-func handleKey(
-	renderer *renderer,
-	state *loopState,
-	ev *tcell.EventKey,
-) bool {
-	keyNow := time.Now()
-
-	if ev.Key() == tcell.KeyEscape {
-		return true
-	}
-
-	handlePause(renderer, state, ev)
-
-	handlePreviousGeneration(renderer, state, ev)
-
-	handleNextGeneration(renderer, state, ev)
-
-	handleNextPredefinedPattern(renderer, state, ev)
-
-	handlePreviousPredefinedPattern(renderer, state, ev)
-
-	// Run / resume / accept predefined pattern
-	handleRun(renderer, state, ev)
-
-	handleIncreaseSpeed(state, ev, keyNow)
-
-	handleDecreaseSpeed(state, ev, keyNow)
-
-	handleStop(renderer, state, ev)
-
-	state.lastKeyTime = keyNow
-
-	return false
-}
-
 func handlePause(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyRune ||
-		ev.Str() != "p" ||
-		state.boxOpen {
+	if state.boxOpen || !state.running {
 		return
 	}
 
-	if state.running {
-		state.running = false
+	state.running = false
 
-		renderer.screen.EnableMouse()
+	renderer.screen.EnableMouse()
 
-		renderer.drawText(1, fmt.Sprintf(
-			"paused after %v generations",
-			renderer.engine.GetGeneration(),
-		))
-		renderer.screen.Show()
-	}
+	renderer.drawText(1, fmt.Sprintf(
+		"paused after %v generations",
+		renderer.engine.GetGeneration(),
+	))
+	renderer.screen.Show()
 }
 
 func handlePreviousGeneration(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyLeft ||
-		state.running ||
-		state.boxOpen {
+	if state.running || state.boxOpen {
 		return
 	}
 
@@ -147,11 +81,8 @@ func handlePreviousGeneration(
 func handleNextGeneration(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyRight ||
-		state.running ||
-		state.boxOpen {
+	if state.running || state.boxOpen {
 		return
 	}
 
@@ -171,12 +102,8 @@ func handleNextGeneration(
 func handleNextPredefinedPattern(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyRune ||
-		ev.Str() != "b" ||
-		state.running ||
-		renderer.engine.Patterns().Len() == 0 {
+	if state.running || renderer.engine.Patterns().Len() == 0 {
 		return
 	}
 
@@ -184,7 +111,7 @@ func handleNextPredefinedPattern(
 
 	lch := renderer.engine.LivingCellsHistory()
 	lch.Clear()
-	// renderer.engine.LivingCellsHistory().Clear()
+
 	renderer.engine.ResetGeneration()
 
 	renderer.screen.DisableMouse()
@@ -208,12 +135,8 @@ func handleNextPredefinedPattern(
 func handlePreviousPredefinedPattern(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyRune ||
-		ev.Str() != "B" ||
-		state.running ||
-		renderer.engine.Patterns().Len() == 0 {
+	if state.running || renderer.engine.Patterns().Len() == 0 {
 		return
 	}
 
@@ -221,7 +144,7 @@ func handlePreviousPredefinedPattern(
 
 	lch := renderer.engine.LivingCellsHistory()
 	lch.Clear()
-	// renderer.engine.LivingCellsHistory().Clear()
+
 	renderer.engine.ResetGeneration()
 
 	renderer.screen.DisableMouse()
@@ -245,12 +168,7 @@ func handlePreviousPredefinedPattern(
 func handleRun(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyRune || ev.Str() != "r" {
-		return
-	}
-
 	if state.boxOpen {
 		renderer.screen.EnableMouse()
 
@@ -282,16 +200,7 @@ func handleRun(
 
 func handleIncreaseSpeed(
 	state *loopState,
-	ev *tcell.EventKey,
-	keyNow time.Time,
 ) {
-	if keyNow.Sub(state.lastKeyTime) > state.dblClickDelay ||
-		ev.Key() != tcell.KeyRune ||
-		ev.Str() != "=" ||
-		!state.running {
-		return
-	}
-
 	if state.interval > 100*time.Millisecond {
 		state.interval -= 100 * time.Millisecond
 		state.ticker.Reset(state.interval)
@@ -300,16 +209,7 @@ func handleIncreaseSpeed(
 
 func handleDecreaseSpeed(
 	state *loopState,
-	ev *tcell.EventKey,
-	keyNow time.Time,
 ) {
-	if keyNow.Sub(state.lastKeyTime) > state.dblClickDelay ||
-		ev.Key() != tcell.KeyRune ||
-		ev.Str() != "-" ||
-		!state.running {
-		return
-	}
-
 	if state.interval < 1000*time.Millisecond {
 		state.interval += 100 * time.Millisecond
 		state.ticker.Reset(state.interval)
@@ -319,11 +219,8 @@ func handleDecreaseSpeed(
 func handleStop(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventKey,
 ) {
-	if ev.Key() != tcell.KeyRune ||
-		ev.Str() != "s" ||
-		!state.running {
+	if !state.running {
 		return
 	}
 
@@ -341,14 +238,8 @@ func handleStop(
 func handleMouse(
 	renderer *renderer,
 	state *loopState,
-	ev *tcell.EventMouse,
+	x, y int,
 ) {
-	x, y := ev.Position()
-
-	if ev.Buttons() != tcell.ButtonPrimary {
-		return
-	}
-
 	now := time.Now()
 
 	validCell := y > renderer.gridOffset &&
