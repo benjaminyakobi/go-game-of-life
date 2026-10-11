@@ -22,7 +22,7 @@ func handleResize(
 		renderer.engine.SetLivingCells(cs)
 		renderer.drawLivingCellsOnGrid(cs)
 
-		renderer.centerCellsHistory(renderer.engine.LivingCellsHistory())
+		// renderer.centerCellsHistory(renderer.engine.LivingCellsHistory())
 	}
 
 	renderer.screen.Show()
