@@ -26,3 +26,39 @@ Every cell interacts with its eight neighbours, which are the cells that are hor
 - `Left Arrow` - When game is paused: Previous Generation
 - `Right Arrow` - When game is paused: Next Generation
 
+## Architecture
+
+The application is split into small files under `internal/game/`, with each file owning one part of the terminal game:
+
+- `config.go` loads `conf.json` and predefined patterns.
+- `engine.go` owns the Game of Life state: living cells, dead cells, generation count, patterns, and history.
+- `handlers.go` handles keyboard, mouse, and resize events from the terminal.
+- `loop.go` starts the game and runs the main loop using a ticker and terminal event queue.
+- `renderer.go` draws the grid, cells, text, and pattern picker using `tcell`.
+
+Runtime flow:
+
+```text
+cmd/grpc/server
+  |
+  v
+internal/game.Start()
+  |
+  |-- loadConfig()      -> reads configuration and predefined patterns
+  |-- initEngine()      -> creates the game state
+  |-- initRenderer()    -> creates the terminal UI
+  |
+  v
+runGameLoop()
+  |
+  |-- ticker event      -> handleTick() -> engine calculates next generation -> renderer redraws cells
+  |
+  |-- terminal event    -> handleEvent() -> input handlers update engine/state -> renderer redraws UI
+```
+
+In simple terms: 
+- `loop.go` keeps the program running
+- `handlers.go` turns user actions into game actions
+- `engine.go` decides what the game state should be
+- `renderer.go` shows that state in the terminal.
+
