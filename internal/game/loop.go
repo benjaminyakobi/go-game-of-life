@@ -3,8 +3,9 @@ package game
 // Contains game loop code
 
 import (
-	// "fmt"
+	"fmt"
 	"log"
+	"os"
 	"time"
 )
 
@@ -35,22 +36,30 @@ func initLoopState() *loopState {
 	}
 }
 
-func Start() {
-	cfg := loadConfig()
+func Start(engineType string) {
+	switch engineType {
+	case "default":
+		cfg := loadConfig()
 
-	engine := newEngine(cfg)
+		engine := newEngine(cfg)
 
-	renderer, err := initRenderer(engine)
-	if err != nil {
-		log.Fatalf("%+v", err)
+		renderer, err := initRenderer(engine)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+
+		defer renderer.cleanup()
+
+		renderer.initializeGame()
+
+		state := initLoopState()
+		defer state.ticker.Stop()
+
+		renderer.runGameLoop(state)
+	case "bit":
+		// TODO: implement
+	default:
+		fmt.Fprintln(os.Stderr, "unknown engine:", engineType)
+		os.Exit(1)
 	}
-
-	defer renderer.cleanup()
-
-	renderer.initializeGame()
-
-	state := initLoopState()
-	defer state.ticker.Stop()
-
-	renderer.runGameLoop(state)
 }
