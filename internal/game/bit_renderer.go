@@ -19,3 +19,13 @@ func initScreen() (tcell.Screen, error) {
 	}
 	return screen, nil
 }
+
+func newBitRenderer(be BitEngine, s tcell.Screen) (*bitRenderer, error) {
+	s.EnableMouse()
+	s.Clear()
+
+	return &bitRenderer{
+		screen: s,
+		engine: be,
+	}, nil
+}
