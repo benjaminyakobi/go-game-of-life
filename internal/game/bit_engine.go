@@ -5,3 +5,7 @@ type bitGrid struct {
 	living []int
 	gen    int
 }
+
+type BitEngine interface {
+	NextGen()
+}
