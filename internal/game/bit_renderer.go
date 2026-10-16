@@ -44,3 +44,13 @@ func newBitRenderer(be BitEngine, s tcell.Screen) (*bitRenderer, error) {
 		engine: be,
 	}, nil
 }
+
+func (br *bitRenderer) cleanup() {
+	maybePanic := recover()
+
+	br.screen.Fini()
+
+	if maybePanic != nil {
+		panic(maybePanic)
+	}
+}
