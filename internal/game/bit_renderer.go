@@ -56,7 +56,17 @@ func (br *bitRenderer) cleanup() {
 }
 
 func (br *bitRenderer) initGame() {
-	// br.drawGrid()
+	br.drawGrid()
 	// br.drawLiving(br.engine.getLiving())
 	// br.screen.Show()
+}
+
+func (br *bitRenderer) drawGrid() {
+	width, height := br.screen.Size()
+
+	for w := range width {
+		for h := range height {
+			br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+		}
+	}
 }
