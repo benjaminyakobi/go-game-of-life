@@ -70,3 +70,26 @@ func (br *bitRenderer) drawGrid() {
 		}
 	}
 }
+
+func (br *bitRenderer) runGameLoop(state *loopState) {
+	for {
+		select {
+		case <-state.ticker.C:
+			br.handleTick(state)
+
+		case ev := <-br.screen.EventQ():
+			if br.eventDispatcher(state, ev) {
+				return
+			}
+		}
+	}
+}
+
+func (br *bitRenderer) handleTick(state *loopState) {
+	// TODO: implement
+}
+
+func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
+	// TODO: implement
+	return false
+}
