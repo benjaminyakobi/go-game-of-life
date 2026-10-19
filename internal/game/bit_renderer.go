@@ -86,10 +86,34 @@ func (br *bitRenderer) runGameLoop(state *loopState) {
 }
 
 func (br *bitRenderer) handleTick(state *loopState) {
-	// TODO: implement
+	if !state.running {
+		return
+	}
+
+	br.engine.nextGen()
+
+	living := br.engine.getLiving()
+	br.drawLiving(living)
+
+	if len(living) == 0 {
+		state.running = false
+		br.screen.EnableMouse()
+		br.engine.resetGen()
+	}
+	br.screen.Show()
 }
 
 func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
-	// TODO: implement
+	// TODO: add new events: select/unselect, run/stop
+	switch ev := ev.(type) {
+	case *tcell.EventKey:
+		if ev.Key() == tcell.KeyEscape {
+			return true
+		}
+	}
 	return false
+}
+
+func (br *bitRenderer) drawLiving(living []int) {
+	// TODO: implement
 }
