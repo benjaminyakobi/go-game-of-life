@@ -54,3 +54,9 @@ func (br *bitRenderer) cleanup() {
 		panic(maybePanic)
 	}
 }
+
+func (br *bitRenderer) initGame() {
+	// br.drawGrid()
+	// br.drawLiving(br.engine.getLiving())
+	// br.screen.Show()
+}
