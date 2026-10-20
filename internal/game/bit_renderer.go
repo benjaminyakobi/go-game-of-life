@@ -66,7 +66,8 @@ func (br *bitRenderer) drawGrid() {
 
 	for w := range width {
 		for h := range height {
-			br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+			// br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+			br.drawDead(w, h)
 		}
 	}
 }
@@ -126,4 +127,12 @@ func (br *bitRenderer) createIndex(x, y int) int {
 func (br *bitRenderer) revertIndex(idx int) (int, int) {
 	w, _ := br.screen.Size()
 	return idx % w, idx / w
+}
+
+func (br *bitRenderer) drawDead(w, h int) {
+	br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+}
+
+func (br *bitRenderer) drawLive(w, h int) {
+	br.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
 }
