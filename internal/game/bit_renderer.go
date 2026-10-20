@@ -57,8 +57,8 @@ func (br *bitRenderer) cleanup() {
 
 func (br *bitRenderer) initGame() {
 	br.drawGrid()
-	// br.drawLiving(br.engine.getLiving())
-	// br.screen.Show()
+	br.drawLiving(br.engine.getLiving())
+	br.screen.Show()
 }
 
 func (br *bitRenderer) drawGrid() {
@@ -90,10 +90,10 @@ func (br *bitRenderer) handleTick(state *loopState) {
 		return
 	}
 
-	br.engine.nextGen()
+	br.engine.nextGen() // TODO: engine's func body not implemented yet
 
 	living := br.engine.getLiving()
-	br.drawLiving(living)
+	br.drawLiving(living) // TODO: func body not implemented yet
 
 	if len(living) == 0 {
 		state.running = false
@@ -116,4 +116,14 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 
 func (br *bitRenderer) drawLiving(living []int) {
 	// TODO: implement
+}
+
+func (br *bitRenderer) createIndex(x, y int) int {
+	w, _ := br.screen.Size()
+	return y*w + x
+}
+
+func (br *bitRenderer) revertIndex(idx int) (int, int) {
+	w, _ := br.screen.Size()
+	return idx % w, idx / w
 }
