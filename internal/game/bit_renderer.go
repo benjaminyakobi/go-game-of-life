@@ -111,6 +111,15 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 		if ev.Key() == tcell.KeyEscape {
 			return true
 		}
+	case *tcell.EventMouse:
+		if ev.Buttons() == tcell.ButtonPrimary {
+			// NOTE: 2d index -> 1d index -> draw cell
+			x, y := ev.Position()
+			idx := br.createIndex(x, y)
+			br.engine.setLiving(idx)
+			br.drawLive(x, y)
+			br.screen.Show()
+		}
 	}
 	return false
 }
