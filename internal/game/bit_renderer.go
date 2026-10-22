@@ -1,6 +1,8 @@
 package game
 
 import (
+	"time"
+
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
 )
@@ -113,12 +115,25 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 		}
 	case *tcell.EventMouse:
 		if ev.Buttons() == tcell.ButtonPrimary {
-			// NOTE: 2d index -> 1d index -> draw cell
+			now := time.Now()
 			x, y := ev.Position()
 			idx := br.createIndex(x, y)
-			br.engine.setLiving(idx)
-			br.drawLive(x, y)
+
+			if now.Sub(ls.lastClickTime) <= ls.dblClickDelay &&
+				(x == ls.lastX && y == ls.lastY) {
+				// NOTE: 2d index -> 1d index -> remove cell
+				br.engine.removeLiving(idx)
+				br.drawDead(x, y)
+
+			} else {
+				// NOTE: 2d index -> 1d index -> draw cell
+				br.engine.setLiving(idx)
+				br.drawLive(x, y)
+			}
 			br.screen.Show()
+			ls.lastClickTime = now
+			ls.lastX = x
+			ls.lastY = y
 		}
 	}
 	return false
