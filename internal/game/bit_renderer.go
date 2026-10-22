@@ -93,10 +93,10 @@ func (br *bitRenderer) handleTick(state *loopState) {
 		return
 	}
 
-	br.engine.nextGen() // TODO: engine's func body not implemented yet
+	br.engine.nextGen()
 
 	living := br.engine.getLiving()
-	br.drawLiving(living) // TODO: func body not implemented yet
+	br.drawLiving(living)
 
 	if len(living) == 0 {
 		state.running = false
@@ -117,7 +117,7 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 		if ev.Buttons() == tcell.ButtonPrimary {
 			now := time.Now()
 			x, y := ev.Position()
-			idx := br.createIndex(x, y)
+			idx := br.engine.createIndex(x, y)
 
 			if now.Sub(ls.lastClickTime) <= ls.dblClickDelay &&
 				(x == ls.lastX && y == ls.lastY) {
@@ -141,16 +141,6 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 
 func (br *bitRenderer) drawLiving(living []int) {
 	// TODO: implement
-}
-
-func (br *bitRenderer) createIndex(x, y int) int {
-	w, _ := br.screen.Size()
-	return y*w + x
-}
-
-func (br *bitRenderer) revertIndex(idx int) (int, int) {
-	w, _ := br.screen.Size()
-	return idx % w, idx / w
 }
 
 func (br *bitRenderer) drawDead(w, h int) {
