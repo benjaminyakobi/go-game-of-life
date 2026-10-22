@@ -68,7 +68,6 @@ func (br *bitRenderer) drawGrid() {
 
 	for w := range width {
 		for h := range height {
-			// br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
 			br.drawDead(w, h)
 		}
 	}
