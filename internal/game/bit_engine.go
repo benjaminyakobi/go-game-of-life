@@ -10,6 +10,12 @@ type bitGrid struct {
 
 type BitEngine interface {
 	nextGen()
+	getLiving() []int
+	setLiving(i int)
+	removeLiving(i int)
+	resetGen()
+	createIndex(x, y int) int
+	revertIndex(i int) (int, int)
 }
 
 func (bg *bitGrid) createIndex(x, y int) int {
