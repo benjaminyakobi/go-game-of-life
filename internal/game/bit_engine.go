@@ -18,6 +18,10 @@ type BitEngine interface {
 	revertIndex(i int) (int, int)
 }
 
+func (bg *bitGrid) resetGen() {
+	bg.gen = 0
+}
+
 func (bg *bitGrid) createIndex(x, y int) int {
 	return y*bg.width + x
 }
