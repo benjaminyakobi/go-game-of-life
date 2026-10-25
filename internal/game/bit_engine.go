@@ -26,6 +26,11 @@ func (bg *bitGrid) getLiving() []int {
 	return bg.living
 }
 
+func (bg *bitGrid) setLiving(i int) {
+	// TODO: should be optimized with bg.grid setting to 1
+	bg.living = append(bg.living, i)
+}
+
 func (bg *bitGrid) createIndex(x, y int) int {
 	return y*bg.width + x
 }
