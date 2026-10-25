@@ -22,6 +22,10 @@ func (bg *bitGrid) resetGen() {
 	bg.gen = 0
 }
 
+func (bg *bitGrid) getLiving() []int {
+	return bg.living
+}
+
 func (bg *bitGrid) createIndex(x, y int) int {
 	return y*bg.width + x
 }
