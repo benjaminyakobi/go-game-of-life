@@ -42,6 +42,10 @@ func (bg *bitGrid) removeLiving(i int) {
 	}
 }
 
+func (bg *bitGrid) nextGen() {
+	// TODO: implement
+}
+
 func (bg *bitGrid) createIndex(x, y int) int {
 	return y*bg.width + x
 }
