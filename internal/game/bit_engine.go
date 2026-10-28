@@ -18,6 +18,17 @@ type BitEngine interface {
 	revertIndex(i int) (int, int)
 }
 
+func newBitEngine(width, height int) (BitEngine, error) {
+	size := width * height
+	return &bitGrid{
+		width:  width,
+		height: height,
+		grid:   make([]uint64, (size+63)/64),
+		living: nil,
+		gen:    0,
+	}, nil
+}
+
 func (bg *bitGrid) resetGen() {
 	bg.gen = 0
 }
