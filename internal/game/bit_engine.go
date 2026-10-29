@@ -1,7 +1,6 @@
 package game
 
 import (
-	// "fmt"
 	"slices"
 )
 
@@ -87,7 +86,6 @@ func (bg *bitGrid) nextGen() {
 
 	}
 	for c, count := range neighborCounter {
-		// fmt.Println(count)
 		if count == 3 || slices.Contains(bg.living, c) && count == 2 {
 			livingNextGen = append(livingNextGen, c)
 		} else {
