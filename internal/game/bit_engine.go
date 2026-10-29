@@ -51,7 +51,7 @@ func (bg *bitGrid) removeLiving(i int) {
 	for j, v := range bg.living {
 		if v == i {
 			copy(bg.living[j:], bg.living[j+1:])
-			bg.living = bg.living[:len(bg.living)-1]
+			bg.living = bg.living[:len(bg.living)-2]
 			return
 		}
 	}
