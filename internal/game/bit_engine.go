@@ -1,5 +1,10 @@
 package game
 
+import (
+	// "fmt"
+	"slices"
+)
+
 type bitGrid struct {
 	width  int
 	height int // currently not in use
@@ -54,7 +59,41 @@ func (bg *bitGrid) removeLiving(i int) {
 }
 
 func (bg *bitGrid) nextGen() {
-	// TODO: implement
+	directions := [][]int{
+		{-1, -1}, // top left
+		{0, -1},  // top mid
+		{1, -1},  // top right
+		{-1, 0},  // left
+		{1, 0},   // right
+		{-1, 1},  // bottom left
+		{0, 1},   // bottom mid
+		{1, 1},   // bottom right
+	}
+	livingNextGen := []int{}
+	neighborCounter := make(map[int]int, len(bg.living))
+
+	for _, v := range bg.living {
+		x, y := bg.revertIndex(v)
+
+		for _, d := range directions {
+			dx, dy := x+d[0], y+d[1]
+			neighbor := bg.createIndex(dx, dy)
+			neighborCounter[neighbor]++
+		}
+		// 0 living neighbors
+		if _, exist := neighborCounter[v]; !exist {
+
+		}
+
+	}
+	for c, count := range neighborCounter {
+		// fmt.Println(count)
+		if count == 3 || slices.Contains(bg.living, c) && count == 2 {
+			livingNextGen = append(livingNextGen, c)
+		} else {
+		}
+	}
+	bg.living = livingNextGen
 }
 
 func (bg *bitGrid) createIndex(x, y int) int {
