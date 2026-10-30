@@ -92,6 +92,7 @@ func (br *bitRenderer) handleTick(state *loopState) {
 		return
 	}
 
+	br.removeLiving(br.engine.getLiving())
 	br.engine.nextGen()
 
 	living := br.engine.getLiving()
@@ -138,8 +139,18 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	return false
 }
 
+func (br *bitRenderer) removeLiving(living []int) {
+	for _, v := range living {
+		x, y := br.engine.revertIndex(v)
+		br.drawDead(x, y)
+	}
+}
+
 func (br *bitRenderer) drawLiving(living []int) {
-	// TODO: implement
+	for _, v := range living {
+		x, y := br.engine.revertIndex(v)
+		br.drawLive(x, y)
+	}
 }
 
 func (br *bitRenderer) drawDead(w, h int) {
