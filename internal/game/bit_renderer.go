@@ -112,6 +112,11 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	case *tcell.EventKey:
 		if ev.Key() == tcell.KeyEscape {
 			return true
+		} else if ev.Key() == tcell.KeyRune && ev.Str() == "r" {
+			if !ls.running {
+				ls.running = true
+				br.screen.DisableMouse()
+			}
 		}
 	case *tcell.EventMouse:
 		if ev.Buttons() == tcell.ButtonPrimary {
