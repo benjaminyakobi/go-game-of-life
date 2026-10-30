@@ -59,7 +59,7 @@ func (br *bitRenderer) cleanup() {
 
 func (br *bitRenderer) initGame() {
 	br.drawGrid()
-	br.drawLiving(br.engine.getLiving())
+	br.drawLivingCells(br.engine.getLiving())
 	br.screen.Show()
 }
 
@@ -92,11 +92,11 @@ func (br *bitRenderer) handleTick(state *loopState) {
 		return
 	}
 
-	br.removeLiving(br.engine.getLiving())
+	br.drawDeadCells(br.engine.getLiving())
 	br.engine.nextGen()
 
 	living := br.engine.getLiving()
-	br.drawLiving(living)
+	br.drawLivingCells(living)
 
 	if len(living) == 0 {
 		state.running = false
@@ -139,14 +139,14 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	return false
 }
 
-func (br *bitRenderer) removeLiving(living []int) {
+func (br *bitRenderer) drawDeadCells(living []int) {
 	for _, v := range living {
 		x, y := br.engine.revertIndex(v)
 		br.drawDead(x, y)
 	}
 }
 
-func (br *bitRenderer) drawLiving(living []int) {
+func (br *bitRenderer) drawLivingCells(living []int) {
 	for _, v := range living {
 		x, y := br.engine.revertIndex(v)
 		br.drawLive(x, y)
