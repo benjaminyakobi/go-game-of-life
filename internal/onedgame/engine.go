@@ -5,11 +5,12 @@ import (
 )
 
 type bitGrid struct {
-	width  int
-	height int // currently not in use
-	grid   []uint64
-	living []int
-	gen    int
+	width    int
+	height   int // currently not in use
+	grid     []uint64
+	living   []int
+	gen      int
+	patterns *flatIndexedPatterns
 }
 
 type BitEngine interface {
@@ -22,14 +23,15 @@ type BitEngine interface {
 	revertIndex(i int) (int, int)
 }
 
-func newBitEngine(width, height int) (BitEngine, error) {
+func newBitEngine(cfg config, width, height int) (BitEngine, error) {
 	size := width * height
 	return &bitGrid{
-		width:  width,
-		height: height,
-		grid:   make([]uint64, (size+63)/64),
-		living: nil,
-		gen:    0,
+		width:    width,
+		height:   height,
+		grid:     make([]uint64, (size+63)/64),
+		living:   nil,
+		gen:      0,
+		patterns: cfg.loadPatterns(width),
 	}, nil
 }
 
