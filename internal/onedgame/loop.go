@@ -38,7 +38,10 @@ func Start() {
 		log.Fatalf("%+v", err)
 	}
 
-	bitEngine, err := newBitEngine(screen.Size())
+	cfg := loadConfig()
+
+	w, h := screen.Size()
+	bitEngine, err := newBitEngine(cfg, w, h)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
