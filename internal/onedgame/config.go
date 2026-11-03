@@ -8,3 +8,7 @@ type cell struct {
 }
 
 type flatCells []int
+
+type config struct {
+	Patterns map[string][]cell `json:"patterns"`
+}
