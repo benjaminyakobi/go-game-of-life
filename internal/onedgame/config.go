@@ -6,3 +6,5 @@ type cell struct {
 	PosX int `json:"x"`
 	PosY int `json:"y"`
 }
+
+type flatCells []int
