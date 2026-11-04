@@ -21,6 +21,7 @@ type BitEngine interface {
 	resetGen()
 	createIndex(x, y int) int
 	revertIndex(i int) (int, int)
+	getPattern(idx int) (string, flatCells)
 }
 
 func newBitEngine(cfg config, width, height int) (BitEngine, error) {
@@ -102,4 +103,11 @@ func (bg *bitGrid) createIndex(x, y int) int {
 
 func (bg *bitGrid) revertIndex(idx int) (int, int) {
 	return idx % bg.width, idx / bg.width
+}
+
+func (bg *bitGrid) getPattern(idx int) (string, flatCells) {
+	ip := bg.patterns
+	cyclicIndex := idx % len(ip.keys)
+	patternName := ip.keys[cyclicIndex]
+	return patternName, ip.sets[patternName]
 }
