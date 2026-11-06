@@ -26,3 +26,7 @@ type flatIndexedPatterns struct {
 	keys []string
 	sets map[string]flatCells
 }
+
+func (ip *flatIndexedPatterns) Len() int {
+	return len(ip.keys)
+}
