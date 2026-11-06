@@ -30,3 +30,9 @@ type flatIndexedPatterns struct {
 func (ip *flatIndexedPatterns) Len() int {
 	return len(ip.keys)
 }
+
+func (ip *flatIndexedPatterns) Get(i int) (string, flatCells) {
+	cyclicIndex := i % len(ip.keys)
+	patternName := ip.keys[cyclicIndex]
+	return patternName, ip.sets[patternName]
+}
