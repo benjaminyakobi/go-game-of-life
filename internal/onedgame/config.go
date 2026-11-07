@@ -39,6 +39,23 @@ func (ip *flatIndexedPatterns) Get(i int) (string, flatCells) {
 
 // func (c *config) loadPatterns(width int) *flatIndexedPatterns {
 // }
-//
-// func loadConfig() config {
-// }
+
+func loadConfig() config {
+	file, err := os.Open("./config.json")
+	if err != nil {
+		log.Fatalf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	var conf config
+	if err := decoder.Decode(&conf); err != nil {
+		if err == io.EOF {
+			fmt.Println("finished decoding config file")
+		} else {
+			log.Fatalf("failed to open file: %v", err)
+		}
+	}
+
+	return conf
+}
