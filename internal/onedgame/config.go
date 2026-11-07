@@ -36,3 +36,9 @@ func (ip *flatIndexedPatterns) Get(i int) (string, flatCells) {
 	patternName := ip.keys[cyclicIndex]
 	return patternName, ip.sets[patternName]
 }
+
+// func (c *config) loadPatterns(width int) *flatIndexedPatterns {
+// }
+//
+// func loadConfig() config {
+// }
