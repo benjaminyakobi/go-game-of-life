@@ -1,7 +1,5 @@
 package onedgame
 
-// TODO: load the config.json file for the predefined patterns!
-
 import (
 	"encoding/json"
 	"fmt"
@@ -37,8 +35,25 @@ func (ip *flatIndexedPatterns) Get(i int) (string, flatCells) {
 	return patternName, ip.sets[patternName]
 }
 
-// func (c *config) loadPatterns(width int) *flatIndexedPatterns {
-// }
+func (c *config) loadPatterns(width int) *flatIndexedPatterns {
+	sets := make(map[string]flatCells, len(c.Patterns))
+	for name, cells := range c.Patterns {
+		var set flatCells
+		for _, c := range cells {
+			flatC := c.PosY*width + c.PosX
+			set = append(set, flatC)
+		}
+		sets[name] = set
+	}
+
+	keys := make([]string, 0, len(sets))
+	for k := range sets {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	return &flatIndexedPatterns{keys: keys, sets: sets}
+}
 
 func loadConfig() config {
 	file, err := os.Open("./config.json")
