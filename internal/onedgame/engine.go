@@ -6,15 +6,15 @@ import (
 
 type bitGrid struct {
 	width    int
-	height   int // currently not in use
-	grid     []uint64
+	height   int      // currently not in use
+	grid     []uint64 // currently not in use
 	living   []int
 	gen      int
 	patterns *flatIndexedPatterns
 }
 
 type BitEngine interface {
-	nextGen()
+	nextGen() (flatCells, flatCells)
 	getLiving() []int
 	setLiving(i int)
 	removeLiving(i int)
@@ -45,12 +45,10 @@ func (bg *bitGrid) getLiving() []int {
 }
 
 func (bg *bitGrid) setLiving(i int) {
-	// TODO: should be optimized with bg.grid setting to 1
 	bg.living = append(bg.living, i)
 }
 
 func (bg *bitGrid) removeLiving(i int) {
-	// TODO: should be optimized with bg.grid setting to 0
 	for j, v := range bg.living {
 		if v == i {
 			bg.living[j] = bg.living[len(bg.living)-1]
@@ -60,7 +58,7 @@ func (bg *bitGrid) removeLiving(i int) {
 	}
 }
 
-func (bg *bitGrid) nextGen() {
+func (bg *bitGrid) nextGen() (flatCells, flatCells) {
 	directions := [][]int{
 		{-1, -1}, // top left
 		{0, -1},  // top mid
@@ -71,12 +69,13 @@ func (bg *bitGrid) nextGen() {
 		{0, 1},   // bottom mid
 		{1, 1},   // bottom right
 	}
-	livingNextGen := []int{}
-	neighborCounter := make(map[int]int, len(bg.living))
+
+	var livingNextGen flatCells
+	var deadNextGen flatCells
+	neighborCounter := make(map[int]int, len(bg.living)*8)
 
 	for _, v := range bg.living {
 		x, y := bg.revertIndex(v)
-
 		for _, d := range directions {
 			dx, dy := x+d[0], y+d[1]
 			neighbor := bg.createIndex(dx, dy)
@@ -84,17 +83,20 @@ func (bg *bitGrid) nextGen() {
 		}
 		// 0 living neighbors
 		if _, exist := neighborCounter[v]; !exist {
-
+			deadNextGen = append(deadNextGen, v)
 		}
-
 	}
+
 	for c, count := range neighborCounter {
 		if count == 3 || slices.Contains(bg.living, c) && count == 2 {
 			livingNextGen = append(livingNextGen, c)
 		} else {
+			deadNextGen = append(deadNextGen, c)
 		}
 	}
+
 	bg.living = livingNextGen
+	return deadNextGen, livingNextGen
 }
 
 func (bg *bitGrid) createIndex(x, y int) int {
