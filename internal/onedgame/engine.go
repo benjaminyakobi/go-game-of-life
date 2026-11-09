@@ -17,6 +17,7 @@ type BitEngine interface {
 	nextGen() (flatCells, flatCells)
 	getLiving() []int
 	setLiving(i int)
+	initLiving(living flatCells)
 	removeLiving(i int)
 	resetGen()
 	createIndex(x, y int) int
@@ -46,6 +47,10 @@ func (bg *bitGrid) getLiving() []int {
 
 func (bg *bitGrid) setLiving(i int) {
 	bg.living = append(bg.living, i)
+}
+
+func (bg *bitGrid) initLiving(living flatCells) {
+	bg.living = living
 }
 
 func (bg *bitGrid) removeLiving(i int) {
