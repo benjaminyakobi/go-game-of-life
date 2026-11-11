@@ -1,6 +1,7 @@
 package onedgame
 
 import (
+	"math"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -92,13 +93,11 @@ func (br *bitRenderer) handleTick(state *loopState) {
 		return
 	}
 
-	br.drawDeadCells(br.engine.getLiving())
-	br.engine.nextGen()
+	deadCells, livingCells := br.engine.nextGen()
+	br.drawDeadCells(deadCells)
+	br.drawLivingCells(livingCells)
 
-	living := br.engine.getLiving()
-	br.drawLivingCells(living)
-
-	if len(living) == 0 {
+	if len(livingCells) == 0 {
 		state.running = false
 		br.screen.EnableMouse()
 		br.engine.resetGen()
