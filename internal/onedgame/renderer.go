@@ -170,3 +170,11 @@ func (br *bitRenderer) drawDead(w, h int) {
 func (br *bitRenderer) drawLive(w, h int) {
 	br.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
 }
+
+// func (br *bitRenderer) calcPatternDimesions(fcs flatCells) (
+// 	int, int, int, int, int, int) {}
+//
+// func (br *bitRenderer) centerCells(
+// 	fcs flatCells,
+// 	x, y, width, height int,
+// ) flatCells {}
