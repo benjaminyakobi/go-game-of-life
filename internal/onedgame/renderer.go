@@ -1,7 +1,6 @@
 package onedgame
 
 import (
-	"math"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -106,7 +105,6 @@ func (br *bitRenderer) handleTick(state *loopState) {
 }
 
 func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
-	// TODO: add new events: select/unselect, run/stop
 	switch ev := ev.(type) {
 	case *tcell.EventKey:
 		if ev.Key() == tcell.KeyEscape {
