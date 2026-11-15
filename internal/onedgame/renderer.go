@@ -1,6 +1,7 @@
 package onedgame
 
 import (
+	"math"
 	"time"
 
 	"github.com/gdamore/tcell/v3"
@@ -169,9 +170,27 @@ func (br *bitRenderer) drawLive(w, h int) {
 	br.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
 }
 
-// func (br *bitRenderer) calcPatternDimesions(fcs flatCells) (
-// 	int, int, int, int, int, int) {}
-//
+func (br *bitRenderer) calcPatternDimesions(fcs flatCells) (
+	int, int, int, int, int, int) {
+	minX := math.MaxInt
+	minY := math.MaxInt
+	maxX := math.MinInt
+	maxY := math.MinInt
+
+	for _, fc := range fcs {
+		x, y := br.engine.revertIndex(fc)
+		minX = min(minX, x)
+		minY = min(minY, y)
+		maxX = max(maxX, x)
+		maxY = max(maxY, y)
+	}
+
+	patternWidth := maxX - minX + 1
+	patternHeight := maxY - minY + 1
+
+	return patternWidth, patternHeight, minX, minY, maxX, maxY
+}
+
 // func (br *bitRenderer) centerCells(
 // 	fcs flatCells,
 // 	x, y, width, height int,
