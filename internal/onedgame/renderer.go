@@ -191,7 +191,28 @@ func (br *bitRenderer) calcPatternDimesions(fcs flatCells) (
 	return patternWidth, patternHeight, minX, minY, maxX, maxY
 }
 
-// func (br *bitRenderer) centerCells(
-// 	fcs flatCells,
-// 	x, y, width, height int,
-// ) flatCells {}
+func (br *bitRenderer) centerCells(
+	fcs flatCells, x, y, width, height int) flatCells {
+	if len(fcs) == 0 {
+		return fcs
+	}
+
+	patternWidth, patternHeight, minX, minY, _, _ :=
+		br.calcPatternDimesions(fcs)
+
+	offsetX := x + (width-patternWidth)/2
+	offsetY := y + (height-patternHeight)/2
+
+	var centeredFCS flatCells
+
+	for _, fc := range fcs {
+		x1, y1 := br.engine.revertIndex(fc)
+		cfc := br.engine.createIndex(
+			offsetX+(x1-minX),
+			offsetY+(y1-minY),
+		)
+		centeredFCS = append(centeredFCS, cfc)
+	}
+
+	return centeredFCS
+}
