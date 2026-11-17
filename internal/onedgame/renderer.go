@@ -121,6 +121,26 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 			}
 			ls.running = !ls.running
 			br.screen.EnableMouse()
+		} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" {
+			if ls.running {
+				return false
+			}
+			ls.boxIndex++
+			br.engine.resetGen()
+			for _, c := range br.engine.getLiving() {
+				x, y := br.engine.revertIndex(c)
+				br.engine.removeLiving(c)
+				br.drawDead(x, y)
+			}
+			_, pattern := br.engine.getPattern(ls.boxIndex)
+			w, h := br.screen.Size()
+			centeredPattern := br.centerCells(
+				pattern,
+				0, 0, w, h,
+			)
+			br.engine.initLiving(centeredPattern)
+			br.drawLivingCells(br.engine.getLiving())
+			br.screen.Show()
 		}
 	case *tcell.EventMouse:
 		if ev.Buttons() == tcell.ButtonPrimary {
