@@ -10,13 +10,13 @@ import (
 )
 
 func main() {
-	engineType := flag.String("engine", "default", "Engine: default or 1d")
+	engineType := flag.String("engine", "default", "Engine: default or linear")
 	flag.Parse()
 
 	switch *engineType {
 	case "default":
 		coo.Start()
-	case "1d":
+	case "linear":
 		lin.Start()
 	default:
 		fmt.Fprintln(os.Stderr, "unknown engine:", *engineType)
