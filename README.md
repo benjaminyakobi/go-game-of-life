@@ -59,6 +59,7 @@ runGameLoop()
 In simple terms: 
 - `loop.go` keeps the program running
 - `handlers.go` turns user actions into game actions
+    - in `internal/linear` this code lives inside the `renderer.go`
 - `engine.go` decides what the game state should be
 - `renderer.go` shows that state in the terminal.
 
