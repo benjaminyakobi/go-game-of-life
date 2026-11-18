@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	game "go-game-of-life/internal/game"
-	onedgame "go-game-of-life/internal/onedgame"
+	coo "go-game-of-life/internal/coordinates"
+	lin "go-game-of-life/internal/linear"
 )
 
 func main() {
@@ -15,9 +15,9 @@ func main() {
 
 	switch *engineType {
 	case "default":
-		game.Start()
+		coo.Start()
 	case "1d":
-		onedgame.Start()
+		lin.Start()
 	default:
 		fmt.Fprintln(os.Stderr, "unknown engine:", *engineType)
 		os.Exit(1)
