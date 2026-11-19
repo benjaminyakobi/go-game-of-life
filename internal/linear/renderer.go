@@ -48,64 +48,64 @@ func newBitRenderer(e Engine, s tcell.Screen) (*renderer, error) {
 	}, nil
 }
 
-func (br *renderer) cleanup() {
+func (r *renderer) cleanup() {
 	maybePanic := recover()
 
-	br.screen.Fini()
+	r.screen.Fini()
 
 	if maybePanic != nil {
 		panic(maybePanic)
 	}
 }
 
-func (br *renderer) initGame() {
-	br.drawGrid()
-	br.drawLivingCells(br.engine.getLiving())
-	br.screen.Show()
+func (r *renderer) initGame() {
+	r.drawGrid()
+	r.drawLivingCells(r.engine.getLiving())
+	r.screen.Show()
 }
 
-func (br *renderer) drawGrid() {
-	width, height := br.screen.Size()
+func (r *renderer) drawGrid() {
+	width, height := r.screen.Size()
 
 	for w := range width {
 		for h := range height {
-			br.drawDead(w, h)
+			r.drawDead(w, h)
 		}
 	}
 }
 
-func (br *renderer) runGameLoop(state *loopState) {
+func (r *renderer) runGameLoop(state *loopState) {
 	for {
 		select {
 		case <-state.ticker.C:
-			br.handleTick(state)
+			r.handleTick(state)
 
-		case ev := <-br.screen.EventQ():
-			if br.eventDispatcher(state, ev) {
+		case ev := <-r.screen.EventQ():
+			if r.eventDispatcher(state, ev) {
 				return
 			}
 		}
 	}
 }
 
-func (br *renderer) handleTick(state *loopState) {
+func (r *renderer) handleTick(state *loopState) {
 	if !state.running {
 		return
 	}
 
-	deadCells, livingCells := br.engine.nextGen()
-	br.drawDeadCells(deadCells)
-	br.drawLivingCells(livingCells)
+	deadCells, livingCells := r.engine.nextGen()
+	r.drawDeadCells(deadCells)
+	r.drawLivingCells(livingCells)
 
 	if len(livingCells) == 0 {
 		state.running = false
-		br.screen.EnableMouse()
-		br.engine.resetGen()
+		r.screen.EnableMouse()
+		r.engine.resetGen()
 	}
-	br.screen.Show()
+	r.screen.Show()
 }
 
-func (br *renderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
+func (r *renderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	switch ev := ev.(type) {
 	case *tcell.EventKey:
 		if ev.Key() == tcell.KeyEscape {
@@ -113,53 +113,53 @@ func (br *renderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 		} else if ev.Key() == tcell.KeyRune && ev.Str() == "r" {
 			if !ls.running {
 				ls.running = true
-				br.screen.DisableMouse()
+				r.screen.DisableMouse()
 			}
 		} else if ev.Key() == tcell.KeyRune && ev.Str() == "s" {
 			if !ls.running {
 				return false
 			}
 			ls.running = !ls.running
-			br.screen.EnableMouse()
+			r.screen.EnableMouse()
 		} else if ev.Key() == tcell.KeyRune && ev.Str() == "b" {
 			if ls.running {
 				return false
 			}
 			ls.boxIndex++
-			br.engine.resetGen()
-			for _, c := range br.engine.getLiving() {
-				x, y := br.engine.revertIndex(c)
-				br.engine.removeLiving(c)
-				br.drawDead(x, y)
+			r.engine.resetGen()
+			for _, c := range r.engine.getLiving() {
+				x, y := r.engine.revertIndex(c)
+				r.engine.removeLiving(c)
+				r.drawDead(x, y)
 			}
-			_, pattern := br.engine.getPattern(ls.boxIndex)
-			w, h := br.screen.Size()
-			centeredPattern := br.centerCells(
+			_, pattern := r.engine.getPattern(ls.boxIndex)
+			w, h := r.screen.Size()
+			centeredPattern := r.centerCells(
 				pattern,
 				0, 0, w, h,
 			)
-			br.engine.initLiving(centeredPattern)
-			br.drawLivingCells(br.engine.getLiving())
-			br.screen.Show()
+			r.engine.initLiving(centeredPattern)
+			r.drawLivingCells(r.engine.getLiving())
+			r.screen.Show()
 		}
 	case *tcell.EventMouse:
 		if ev.Buttons() == tcell.ButtonPrimary {
 			now := time.Now()
 			x, y := ev.Position()
-			idx := br.engine.createIndex(x, y)
+			idx := r.engine.createIndex(x, y)
 
 			if now.Sub(ls.lastClickTime) <= ls.dblClickDelay &&
 				(x == ls.lastX && y == ls.lastY) {
 				// NOTE: 2d index -> 1d index -> remove cell
-				br.engine.removeLiving(idx)
-				br.drawDead(x, y)
+				r.engine.removeLiving(idx)
+				r.drawDead(x, y)
 
 			} else {
 				// NOTE: 2d index -> 1d index -> draw cell
-				br.engine.setLiving(idx)
-				br.drawLive(x, y)
+				r.engine.setLiving(idx)
+				r.drawLive(x, y)
 			}
-			br.screen.Show()
+			r.screen.Show()
 			ls.lastClickTime = now
 			ls.lastX = x
 			ls.lastY = y
@@ -168,29 +168,29 @@ func (br *renderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	return false
 }
 
-func (br *renderer) drawDeadCells(living []int) {
+func (r *renderer) drawDeadCells(living []int) {
 	for _, v := range living {
-		x, y := br.engine.revertIndex(v)
-		br.drawDead(x, y)
+		x, y := r.engine.revertIndex(v)
+		r.drawDead(x, y)
 	}
 }
 
-func (br *renderer) drawLivingCells(living []int) {
+func (r *renderer) drawLivingCells(living []int) {
 	for _, v := range living {
-		x, y := br.engine.revertIndex(v)
-		br.drawLive(x, y)
+		x, y := r.engine.revertIndex(v)
+		r.drawLive(x, y)
 	}
 }
 
-func (br *renderer) drawDead(w, h int) {
-	br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+func (r *renderer) drawDead(w, h int) {
+	r.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
 }
 
-func (br *renderer) drawLive(w, h int) {
-	br.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
+func (r *renderer) drawLive(w, h int) {
+	r.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
 }
 
-func (br *renderer) calcPatternDimesions(fcs flatCells) (
+func (r *renderer) calcPatternDimesions(fcs flatCells) (
 	int, int, int, int, int, int) {
 	minX := math.MaxInt
 	minY := math.MaxInt
@@ -198,7 +198,7 @@ func (br *renderer) calcPatternDimesions(fcs flatCells) (
 	maxY := math.MinInt
 
 	for _, fc := range fcs {
-		x, y := br.engine.revertIndex(fc)
+		x, y := r.engine.revertIndex(fc)
 		minX = min(minX, x)
 		minY = min(minY, y)
 		maxX = max(maxX, x)
@@ -211,14 +211,14 @@ func (br *renderer) calcPatternDimesions(fcs flatCells) (
 	return patternWidth, patternHeight, minX, minY, maxX, maxY
 }
 
-func (br *renderer) centerCells(
+func (r *renderer) centerCells(
 	fcs flatCells, x, y, width, height int) flatCells {
 	if len(fcs) == 0 {
 		return fcs
 	}
 
 	patternWidth, patternHeight, minX, minY, _, _ :=
-		br.calcPatternDimesions(fcs)
+		r.calcPatternDimesions(fcs)
 
 	offsetX := x + (width-patternWidth)/2
 	offsetY := y + (height-patternHeight)/2
@@ -226,8 +226,8 @@ func (br *renderer) centerCells(
 	var centeredFCS flatCells
 
 	for _, fc := range fcs {
-		x1, y1 := br.engine.revertIndex(fc)
-		cfc := br.engine.createIndex(
+		x1, y1 := r.engine.revertIndex(fc)
+		cfc := r.engine.createIndex(
 			offsetX+(x1-minX),
 			offsetY+(y1-minY),
 		)
