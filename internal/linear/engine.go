@@ -13,7 +13,7 @@ type grid struct {
 	patterns *flatIndexedPatterns
 }
 
-type BitEngine interface {
+type Engine interface {
 	nextGen() (flatCells, flatCells)
 	getLiving() []int
 	setLiving(i int)
@@ -25,7 +25,7 @@ type BitEngine interface {
 	getPattern(idx int) (string, flatCells)
 }
 
-func newBitEngine(cfg config, width, height int) (BitEngine, error) {
+func newBitEngine(cfg config, width, height int) (Engine, error) {
 	size := width * height
 	return &grid{
 		width:    width,

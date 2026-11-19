@@ -24,7 +24,7 @@ var gs = gridStyle{
 
 type bitRenderer struct {
 	screen tcell.Screen
-	engine BitEngine
+	engine Engine
 }
 
 func initScreen() (tcell.Screen, error) {
@@ -38,7 +38,7 @@ func initScreen() (tcell.Screen, error) {
 	return screen, nil
 }
 
-func newBitRenderer(be BitEngine, s tcell.Screen) (*bitRenderer, error) {
+func newBitRenderer(be Engine, s tcell.Screen) (*bitRenderer, error) {
 	s.EnableMouse()
 	s.Clear()
 
