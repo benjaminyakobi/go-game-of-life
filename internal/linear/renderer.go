@@ -22,7 +22,7 @@ var gs = gridStyle{
 		Foreground(color.White),
 }
 
-type bitRenderer struct {
+type renderer struct {
 	screen tcell.Screen
 	engine Engine
 }
@@ -38,17 +38,17 @@ func initScreen() (tcell.Screen, error) {
 	return screen, nil
 }
 
-func newBitRenderer(e Engine, s tcell.Screen) (*bitRenderer, error) {
+func newBitRenderer(e Engine, s tcell.Screen) (*renderer, error) {
 	s.EnableMouse()
 	s.Clear()
 
-	return &bitRenderer{
+	return &renderer{
 		screen: s,
 		engine: e,
 	}, nil
 }
 
-func (br *bitRenderer) cleanup() {
+func (br *renderer) cleanup() {
 	maybePanic := recover()
 
 	br.screen.Fini()
@@ -58,13 +58,13 @@ func (br *bitRenderer) cleanup() {
 	}
 }
 
-func (br *bitRenderer) initGame() {
+func (br *renderer) initGame() {
 	br.drawGrid()
 	br.drawLivingCells(br.engine.getLiving())
 	br.screen.Show()
 }
 
-func (br *bitRenderer) drawGrid() {
+func (br *renderer) drawGrid() {
 	width, height := br.screen.Size()
 
 	for w := range width {
@@ -74,7 +74,7 @@ func (br *bitRenderer) drawGrid() {
 	}
 }
 
-func (br *bitRenderer) runGameLoop(state *loopState) {
+func (br *renderer) runGameLoop(state *loopState) {
 	for {
 		select {
 		case <-state.ticker.C:
@@ -88,7 +88,7 @@ func (br *bitRenderer) runGameLoop(state *loopState) {
 	}
 }
 
-func (br *bitRenderer) handleTick(state *loopState) {
+func (br *renderer) handleTick(state *loopState) {
 	if !state.running {
 		return
 	}
@@ -105,7 +105,7 @@ func (br *bitRenderer) handleTick(state *loopState) {
 	br.screen.Show()
 }
 
-func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
+func (br *renderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	switch ev := ev.(type) {
 	case *tcell.EventKey:
 		if ev.Key() == tcell.KeyEscape {
@@ -168,29 +168,29 @@ func (br *bitRenderer) eventDispatcher(ls *loopState, ev tcell.Event) bool {
 	return false
 }
 
-func (br *bitRenderer) drawDeadCells(living []int) {
+func (br *renderer) drawDeadCells(living []int) {
 	for _, v := range living {
 		x, y := br.engine.revertIndex(v)
 		br.drawDead(x, y)
 	}
 }
 
-func (br *bitRenderer) drawLivingCells(living []int) {
+func (br *renderer) drawLivingCells(living []int) {
 	for _, v := range living {
 		x, y := br.engine.revertIndex(v)
 		br.drawLive(x, y)
 	}
 }
 
-func (br *bitRenderer) drawDead(w, h int) {
+func (br *renderer) drawDead(w, h int) {
 	br.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
 }
 
-func (br *bitRenderer) drawLive(w, h int) {
+func (br *renderer) drawLive(w, h int) {
 	br.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
 }
 
-func (br *bitRenderer) calcPatternDimesions(fcs flatCells) (
+func (br *renderer) calcPatternDimesions(fcs flatCells) (
 	int, int, int, int, int, int) {
 	minX := math.MaxInt
 	minY := math.MaxInt
@@ -211,7 +211,7 @@ func (br *bitRenderer) calcPatternDimesions(fcs flatCells) (
 	return patternWidth, patternHeight, minX, minY, maxX, maxY
 }
 
-func (br *bitRenderer) centerCells(
+func (br *renderer) centerCells(
 	fcs flatCells, x, y, width, height int) flatCells {
 	if len(fcs) == 0 {
 		return fcs
