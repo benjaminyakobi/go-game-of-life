@@ -25,7 +25,7 @@ type Engine interface {
 	getPattern(idx int) (string, flatCells)
 }
 
-func newBitEngine(cfg config, width, height int) (Engine, error) {
+func newEngine(cfg config, width, height int) (Engine, error) {
 	size := width * height
 	return &grid{
 		width:    width,
