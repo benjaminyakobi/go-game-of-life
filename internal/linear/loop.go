@@ -46,16 +46,16 @@ func Start() {
 		log.Fatalf("%+v", err)
 	}
 
-	bitRenderer, err := newBitRenderer(engine, screen)
+	renderer, err := newRenderer(engine, screen)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
-	defer bitRenderer.cleanup()
+	defer renderer.cleanup()
 
-	bitRenderer.initGame()
+	renderer.initGame()
 
 	state := initLoopState()
 	defer state.ticker.Stop()
 
-	bitRenderer.runGameLoop(state)
+	renderer.runGameLoop(state)
 }
