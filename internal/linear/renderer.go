@@ -38,13 +38,13 @@ func initScreen() (tcell.Screen, error) {
 	return screen, nil
 }
 
-func newBitRenderer(be Engine, s tcell.Screen) (*bitRenderer, error) {
+func newBitRenderer(e Engine, s tcell.Screen) (*bitRenderer, error) {
 	s.EnableMouse()
 	s.Clear()
 
 	return &bitRenderer{
 		screen: s,
-		engine: be,
+		engine: e,
 	}, nil
 }
 
