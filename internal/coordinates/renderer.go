@@ -1,4 +1,4 @@
-package game
+package coordinates
 
 // Contains game grid code
 
