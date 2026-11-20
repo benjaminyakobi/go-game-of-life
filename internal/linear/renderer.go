@@ -1,4 +1,4 @@
-package onedgame
+package linear
 
 import (
 	"math"
