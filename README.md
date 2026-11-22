@@ -32,33 +32,7 @@ The application is split into small files under `internal/game/`, with each file
 
 - `config.go` loads `conf.json` and predefined patterns.
 - `engine.go` owns the Game of Life state: living cells, dead cells, generation count, patterns, and history.
-- `handlers.go` handles keyboard, mouse, and resize events from the terminal.
+- `handlers.go` handles keyboard, mouse, and resize events from the terminal (when the amount of code is low the code is inside the `renderer.go` file).
 - `loop.go` starts the game and runs the main loop using a ticker and terminal event queue.
 - `renderer.go` draws the grid, cells, text, and pattern picker using `tcell`.
-
-Runtime flow:
-
-```text
-cmd/grpc/server
-  |
-  v
-internal/game.Start()
-  |
-  |-- loadConfig()      -> reads configuration and predefined patterns
-  |-- initEngine()      -> creates the game state
-  |-- initRenderer()    -> creates the terminal UI
-  |
-  v
-runGameLoop()
-  |
-  |-- ticker event      -> handleTick() -> engine calculates next generation -> renderer redraws cells
-  |
-  |-- terminal event    -> handleEvent() -> input handlers update engine/state -> renderer redraws UI
-```
-
-In simple terms: 
-- `loop.go` keeps the program running
-- `handlers.go` turns user actions into game actions
-- `engine.go` decides what the game state should be
-- `renderer.go` shows that state in the terminal.
 
