@@ -1,9 +1,8 @@
-package game
+package coordinates
 
 // Contains game loop code
 
 import (
-	// "fmt"
 	"log"
 	"time"
 )
