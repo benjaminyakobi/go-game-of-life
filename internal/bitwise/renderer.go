@@ -18,3 +18,8 @@ var gs = gridStyle{
 		Background(color.Black).
 		Foreground(color.White),
 }
+
+type renderer struct {
+	screen tcell.Screen
+	engine Engine
+}
