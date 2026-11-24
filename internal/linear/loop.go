@@ -7,7 +7,7 @@ import (
 
 type loopState struct {
 	lastClickTime time.Time
-	lastKeyTime   time.Time
+	lastKeyTime   time.Time // currently not in use
 	lastX         int
 	lastY         int
 
