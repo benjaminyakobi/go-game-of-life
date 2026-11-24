@@ -23,3 +23,14 @@ type renderer struct {
 	screen tcell.Screen
 	engine Engine
 }
+
+func initScreen() (tcell.Screen, error) {
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		return nil, err
+	}
+	if err := screen.Init(); err != nil {
+		return nil, err
+	}
+	return screen, nil
+}
