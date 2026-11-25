@@ -34,3 +34,13 @@ func initScreen() (tcell.Screen, error) {
 	}
 	return screen, nil
 }
+
+func newRenderer(e Engine, s tcell.Screen) (*renderer, error) {
+	s.EnableMouse()
+	s.Clear()
+
+	return &renderer{
+		screen: s,
+		engine: e,
+	}, nil
+}
