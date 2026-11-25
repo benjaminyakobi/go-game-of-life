@@ -54,10 +54,10 @@ func (r *renderer) cleanup() {
 	}
 }
 
-func (r *renderer) drawLive(w, h int) {
-	r.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
+func (r *renderer) drawLive(x, y int) {
+	r.screen.Put(x, y, gs.liveGlyph, gs.defStyle)
 }
 
-func (r *renderer) drawDead(w, h int) {
-	r.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+func (r *renderer) drawDead(x, y int) {
+	r.screen.Put(x, y, gs.deadGlyph, gs.defStyle)
 }
