@@ -44,3 +44,12 @@ func newRenderer(e Engine, s tcell.Screen) (*renderer, error) {
 		engine: e,
 	}, nil
 }
+
+func (r *renderer) cleanup() {
+	maybePanic := recover()
+	r.screen.Fini()
+
+	if maybePanic != nil {
+		panic(maybePanic)
+	}
+}
