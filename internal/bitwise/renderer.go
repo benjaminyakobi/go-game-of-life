@@ -53,3 +53,7 @@ func (r *renderer) cleanup() {
 		panic(maybePanic)
 	}
 }
+
+func (r *renderer) drawLive(w, h int) {
+	r.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
+}
