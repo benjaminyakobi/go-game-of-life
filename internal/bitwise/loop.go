@@ -1,12 +1,21 @@
 package bitwise
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 type loopState struct {
+	lastClickTime time.Time
+	dblClickDelay time.Duration
+	lastX         int
+	lastY         int
 }
 
 func newLoopState() (*loopState, error) {
-	return &loopState{}, nil
+	return &loopState{
+		dblClickDelay: 500 * time.Millisecond,
+	}, nil
 }
 
 func Start() {
