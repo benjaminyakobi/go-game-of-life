@@ -57,3 +57,7 @@ func (r *renderer) cleanup() {
 func (r *renderer) drawLive(w, h int) {
 	r.screen.Put(w, h, gs.liveGlyph, gs.defStyle)
 }
+
+func (r *renderer) drawDead(w, h int) {
+	r.screen.Put(w, h, gs.deadGlyph, gs.defStyle)
+}
