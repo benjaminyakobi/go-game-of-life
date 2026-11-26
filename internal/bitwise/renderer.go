@@ -61,3 +61,12 @@ func (r *renderer) drawLive(x, y int) {
 func (r *renderer) drawDead(x, y int) {
 	r.screen.Put(x, y, gs.deadGlyph, gs.defStyle)
 }
+
+func (r *renderer) drawGrid() {
+	width, height := r.screen.Size()
+	for x := range width {
+		for y := range height {
+			r.drawDead(x, y)
+		}
+	}
+}
