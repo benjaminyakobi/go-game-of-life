@@ -70,3 +70,8 @@ func (r *renderer) drawGrid() {
 		}
 	}
 }
+
+func (r *renderer) initGame() {
+	r.drawGrid()
+	r.screen.Show()
+}
