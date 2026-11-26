@@ -6,8 +6,6 @@ import (
 
 type grid struct {
 	width    int
-	height   int      // currently not in use
-	grid     []uint64 // currently not in use
 	living   []int
 	gen      int
 	patterns *flatIndexedPatterns
@@ -25,12 +23,9 @@ type Engine interface {
 	getPattern(idx int) (string, flatCells)
 }
 
-func newEngine(cfg config, width, height int) (Engine, error) {
-	size := width * height
+func newEngine(cfg config, width int) (Engine, error) {
 	return &grid{
 		width:    width,
-		height:   height,
-		grid:     make([]uint64, (size+63)/64),
 		living:   nil,
 		gen:      0,
 		patterns: cfg.loadPatterns(width),

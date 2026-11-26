@@ -40,8 +40,8 @@ func Start() {
 
 	cfg := loadConfig()
 
-	w, h := screen.Size()
-	engine, err := newEngine(cfg, w, h)
+	w, _ := screen.Size()
+	engine, err := newEngine(cfg, w)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
