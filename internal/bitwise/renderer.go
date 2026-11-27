@@ -75,3 +75,17 @@ func (r *renderer) initGame() {
 	r.drawGrid()
 	r.screen.Show()
 }
+
+func (r *renderer) drawLiving(data []uint64) {
+	for idx, word := range data {
+		for bit := uint64(0); bit < 64; bit++ {
+			mask := uint64(1) << bit
+			x, y := r.engine.revertIndex(idx, bit)
+			if word&mask != 0 {
+				r.drawLive(x, y)
+			} else {
+				r.drawDead(x, y)
+			}
+		}
+	}
+}
