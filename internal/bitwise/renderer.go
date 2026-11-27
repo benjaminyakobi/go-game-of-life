@@ -78,7 +78,7 @@ func (r *renderer) initGame() {
 
 func (r *renderer) drawLiving(data []uint64) {
 	for idx, word := range data {
-		for bit := uint64(0); bit < 64; bit++ {
+		for bit := range uint64(64) {
 			mask := uint64(1) << bit
 			x, y := r.engine.revertIndex(idx, bit)
 			if word&mask != 0 {
